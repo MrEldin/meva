@@ -104,105 +104,107 @@ function onLeave(el, done) {
 </script>
 
 <template>
-  <section id="pronadji" class="relative overflow-hidden bg-ink text-paper" data-surface="dark">
-    <div class="pointer-events-none absolute -right-40 top-1/3 h-[40rem] w-[40rem] rounded-full bg-blush-500/15 blur-[140px]" />
+  <section id="pronadji" class="relative overflow-hidden bg-sage text-forest">
+    <div class="shell py-20 lg:py-28">
+      <div class="grid gap-12 lg:grid-cols-[.8fr_1.2fr]">
+        <div class="flex flex-col justify-between">
+          <div>
+            <p class="eyebrow text-sage-deep">02 / Pronađi svoj preparat</p>
+            <h2 class="mt-5 font-display text-5xl leading-[0.95] tracking-tight sm:text-7xl">
+              Kaži nam<br />šta te <em class="italic">muči</em>.
+            </h2>
+            <p class="mt-6 max-w-xs text-sm leading-relaxed text-forest/70">
+              Dva pitanja. Isti odgovor koji biste dobili preko pulta u Novom Pazaru.
+            </p>
+          </div>
 
-    <div class="shell py-24 lg:py-36">
-      <div class="grid gap-14 lg:grid-cols-12">
-        <div class="lg:col-span-4">
-          <p class="eyebrow text-blush-300">Pronađi svoj preparat</p>
-          <h2 class="mt-5 font-display text-4xl leading-[1] lg:text-6xl">
-            Kaži nam<br />šta te <em class="italic text-blush-300">muči</em>.
-          </h2>
-          <p class="mt-6 max-w-xs text-sm font-light leading-relaxed text-paper/55">
-            Dva pitanja. Isti odgovor koji biste dobili preko pulta u Novom Pazaru.
-          </p>
-
-          <ol class="mt-10 flex items-center gap-3">
-            <li v-for="n in 3" :key="n" class="flex items-center gap-3">
-              <span
-                class="flex h-8 w-8 items-center justify-center rounded-full border text-xs transition-colors duration-500"
-                :class="step >= n - 1 ? 'border-blush-300 text-blush-300' : 'border-paper/20 text-paper/30'"
-              >{{ n }}</span>
-              <span v-if="n < 3" class="h-px w-8 transition-colors duration-500" :class="step >= n ? 'bg-blush-300' : 'bg-paper/15'" />
-            </li>
-          </ol>
-
-          <button v-if="step > 0" type="button" class="eyebrow mt-10 text-paper/50 transition-colors hover:text-blush-300" @click="reset">
-            ← Od početka
-          </button>
+          <div class="mt-10 flex items-center gap-3">
+            <ol class="flex items-center gap-3">
+              <li v-for="n in 3" :key="n" class="flex items-center gap-3">
+                <span
+                  class="flex h-9 w-9 items-center justify-center rounded-full border font-mono text-[0.625rem] transition-colors duration-500"
+                  :class="step >= n - 1 ? 'border-forest bg-forest text-cream' : 'border-forest/25 text-forest/40'"
+                >{{ n }}</span>
+                <span v-if="n < 3" class="h-px w-8 transition-colors duration-500" :class="step >= n ? 'bg-forest' : 'bg-forest/20'" />
+              </li>
+            </ol>
+            <button v-if="step > 0" type="button" class="eyebrow ml-4 text-forest/60 transition-colors hover:text-clay-600" @click="reset">← Od početka</button>
+          </div>
         </div>
 
-        <div class="min-h-[22rem] lg:col-span-8">
+        <div class="min-h-[22rem]">
           <Transition mode="out-in" :css="false" @enter="onEnter" @leave="onLeave">
             <!-- Step 1: where -->
-            <div v-if="step === 0" key="area" class="grid gap-3 sm:grid-cols-2">
+            <div v-if="step === 0" key="area" class="grid gap-4 sm:grid-cols-2">
               <button
                 v-for="a in areas"
                 :key="a.key"
                 type="button"
-                class="f-item group flex items-end justify-between border border-paper/12 p-6 text-left transition-all duration-500 hover:border-blush-300 hover:bg-paper/[0.03] sm:min-h-[11rem]"
+                class="f-item group flex items-end justify-between rounded-[1.5rem] bg-sand p-7 text-left transition-all duration-500 hover:bg-forest hover:text-cream sm:min-h-[12rem]"
                 @click="pickArea(a)"
               >
                 <span>
                   <span class="block font-display text-3xl">{{ a.label }}</span>
-                  <span class="mt-2 block text-xs font-light text-paper/45">{{ a.hint }}</span>
+                  <span class="mt-2 block text-xs text-current/55">{{ a.hint }}</span>
                 </span>
-                <span class="flex h-10 w-10 items-center justify-center rounded-full border border-paper/20 transition-all duration-500 group-hover:border-blush-300 group-hover:bg-blush-300 group-hover:text-ink">→</span>
+                <span class="flex h-11 w-11 items-center justify-center rounded-full border border-current/20 transition-all duration-500 group-hover:bg-sage group-hover:text-forest">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" class="h-4 w-4"><path d="M7 7l10 10M17 7v10H7" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                </span>
               </button>
             </div>
 
             <!-- Step 2: what -->
             <div v-else-if="step === 1" key="issue">
-              <p class="f-item eyebrow mb-6 text-paper/45">{{ area.label }} — šta se dešava?</p>
-              <div class="grid gap-3 sm:grid-cols-2">
+              <p class="f-item eyebrow mb-6 text-forest/60">{{ area.label }} — šta se dešava?</p>
+              <div class="grid gap-4 sm:grid-cols-2">
                 <button
                   v-for="i in area.issues"
                   :key="i.label"
                   type="button"
-                  class="f-item group flex items-center justify-between border border-paper/12 px-6 py-6 text-left transition-all duration-500 hover:border-blush-300 hover:bg-paper/[0.03]"
+                  class="f-item group flex items-center justify-between rounded-[1.5rem] bg-sand px-7 py-6 text-left transition-all duration-500 hover:bg-forest hover:text-cream"
                   @click="pickIssue(i)"
                 >
                   <span class="font-display text-2xl">{{ i.label }}</span>
-                  <span class="text-paper/40 transition-all duration-500 group-hover:translate-x-1 group-hover:text-blush-300">→</span>
+                  <span class="text-current/50 transition-all duration-500 group-hover:translate-x-1">→</span>
                 </button>
               </div>
             </div>
 
             <!-- Step 3: the answer -->
             <div v-else key="result">
-              <p class="f-item eyebrow mb-6 text-blush-300">{{ area.label }} · {{ issue.label }}</p>
-              <div class="grid gap-6 md:grid-cols-2">
+              <p class="f-item eyebrow mb-6 text-clay-600">{{ area.label }} · {{ issue.label }}</p>
+              <div class="grid gap-5 md:grid-cols-2">
                 <article
                   v-for="(product, i) in products"
                   :key="product.slug"
-                  class="f-item group relative border border-paper/12 p-5 transition-colors duration-500 hover:border-blush-300"
-                  :class="i === 0 ? '' : 'md:mt-10'"
+                  class="f-item group rounded-[1.5rem] bg-sand p-4"
                 >
                   <RouterLink :to="{ name: 'product', params: { slug: product.slug } }" class="block" data-cursor="view">
-                    <div class="aspect-square overflow-hidden bg-mist-200">
-                      <img v-if="product.image" :src="product.image" :alt="product.name" class="h-full w-full object-cover transition-transform duration-[1.4s] ease-[var(--ease-silk)] group-hover:scale-105" />
+                    <div class="aspect-square overflow-hidden rounded-[1.25rem]" :class="i === 0 ? 'bg-rose' : 'bg-sky'">
+                      <img v-if="product.image" :src="product.image" :alt="product.name" class="h-full w-full object-cover mix-blend-multiply transition-transform duration-700 ease-[var(--ease-silk)] group-hover:scale-105" />
                     </div>
                   </RouterLink>
-                  <p class="eyebrow mt-5 text-[0.6rem] text-paper/40">{{ i === 0 ? 'Preporuka' : 'Uz to' }}</p>
-                  <h3 class="mt-2 font-display text-2xl leading-tight">{{ product.name }}</h3>
-                  <div class="mt-4 flex items-center justify-between">
-                    <span class="text-sm tabular-nums text-paper/70">{{ product.price?.formatted }}</span>
-                    <Magnetic :strength="0.2">
-                      <button
-                        type="button"
-                        class="eyebrow border border-paper/30 px-5 py-3 text-[0.6rem] transition-all duration-400 hover:border-paper hover:bg-paper hover:text-ink"
-                        :class="added === product.slug && 'border-blush-300! bg-blush-300! text-ink!'"
-                        @click="add(product)"
-                      >
-                        {{ added === product.slug ? 'Dodato ✓' : 'Dodaj u korpu' }}
-                      </button>
-                    </Magnetic>
+                  <div class="px-2 pb-2 pt-5">
+                    <p class="eyebrow text-[0.5625rem] text-clay-500">{{ i === 0 ? 'Preporuka' : 'Uz to' }}</p>
+                    <h3 class="mt-2 text-base font-semibold leading-snug">{{ product.name }}</h3>
+                    <div class="mt-4 flex items-center justify-between gap-3">
+                      <span class="font-mono text-[0.625rem] tabular-nums">{{ product.price?.formatted }}</span>
+                      <Magnetic :strength="0.2">
+                        <button
+                          type="button"
+                          class="pill border border-forest/20 py-3 hover:bg-forest hover:text-cream"
+                          :class="added === product.slug && 'border-clay-500! bg-clay-500! text-cream!'"
+                          @click="add(product)"
+                        >
+                          {{ added === product.slug ? 'Dodato ✓' : 'Dodaj' }}
+                        </button>
+                      </Magnetic>
+                    </div>
                   </div>
                 </article>
               </div>
-              <p class="f-item mt-8 max-w-lg text-sm font-light leading-relaxed text-paper/55">
-                <span class="text-blush-300">Zašto ovo:</span> {{ issue.why }}
+              <p class="f-item mt-8 max-w-lg text-sm leading-relaxed text-forest/70">
+                <span class="font-semibold text-forest">Zašto ovo:</span> {{ issue.why }}
               </p>
             </div>
           </Transition>

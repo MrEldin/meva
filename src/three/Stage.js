@@ -9,7 +9,9 @@ import { createFloorFadeTexture, createSpriteTexture } from './label'
 
 const lerp = (a, b, t) => a + (b - a) * t
 const clamp01 = (v) => Math.max(0, Math.min(1, v))
-const BLUSH = 0xe5b6c6
+const SAGE = 0xd9e4c6
+const CLAY = 0xc56d59
+const ROSE = 0xe8c8c1
 
 export const defaultState = {
   rotation: -0.7, // hero bottle spin, radians
@@ -97,7 +99,7 @@ export class Stage {
     this.top.position.set(-1, 6, 1)
     this.scene.add(this.top)
 
-    this.rim = new THREE.DirectionalLight(0xb3617e, 1.6)
+    this.rim = new THREE.DirectionalLight(CLAY, 1.6)
     this.rim.position.set(-3.5, 2, -3)
     this.scene.add(this.rim)
 
@@ -106,7 +108,7 @@ export class Stage {
     this.scene.add(this.fill)
 
     // A pink pool of light on the floor behind the products.
-    this.pool = new THREE.PointLight(0xb3617e, 12, 8, 2)
+    this.pool = new THREE.PointLight(CLAY, 12, 8, 2)
     this.pool.position.set(0, -0.6, -2.4)
     this.scene.add(this.pool)
   }
@@ -169,7 +171,7 @@ export class Stage {
     const reach = 1.0
 
     const lineMaterial = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0 })
-    const dotMaterial = new THREE.MeshBasicMaterial({ color: BLUSH, transparent: true, opacity: 0 })
+    const dotMaterial = new THREE.MeshBasicMaterial({ color: SAGE, transparent: true, opacity: 0 })
 
     Object.entries(this.anchors).forEach(([name, { angle, y }]) => {
       const start = new THREE.Vector3(Math.sin(angle) * r, y, Math.cos(angle) * r)
@@ -192,13 +194,13 @@ export class Stage {
 
     const ring = new THREE.Mesh(
       new THREE.TorusGeometry(0.52, 0.006, 8, 96),
-      new THREE.MeshBasicMaterial({ color: BLUSH, transparent: true, opacity: 0 }),
+      new THREE.MeshBasicMaterial({ color: SAGE, transparent: true, opacity: 0 }),
     )
     ring.rotation.x = Math.PI / 2
 
     const halo = new THREE.Mesh(
       new THREE.RingGeometry(0.36, 0.7, 96),
-      new THREE.MeshBasicMaterial({ color: 0xb3617e, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false }),
+      new THREE.MeshBasicMaterial({ color: SAGE, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false }),
     )
     halo.rotation.x = Math.PI / 2
 
@@ -232,8 +234,8 @@ export class Stage {
     }
 
     this.particleLayers = [
-      make(150, 0.14, 0xcf8ba4, 0.85, [-3.5, 1.5]),
-      make(28, 0.42, 0xb3617e, 0.35, [1.8, 4.2]),
+      make(150, 0.14, ROSE, 0.7, [-3.5, 1.5]),
+      make(28, 0.42, CLAY, 0.3, [1.8, 4.2]),
     ]
   }
 

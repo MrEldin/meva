@@ -20,7 +20,7 @@ const max = computed(() => Math.max(1, ...props.rows.map((row) => row[props.metr
       <li v-for="row in rows" :key="row.label" class="relative">
         <!-- The bar sits behind the label so long names stay readable. -->
         <div
-          class="absolute inset-y-0 left-0 bg-blush-100/70"
+          class="absolute inset-y-0 left-0 bg-clay-100/70"
           :style="{ width: `${(row[metric] / max) * 100}%` }"
         />
         <div class="relative flex items-center justify-between gap-4 px-2.5 py-2">

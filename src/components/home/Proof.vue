@@ -81,44 +81,44 @@ onBeforeUnmount(() => ctx?.revert())
 </script>
 
 <template>
-  <section ref="root" class="bg-paper text-ink" data-surface="light">
-    <div class="shell pt-24 lg:pt-36">
-      <div class="grid gap-10 border-b border-ink/10 pb-16 lg:grid-cols-12 lg:gap-6">
+  <section ref="root" class="bg-cream text-forest">
+    <div class="shell pt-20 lg:pt-28">
+      <div class="grid gap-10 border-b border-forest pb-12 lg:grid-cols-12 lg:gap-6">
         <div class="lg:col-span-4">
-          <p class="eyebrow text-blush-500">Dokazano</p>
-          <h2 class="mt-5 font-display text-4xl leading-[1] lg:text-6xl">Brojke,<br />ne obećanja.</h2>
+          <p class="eyebrow text-clay-500">03 / Dokazano</p>
+          <h2 class="mt-4 font-display text-5xl leading-[0.95] tracking-tight sm:text-7xl">Brojke,<br />ne obećanja.</h2>
         </div>
         <dl class="grid grid-cols-2 gap-x-6 gap-y-10 lg:col-span-8 lg:grid-cols-4">
           <div v-for="f in figures" :key="f.label">
-            <dt class="eyebrow text-[0.6rem] text-mist-500">{{ f.label }}</dt>
+            <dt class="eyebrow text-[0.5625rem] text-forest/55">{{ f.label }}</dt>
             <dd class="figure mt-3 font-display text-5xl tabular-nums leading-none lg:text-6xl" :data-value="f.value">0</dd>
-            <dd class="mt-3 text-xs font-light text-mist-500">{{ f.note }}</dd>
+            <dd class="mt-3 text-xs text-forest/55">{{ f.note }}</dd>
           </div>
         </dl>
       </div>
     </div>
 
-    <div class="pt-16 lg:pt-20">
+    <div class="pt-14 lg:pt-20">
       <div class="shell flex items-end justify-between">
-        <h3 class="font-display text-3xl lg:text-4xl">Rečeno o preparatima</h3>
-        <span class="eyebrow hidden text-mist-400 lg:inline">Prevuci →</span>
+        <h3 class="font-display text-3xl tracking-tight lg:text-4xl">Rečeno o preparatima</h3>
+        <span class="eyebrow hidden text-forest/50 lg:inline">Prevuci →</span>
       </div>
       <div
         ref="rail"
-        class="review-rail mt-10 flex cursor-grab gap-5 overflow-x-auto px-5 pb-24 scrollbar-none select-none lg:px-10 xl:px-16"
+        class="review-rail mt-8 flex cursor-grab gap-5 overflow-x-auto px-5 pb-20 scrollbar-none select-none sm:px-10 lg:px-16"
         data-cursor="drag"
       >
         <TiltCard v-for="(r, i) in reviews" :key="i" :max="5" class="review w-[80vw] shrink-0 sm:w-[24rem]">
-          <blockquote class="flex h-full min-h-[18rem] flex-col justify-between border border-ink/10 bg-paper p-8">
+          <blockquote class="flex h-full min-h-[18rem] flex-col justify-between rounded-[1.5rem] bg-sand p-8">
             <div>
-              <div class="flex gap-1 text-blush-500" aria-label="5 od 5">
+              <div class="flex gap-1 text-clay-500" aria-label="5 od 5">
                 <svg v-for="n in r.rating" :key="n" viewBox="0 0 20 20" class="h-3.5 w-3.5 fill-current"><path d="M10 1.5l2.6 5.6 6.1.7-4.5 4.2 1.2 6-5.4-3-5.4 3 1.2-6L1.3 7.8l6.1-.7z" /></svg>
               </div>
               <p class="mt-6 font-display text-xl leading-snug">“{{ r.text }}”</p>
             </div>
             <footer class="mt-8 flex items-center justify-between">
-              <span class="text-sm">{{ r.name }}</span>
-              <span class="eyebrow text-[0.6rem] text-mist-400">{{ r.product }}</span>
+              <span class="text-sm font-semibold">{{ r.name }}</span>
+              <span class="eyebrow text-[0.5625rem] text-forest/50">{{ r.product }}</span>
             </footer>
           </blockquote>
         </TiltCard>

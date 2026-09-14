@@ -107,7 +107,7 @@ function addToCart() {
 
         <!-- Detail -->
         <div class="md:pt-6">
-          <p v-if="product.categories.length" class="eyebrow text-blush-500">
+          <p v-if="product.categories.length" class="eyebrow text-clay-500">
             {{ product.categories[0].name }}
           </p>
 
@@ -128,7 +128,7 @@ function addToCart() {
 
           <!-- Set contents -->
           <div v-if="setItems.length" class="mt-8 border border-mist-200 p-5">
-            <p class="eyebrow text-blush-500">Set sadrži</p>
+            <p class="eyebrow text-clay-500">Set sadrži</p>
             <ul class="mt-4 space-y-2.5">
               <li v-for="item in setItems" :key="item.id" class="flex justify-between gap-4 text-sm font-light text-mist-600">
                 <span>{{ item.name }}</span>
@@ -147,8 +147,8 @@ function addToCart() {
 
             <button
               type="button"
-              class="eyebrow flex-1 bg-ink px-8 py-4.5 text-paper transition-colors duration-400 hover:bg-blush-500"
-              :class="added && 'bg-blush-500!'"
+              class="eyebrow flex-1 bg-ink px-8 py-4.5 text-paper transition-colors duration-400 hover:bg-clay-500"
+              :class="added && 'bg-clay-500!'"
               @click="addToCart"
             >
               {{ added ? 'Dodato u korpu ✓' : 'Dodaj u korpu' }}

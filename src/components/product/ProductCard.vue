@@ -41,7 +41,7 @@ function add(product) {
       </div>
 
       <div class="pt-4">
-        <h3 class="font-display text-lg leading-snug text-ink transition-colors duration-300 group-hover:text-blush-600">
+        <h3 class="font-display text-lg leading-snug text-ink transition-colors duration-300 group-hover:text-clay-600">
           {{ product.name }}
         </h3>
         <p class="mt-1.5 text-sm font-light tabular-nums text-mist-500">
@@ -54,7 +54,7 @@ function add(product) {
       v-if="product.price"
       type="button"
       class="eyebrow mt-3 w-full border border-ink/12 py-3 text-ink transition-all duration-400 hover:border-ink hover:bg-ink hover:text-paper"
-      :class="added && 'border-blush-500! bg-blush-500! text-paper!'"
+      :class="added && 'border-clay-500! bg-clay-500! text-paper!'"
       @click="add(product)"
     >
       {{ added ? 'Dodato ✓' : 'Dodaj u korpu' }}

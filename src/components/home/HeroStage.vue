@@ -148,17 +148,17 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <section ref="root" class="relative h-[520vh] bg-ink text-paper" data-surface="dark">
-    <div class="sticky top-0 h-screen overflow-hidden">
+  <section ref="root" class="relative h-[520vh] px-5 pt-2 text-cream sm:px-10 lg:px-16">
+    <div class="sticky top-4 mx-auto h-[calc(100vh-2rem)] max-w-[90rem] overflow-hidden rounded-[2rem] bg-forest">
       <!-- Ground glow -->
-      <div class="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-[radial-gradient(60%_60%_at_50%_100%,rgba(179,97,126,0.22),transparent_70%)]" />
+      <div class="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-[radial-gradient(60%_60%_at_50%_100%,rgba(197,109,89,0.22),transparent_70%)]" />
 
       <!-- Vignette and a whisper of grain, so the black reads as a room, not a void -->
       <div class="stage-vignette pointer-events-none absolute inset-0 z-10" />
 
       <!-- Word-mark, behind the bottle -->
       <div class="wordmark pointer-events-none absolute inset-0 flex items-center justify-center">
-        <span class="wordmark-in font-display text-[34vw] font-semibold leading-none tracking-[-0.04em] text-paper/[0.045] select-none lg:text-[26vw]">MEVA</span>
+        <span class="wordmark-in font-display text-[34vw] font-semibold leading-none tracking-[-0.04em] text-cream/[0.05] select-none lg:text-[26vw]">MEVA</span>
       </div>
 
       <canvas ref="canvas" class="absolute inset-0 h-full w-full touch-pan-y" :class="!webgl && 'hidden'" data-cursor="drag" />
@@ -171,21 +171,21 @@ onBeforeUnmount(() => {
         <div class="ch-scrim lg:hidden" />
         <div class="shell flex h-full flex-col justify-end pb-28 lg:justify-center lg:pb-0">
           <div class="max-w-[30rem]">
-            <p class="eyebrow overflow-hidden text-blush-300"><span class="rise block">N°15+ · Losion za seboreični dermatitis</span></p>
+            <p class="eyebrow overflow-hidden text-sage"><span class="rise block">Prirodna kozmetika · Novi Pazar</span></p>
             <h1 class="mt-5 font-display text-[2.75rem] font-medium leading-[1] tracking-tight sm:text-6xl lg:text-[4.5rem]">
               <span class="block overflow-hidden"><span class="rise block">Koža glave</span></span>
               <span class="block overflow-hidden"><span class="rise block">koja se, konačno,</span></span>
-              <span class="block overflow-hidden"><span class="rise block italic font-normal text-blush-300">smirila.</span></span>
+              <span class="block overflow-hidden"><span class="rise block italic font-normal text-sage">smirila.</span></span>
             </h1>
-            <p class="mt-7 max-w-sm overflow-hidden text-base leading-relaxed text-paper/80 lg:text-lg">
+            <p class="mt-7 max-w-sm overflow-hidden text-base leading-relaxed text-cream/75 lg:text-lg">
               <span class="rise block">Poručen 2.763 puta. Ručno rađen u Novom Pazaru, u malim serijama, od 2010.</span>
             </p>
           </div>
         </div>
         <div class="hint pointer-events-none absolute inset-x-0 bottom-6 lg:bottom-10">
-          <div class="hint-in flex items-center justify-center gap-6 text-paper/60">
+          <div class="hint-in flex items-center justify-center gap-6 text-cream/60">
             <span class="eyebrow hidden lg:inline">Prevuci da okreneš</span>
-            <span class="h-9 w-px overflow-hidden bg-paper/20"><span class="scroll-line block h-full w-full bg-paper/90" /></span>
+            <span class="h-9 w-px overflow-hidden bg-cream/20"><span class="scroll-line block h-full w-full bg-paper/90" /></span>
             <span class="eyebrow">Skroluj</span>
           </div>
         </div>
@@ -196,12 +196,12 @@ onBeforeUnmount(() => {
         <div class="ch-scrim lg:hidden" />
         <div class="shell absolute inset-x-0 bottom-0 hidden pb-16 lg:block">
           <div class="lg:max-w-sm">
-            <p class="eyebrow overflow-hidden text-blush-300"><span class="rise block">Sastav</span></p>
+            <p class="eyebrow overflow-hidden text-sage"><span class="rise block">Sastav</span></p>
             <h2 class="mt-3 font-display text-3xl font-medium leading-[1.05] lg:text-4xl">
               <span class="block overflow-hidden"><span class="rise block">Sedam sastojaka.</span></span>
               <span class="block overflow-hidden"><span class="rise block">Nijedan slučajan.</span></span>
             </h2>
-            <p class="rise mt-4 hidden text-[0.95rem] leading-relaxed text-paper/65 lg:block">
+            <p class="rise mt-4 hidden text-[0.95rem] leading-relaxed text-cream/60 lg:block">
               Uz hidrolat ruže, proteine pšenice i ekstrakt zelenog čaja. Bez sulfata, parabena i silikona.
             </p>
           </div>
@@ -209,14 +209,14 @@ onBeforeUnmount(() => {
 
         <!-- Mobile: a plain list under the bottle -->
         <div class="shell absolute inset-x-0 bottom-0 pb-14 lg:hidden">
-          <p class="eyebrow overflow-hidden text-blush-300"><span class="rise block">Sastav</span></p>
+          <p class="eyebrow overflow-hidden text-sage"><span class="rise block">Sastav</span></p>
           <h2 class="mb-6 mt-3 font-display text-3xl font-medium leading-[1.05]">
             <span class="block overflow-hidden"><span class="rise block">Sedam sastojaka. Nijedan slučajan.</span></span>
           </h2>
           <ul class="grid grid-cols-2 gap-x-6 gap-y-4">
-            <li v-for="c in callouts" :key="c.key" class="rise border-l border-blush-300/60 pl-3">
+            <li v-for="c in callouts" :key="c.key" class="rise border-l border-clay-300/60 pl-3">
               <p class="text-[0.95rem]">{{ c.name }}</p>
-              <p class="text-sm text-paper/65">{{ c.role }}</p>
+              <p class="text-sm text-cream/60">{{ c.role }}</p>
             </li>
           </ul>
         </div>
@@ -230,7 +230,7 @@ onBeforeUnmount(() => {
         >
           <div class="callout-text">
             <p class="text-lg leading-tight">{{ c.name }}</p>
-            <p class="mt-1 text-sm text-paper/65">{{ c.role }}</p>
+            <p class="mt-1 text-sm text-cream/60">{{ c.role }}</p>
           </div>
         </div>
       </div>
@@ -240,23 +240,23 @@ onBeforeUnmount(() => {
         <div class="ch-scrim lg:hidden" />
         <div class="shell flex h-full flex-col justify-end pb-24 lg:items-end lg:justify-center lg:pb-0">
           <div class="lg:max-w-md">
-            <p class="eyebrow overflow-hidden text-blush-300"><span class="rise block">Način upotrebe</span></p>
+            <p class="eyebrow overflow-hidden text-sage"><span class="rise block">Način upotrebe</span></p>
             <h2 class="mt-4 font-display text-4xl font-medium leading-[1.02] lg:text-5xl">
               <span class="block overflow-hidden"><span class="rise block">Uveče.</span></span>
               <span class="block overflow-hidden"><span class="rise block">Direktno na kožu glave.</span></span>
-              <span class="block overflow-hidden"><span class="rise block italic font-normal text-blush-300">Ne ispira se.</span></span>
+              <span class="block overflow-hidden"><span class="rise block italic font-normal text-sage">Ne ispira se.</span></span>
             </h2>
-            <p class="rise mt-5 max-w-sm text-[0.95rem] leading-relaxed text-paper/70 lg:ml-auto">
+            <p class="rise mt-5 max-w-sm text-[0.95rem] leading-relaxed text-cream/70 lg:ml-auto">
               Sedam sastojaka, bez sulfata, parabena i silikona — sve piše na poleđini. 100 ml traje oko dva meseca redovne upotrebe.
             </p>
             <div class="mt-8 flex gap-12">
               <div class="rise">
                 <p class="font-display text-4xl font-medium">1,4</p>
-                <p class="mt-1 text-sm text-paper/65">porudžbine po kupcu</p>
+                <p class="mt-1 text-sm text-cream/60">porudžbine po kupcu</p>
               </div>
               <div class="rise">
                 <p class="font-display text-4xl font-medium">3.964</p>
-                <p class="mt-1 text-sm text-paper/65">kupaca od 2024.</p>
+                <p class="mt-1 text-sm text-cream/60">kupaca od 2024.</p>
               </div>
             </div>
           </div>
@@ -269,34 +269,23 @@ onBeforeUnmount(() => {
         <div class="shell flex h-full flex-col justify-end pb-14 lg:pb-16">
           <div class="pointer-events-auto flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
             <div class="max-w-lg">
-              <p class="eyebrow overflow-hidden text-blush-300"><span class="rise block">Sam, ili u setu</span></p>
+              <p class="eyebrow overflow-hidden text-sage"><span class="rise block">Sam, ili u setu</span></p>
               <h2 class="mt-4 font-display text-4xl font-medium leading-[1.02] lg:text-5xl">
                 <span class="block overflow-hidden"><span class="rise block">Set za seboreju.</span></span>
               </h2>
-              <p class="rise mt-4 text-[0.95rem] leading-relaxed text-paper/75 lg:text-base">
+              <p class="rise mt-4 text-[0.95rem] leading-relaxed text-cream/75 lg:text-base">
                 Šampon N°10, losion N°15+, ulje za seboreju, ulje za kosu i detox čaj — kompletna rutina za kožu glave, po ceni nižoj od zbira.
               </p>
             </div>
-            <div class="rise flex flex-wrap items-center gap-5">
+            <div class="rise flex flex-wrap items-center gap-4">
               <Magnetic>
-                <button
-                  type="button"
-                  class="btn-fill group relative overflow-hidden bg-paper px-8 py-5 text-ink"
-                  :disabled="!set"
-                  @click="add(set)"
-                >
-                  <span class="relative z-10 eyebrow transition-colors duration-500 group-hover:text-paper">
-                    {{ added === set?.slug ? 'Dodato u korpu ✓' : `Dodaj set — ${set?.price?.formatted ?? '4.000 RSD'}` }}
-                  </span>
+                <button type="button" class="pill bg-sage text-forest hover:bg-cream" :disabled="!set" @click="add(set)">
+                  {{ added === set?.slug ? 'Dodato u korpu ✓' : `Dodaj set — ${set?.price?.formatted ?? '4.000 RSD'}` }}
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" class="h-4 w-4"><path d="M7 17 17 7M9 7h8v8" stroke-linecap="round" stroke-linejoin="round" /></svg>
                 </button>
               </Magnetic>
               <Magnetic :strength="0.25">
-                <button
-                  type="button"
-                  class="eyebrow border-b border-paper/50 pb-1 text-paper transition-colors duration-300 hover:border-blush-300 hover:text-blush-300"
-                  :disabled="!hero"
-                  @click="add(hero)"
-                >
+                <button type="button" class="pill border border-cream/30 text-cream hover:border-cream hover:bg-cream hover:text-forest" :disabled="!hero" @click="add(hero)">
                   {{ added === hero?.slug ? 'Dodato ✓' : `Samo losion — ${hero?.price?.formatted ?? '1.400 RSD'}` }}
                 </button>
               </Magnetic>

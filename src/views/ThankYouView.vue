@@ -7,8 +7,8 @@ const route = useRoute()
 <template>
   <div class="shell flex min-h-[70svh] items-center py-20">
     <div class="mx-auto max-w-lg text-center">
-      <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-blush-100">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" class="h-7 w-7 text-blush-600">
+      <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-clay-100">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" class="h-7 w-7 text-clay-600">
           <path d="m5 12.5 4.5 4.5L19 7.5" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
       </div>

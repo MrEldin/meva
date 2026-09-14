@@ -12,33 +12,50 @@
 */
 
 @theme {
-  --color-ink: #0a0a0a;
-  --color-ink-soft: #1c1a1b;
-  --color-paper: #ffffff;
+  /* Cream ground, deep forest ink, terracotta accent, sage tint. */
+  --color-cream: #f2efe8;
+  --color-sand: #faf8f3;
+  --color-forest: #24342c;
+  --color-forest-soft: #2e4238;
+  --color-sage: #d9e4c6;
+  --color-sage-deep: #536b59;
 
-  /* Powder pink, and the tints that keep it usable on large surfaces. */
-  --color-blush-50: #fdf7f9;
-  --color-blush-100: #faedf1;
-  --color-blush-200: #f2d7e0;
-  --color-blush-300: #e5b6c6;
-  --color-blush-400: #cf8ba4;
-  --color-blush-500: #b3617e;
-  --color-blush-600: #9a4d69;
-  --color-blush-700: #7d3d54;
+  /* Semantic aliases the whole app is written against. */
+  --color-ink: #24342c;
+  --color-ink-soft: #2e4238;
+  --color-paper: #f2efe8;
 
-  /* Warm greys, tinted towards the blush so the palette stays one family. */
-  --color-mist-50: #faf9f9;
-  --color-mist-100: #f4f2f3;
-  --color-mist-200: #e8e4e6;
-  --color-mist-300: #d4ced1;
-  --color-mist-400: #a89ea3;
-  --color-mist-500: #7c7175;
-  --color-mist-600: #574f52;
+  /* Terracotta and its tints. */
+  --color-clay-50: #fbf4f1;
+  --color-clay-100: #f4e3dd;
+  --color-clay-200: #e8c8c1;
+  --color-clay-300: #dfab9d;
+  --color-clay-400: #d28c78;
+  --color-clay-500: #c56d59;
+  --color-clay-600: #a45140;
+  --color-clay-700: #7f3e31;
+
+  /* Warm greys, tinted towards the forest. */
+  --color-mist-50: #faf8f3;
+  --color-mist-100: #f4f1ea;
+  --color-mist-200: #e4e0d6;
+  --color-mist-300: #cfcabf;
+  --color-mist-400: #9aa097;
+  --color-mist-500: #6e776f;
+  --color-mist-600: #536b59;
+
+  /* Pastel tiles behind product photography. */
+  --color-rose: #e8c8c1;
+  --color-wheat: #e8d99c;
+  --color-mint: #bdd7c1;
+  --color-sky: #c9dbe5;
+  --color-linen: #e6d5c5;
 
   --font-display: "Playfair Display", "Didot", "Times New Roman", serif;
-  --font-sans: "Jost", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "DM Mono", ui-monospace, monospace;
 
-  --radius-card: 2px;
+  --radius-card: 1.5rem;
 
   --ease-silk: cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -79,15 +96,15 @@
   h1, h2, h3, h4 {
     font-family: var(--font-display);
     font-weight: 500;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.02em;
   }
 
   ::selection {
-    @apply bg-blush-200 text-ink;
+    @apply bg-clay-200 text-ink;
   }
 
   :focus-visible {
-    @apply outline-2 outline-offset-3 outline-blush-500;
+    @apply outline-2 outline-offset-3 outline-clay-500;
   }
 }
 
@@ -98,19 +115,34 @@
 */
 
 @utility eyebrow {
-  /* The wide-tracked caps used throughout the brand, as in the logo's word-mark. */
-  font-family: var(--font-sans);
-  font-size: 0.75rem;
+  /* Small tracked mono caps: section numbers, labels, buttons. */
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
   font-weight: 500;
-  letter-spacing: 0.24em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
+}
+
+@utility pill {
+  /* The template's rounded controls. */
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-radius: 9999px;
+  padding: 1rem 1.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  transition: background-color 0.4s var(--ease-silk), color 0.4s var(--ease-silk), border-color 0.4s;
 }
 
 @utility shell {
   width: 100%;
   margin-inline: auto;
   padding-inline: 1.25rem;
-  max-width: 88rem;
+  max-width: 90rem;
 
   @media (min-width: 768px) {
     padding-inline: 2.5rem;
@@ -236,11 +268,11 @@
   }
   .tilt:hover .tilt-sheen { opacity: 1; }
 
-  /* Buttons whose blush fill slides up on hover */
+  /* Buttons whose clay fill slides up on hover */
   .btn-fill::before {
     content: '';
     position: absolute; inset: 0;
-    background: var(--color-blush-500);
+    background: var(--color-clay-500);
     transform: translateY(101%);
     transition: transform 0.55s var(--ease-silk);
   }
@@ -255,7 +287,7 @@
   .ch-scrim {
     position: absolute; left: 0; right: 0; bottom: 0;
     height: 50%;
-    background: linear-gradient(to top, var(--color-ink) 40%, rgba(10,10,10,0.75) 70%, transparent);
+    background: linear-gradient(to top, var(--color-forest) 40%, rgba(36,52,44,0.75) 70%, transparent);
   }
 
   .scroll-line { animation: scroll-line 1.8s var(--ease-silk) infinite; }
@@ -279,7 +311,7 @@
   /* Stage vignette + grain */
   .stage-vignette {
     background:
-      radial-gradient(120% 90% at 50% 40%, transparent 55%, rgba(0,0,0,0.55) 100%),
+      radial-gradient(120% 90% at 50% 40%, transparent 55%, rgba(12,20,16,0.55) 100%),
       url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     background-size: auto, 160px 160px;
     mix-blend-mode: normal;
@@ -289,7 +321,7 @@
   /* Stage vignette + grain */
   .stage-vignette {
     background:
-      radial-gradient(120% 90% at 50% 40%, transparent 55%, rgba(0,0,0,0.55) 100%),
+      radial-gradient(120% 90% at 50% 40%, transparent 55%, rgba(12,20,16,0.55) 100%),
       url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     background-size: auto, 160px 160px;
     mix-blend-mode: normal;

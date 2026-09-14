@@ -34,7 +34,7 @@ async function submit() {
 
 <template>
   <div class="relative flex min-h-[80svh] items-center overflow-hidden py-16">
-    <div class="pointer-events-none absolute -left-32 top-1/4 h-96 w-96 rounded-full bg-blush-100/60 blur-3xl" />
+    <div class="pointer-events-none absolute -left-32 top-1/4 h-96 w-96 rounded-full bg-clay-100/60 blur-3xl" />
 
     <div class="shell relative">
       <div class="mx-auto max-w-sm">
@@ -68,12 +68,12 @@ async function submit() {
             />
           </label>
 
-          <p v-if="error" class="text-sm text-blush-600">{{ error }}</p>
+          <p v-if="error" class="text-sm text-clay-600">{{ error }}</p>
 
           <button
             type="submit"
             :disabled="submitting"
-            class="eyebrow w-full bg-ink py-4 text-paper transition-colors duration-400 hover:bg-blush-500 disabled:opacity-55"
+            class="eyebrow w-full bg-ink py-4 text-paper transition-colors duration-400 hover:bg-clay-500 disabled:opacity-55"
           >
             {{ submitting ? 'Prijavljujem…' : 'Prijavi se' }}
           </button>

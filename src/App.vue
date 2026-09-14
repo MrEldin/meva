@@ -10,28 +10,29 @@ const route = useRoute()
 
 // The admin panel is its own world and wears neither the shop header nor footer.
 const bare = computed(() => route.meta.bare === true)
-const overHero = computed(() => route.meta.overHero === true)
 
 onMounted(() => initSmoothScroll())
 </script>
 
 <template>
   <Cursor />
-  <SiteHeader v-if="!bare" :over-hero="overHero" />
+  <div class="min-h-screen bg-cream text-forest">
+    <SiteHeader v-if="!bare" />
 
-  <main :class="!bare && !overHero && 'pt-[4.5rem] md:pt-[5.5rem]'">
-    <RouterView v-slot="{ Component }">
-      <Transition
-        mode="out-in"
-        enter-from-class="opacity-0"
-        enter-active-class="transition-opacity duration-400 ease-[var(--ease-silk)]"
-        leave-to-class="opacity-0"
-        leave-active-class="transition-opacity duration-150"
-      >
-        <component :is="Component" />
-      </Transition>
-    </RouterView>
-  </main>
+    <main>
+      <RouterView v-slot="{ Component }">
+        <Transition
+          mode="out-in"
+          enter-from-class="opacity-0"
+          enter-active-class="transition-opacity duration-400 ease-[var(--ease-silk)]"
+          leave-to-class="opacity-0"
+          leave-active-class="transition-opacity duration-150"
+        >
+          <component :is="Component" />
+        </Transition>
+      </RouterView>
+    </main>
 
-  <SiteFooter v-if="!bare" />
+    <SiteFooter v-if="!bare" />
+  </div>
 </template>

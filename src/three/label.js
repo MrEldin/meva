@@ -324,7 +324,7 @@ export function createSpriteTexture(size = 128) {
 }
 
 /**
- * The floor's fade: the page's ink, thinning to nothing under the products,
+ * The floor's fade: the card's forest green, thinning to nothing under the products,
  * so the mirror beneath shows only close to their feet. Drawn in sRGB and
  * left un-tone-mapped so its edges match the page exactly.
  */
@@ -333,10 +333,10 @@ export function createFloorFadeTexture(size = 512) {
   canvas.width = canvas.height = size
   const ctx = canvas.getContext('2d')
   const gradient = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2)
-  gradient.addColorStop(0, 'rgba(10,10,10,0.45)')
-  gradient.addColorStop(0.35, 'rgba(10,10,10,0.8)')
-  gradient.addColorStop(0.75, 'rgba(10,10,10,1)')
-  gradient.addColorStop(1, 'rgba(10,10,10,1)')
+  gradient.addColorStop(0, 'rgba(36,52,44,0.45)')
+  gradient.addColorStop(0.35, 'rgba(36,52,44,0.8)')
+  gradient.addColorStop(0.75, 'rgba(36,52,44,1)')
+  gradient.addColorStop(1, 'rgba(36,52,44,1)')
   ctx.fillStyle = gradient
   ctx.fillRect(0, 0, size, size)
   const texture = new THREE.CanvasTexture(canvas)

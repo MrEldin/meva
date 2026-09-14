@@ -11,7 +11,7 @@ const cart = useCartStore()
 
     <div v-if="!cart.lines.length" class="py-20 text-center md:py-28">
       <p class="font-display text-2xl text-mist-400">Korpa je prazna</p>
-      <RouterLink :to="{ name: 'catalog' }" class="eyebrow mt-8 inline-block bg-ink px-9 py-4 text-paper transition-colors hover:bg-blush-500">
+      <RouterLink :to="{ name: 'catalog' }" class="eyebrow mt-8 inline-block bg-ink px-9 py-4 text-paper transition-colors hover:bg-clay-500">
         Pogledaj proizvode
       </RouterLink>
     </div>
@@ -27,7 +27,7 @@ const cart = useCartStore()
 
           <div class="flex min-w-0 flex-1 flex-col justify-between">
             <div>
-              <RouterLink :to="{ name: 'product', params: { slug: line.slug } }" class="font-display text-lg leading-snug text-ink transition-colors hover:text-blush-600">
+              <RouterLink :to="{ name: 'product', params: { slug: line.slug } }" class="font-display text-lg leading-snug text-ink transition-colors hover:text-clay-600">
                 {{ line.name }}
               </RouterLink>
               <p class="mt-1 text-sm font-light tabular-nums text-mist-500">{{ money(line.price) }}</p>
@@ -42,7 +42,7 @@ const cart = useCartStore()
 
               <div class="flex items-center gap-5">
                 <span class="text-sm tabular-nums text-ink">{{ money(line.price * line.quantity) }}</span>
-                <button type="button" class="text-xs font-light text-mist-400 underline underline-offset-4 transition-colors hover:text-blush-600" @click="cart.remove(line.id)">
+                <button type="button" class="text-xs font-light text-mist-400 underline underline-offset-4 transition-colors hover:text-clay-600" @click="cart.remove(line.id)">
                   Ukloni
                 </button>
               </div>
@@ -62,7 +62,7 @@ const cart = useCartStore()
             </div>
             <div class="flex justify-between text-mist-600">
               <dt>Dostava</dt>
-              <dd class="text-blush-600">Besplatno</dd>
+              <dd class="text-clay-600">Besplatno</dd>
             </div>
           </dl>
 
@@ -71,7 +71,7 @@ const cart = useCartStore()
             <span class="font-display text-2xl tabular-nums text-ink">{{ money(cart.subtotal) }}</span>
           </div>
 
-          <RouterLink :to="{ name: 'checkout' }" class="eyebrow mt-7 block bg-ink py-4.5 text-center text-paper transition-colors duration-400 hover:bg-blush-500">
+          <RouterLink :to="{ name: 'checkout' }" class="eyebrow mt-7 block bg-ink py-4.5 text-center text-paper transition-colors duration-400 hover:bg-clay-500">
             Nastavi ka poručivanju
           </RouterLink>
 

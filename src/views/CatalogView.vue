@@ -49,7 +49,7 @@ watch(() => route.query, () => (search.value = ''))
 <template>
   <div class="shell py-14 md:py-20">
     <header class="max-w-2xl">
-      <p class="eyebrow text-blush-500">Prodavnica</p>
+      <p class="eyebrow text-clay-500">Prodavnica</p>
       <h1 class="mt-4 font-display text-4xl leading-tight text-ink md:text-6xl">{{ heading }}</h1>
       <p class="mt-4 text-sm font-light text-mist-500">
         {{ visible.length }} {{ visible.length === 1 ? 'proizvod' : 'proizvoda' }}

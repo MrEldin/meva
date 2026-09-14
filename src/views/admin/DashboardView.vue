@@ -54,7 +54,7 @@ function signOut() {
           <RouterLink :to="{ name: 'home' }" class="eyebrow text-mist-500 transition-colors hover:text-ink">
             Prodavnica
           </RouterLink>
-          <button type="button" class="eyebrow text-mist-500 transition-colors hover:text-blush-600" @click="signOut">
+          <button type="button" class="eyebrow text-mist-500 transition-colors hover:text-clay-600" @click="signOut">
             Odjava
           </button>
         </div>

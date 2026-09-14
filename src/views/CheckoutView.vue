@@ -79,7 +79,7 @@ async function submit() {
 
     <form v-else class="mt-10 grid gap-12 lg:grid-cols-[1fr_22rem] lg:gap-16" @submit.prevent="submit">
       <div>
-        <p class="eyebrow text-blush-500">Podaci za dostavu</p>
+        <p class="eyebrow text-clay-500">Podaci za dostavu</p>
 
         <div class="mt-7 grid gap-5 sm:grid-cols-2">
           <label
@@ -88,7 +88,7 @@ async function submit() {
             :class="field.half ? 'sm:col-span-1' : 'sm:col-span-2'"
           >
             <span class="eyebrow text-mist-500">
-              {{ field.label }}<span v-if="field.required" class="text-blush-500"> *</span>
+              {{ field.label }}<span v-if="field.required" class="text-clay-500"> *</span>
             </span>
             <input
               v-model="form[field.key]"
@@ -96,9 +96,9 @@ async function submit() {
               :autocomplete="field.autocomplete"
               :aria-invalid="Boolean(errors[field.key])"
               class="mt-2 w-full border bg-paper px-4 py-3.5 text-base font-light text-ink transition-colors focus:outline-none"
-              :class="errors[field.key] ? 'border-blush-500' : 'border-mist-200 focus:border-ink'"
+              :class="errors[field.key] ? 'border-clay-500' : 'border-mist-200 focus:border-ink'"
             />
-            <span v-if="errors[field.key]" class="mt-1.5 block text-xs text-blush-600">{{ errors[field.key] }}</span>
+            <span v-if="errors[field.key]" class="mt-1.5 block text-xs text-clay-600">{{ errors[field.key] }}</span>
             <span v-else-if="field.hint" class="mt-1.5 block text-xs font-light text-mist-400">{{ field.hint }}</span>
           </label>
 
@@ -112,8 +112,8 @@ async function submit() {
           </label>
         </div>
 
-        <div class="mt-8 border border-mist-200 bg-blush-50 p-5">
-          <p class="eyebrow text-blush-600">Plaćanje pouzećem</p>
+        <div class="mt-8 border border-mist-200 bg-clay-50 p-5">
+          <p class="eyebrow text-clay-600">Plaćanje pouzećem</p>
           <p class="mt-2.5 text-sm font-light leading-relaxed text-mist-600">
             Ne plaćate ništa online. Iznos predajete kuriru kada paket stigne na vašu adresu.
           </p>
@@ -136,7 +136,7 @@ async function submit() {
 
           <div class="mt-6 flex justify-between border-t border-mist-200 pt-4 text-sm font-light text-mist-600">
             <span>Dostava</span>
-            <span class="text-blush-600">Besplatno</span>
+            <span class="text-clay-600">Besplatno</span>
           </div>
 
           <div class="mt-4 flex items-baseline justify-between border-t border-mist-200 pt-5">
@@ -144,12 +144,12 @@ async function submit() {
             <span class="font-display text-2xl tabular-nums text-ink">{{ money(cart.subtotal) }}</span>
           </div>
 
-          <p v-if="failure" class="mt-5 text-sm text-blush-600">{{ failure }}</p>
+          <p v-if="failure" class="mt-5 text-sm text-clay-600">{{ failure }}</p>
 
           <button
             type="submit"
             :disabled="submitting"
-            class="eyebrow mt-6 w-full bg-ink py-4.5 text-paper transition-colors duration-400 hover:bg-blush-500 disabled:opacity-55"
+            class="eyebrow mt-6 w-full bg-ink py-4.5 text-paper transition-colors duration-400 hover:bg-clay-500 disabled:opacity-55"
           >
             {{ submitting ? 'Šaljem…' : 'Potvrdi porudžbinu' }}
           </button>
