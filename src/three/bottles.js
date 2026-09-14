@@ -1,8 +1,12 @@
 import * as THREE from 'three'
 
-import { createLabelTexture, createShadowTexture } from './label'
+import { BACK_CENTRE, createLabelTexture, createShadowTexture, FRONT_CENTRE } from './label'
 
 const TAU = Math.PI * 2
+const WRAP = 0.86 // share of the circumference the label covers
+
+/** Turn a bottle by this much to bring the back panel to the camera. */
+export const BACK_ROTATION = -(BACK_CENTRE - FRONT_CENTRE) * TAU * WRAP
 
 // Shared materials, so every bottle in the scene catches the light the same way.
 const plastic = new THREE.MeshPhysicalMaterial({
@@ -84,10 +88,10 @@ function flipCap(r, h) {
   return group
 }
 
-function labelMesh(r, y, h, spec, wrap = 0.86) {
+function labelMesh(r, y, h, spec, wrap = WRAP) {
   const length = TAU * wrap
-  // The design (left half of the texture) faces the camera at rotation 0.
-  const geometry = new THREE.CylinderGeometry(r, r, h, 160, 1, true, -length * 0.28, length)
+  // The front of the design faces the camera at rotation 0.
+  const geometry = new THREE.CylinderGeometry(r, r, h, 192, 1, true, -FRONT_CENTRE * length, length)
   const material = new THREE.MeshStandardMaterial({
     map: createLabelTexture(spec),
     roughness: 0.55,
@@ -138,7 +142,21 @@ export function lotionBottle(spec = {}) {
   cap.position.y = h + 0.03
   group.add(cap)
 
-  group.add(labelMesh(r + 0.003, h * 0.47, h * 0.72, { number: '15+', script: 'hair', name: 'Losion za seboreični dermatitis', ...spec }))
+  group.add(labelMesh(r + 0.003, h * 0.47, h * 0.72, {
+    number: '15+',
+    script: 'hair',
+    care: 'WE CARE',
+    kind: 'LOTION',
+    name: 'Losion za seboreični dermatitis',
+    back: {
+      title: 'Losion za seboreični dermatitis',
+      description: 'Za kožu glave sklonu seboreji, peruti i masnom temenu. Deluje umirujuće, regenerišuće i antibakterijski.',
+      ingredients: ['Lavandula angustifolia (hidrolat lavande)', 'Rosa damascena (hidrolat ruže)', 'Triticum vulgare (proteini pšenice)', 'Niacinamide (vitamin B3)', 'Melaleuca alternifolia (ulje čajevca)', 'Camellia sinensis (ekstrakt zelenog čaja)', 'Salicylic Acid (salicilna kiselina)'],
+      usage: 'Naneti uveče direktno na kožu glave i ne ispirati. Preporučuje se redovna upotreba.',
+      volume: '100 ml ℮',
+    },
+    ...spec,
+  }))
   group.add(contactShadow(r))
 
   return finish(group, h + 0.37)
@@ -156,7 +174,22 @@ export function shampooBottle(spec = {}) {
   cap.position.y = h + 0.03
   group.add(cap)
 
-  group.add(labelMesh(r + 0.003, h * 0.45, h * 0.78, { number: '10', script: 'hair', name: 'Šampon za kosu', bands: 2, ...spec }))
+  group.add(labelMesh(r + 0.003, h * 0.45, h * 0.78, {
+    number: '10',
+    script: 'hair',
+    care: 'WE CARE',
+    kind: 'SHAMPOO',
+    name: 'Šampon za kosu',
+    bands: 2,
+    back: {
+      title: 'Šampon za kosu',
+      description: 'Čisti bez sulfata i silikona, jača strukturu vlasi i podstiče rast.',
+      ingredients: ['Cocamidopropyl Betaine', 'Aqua', 'Ricinus Communis Seed Oil', 'Olea Europaea', 'Triticum Vulgare Germ Oil', 'Prunus Amygdalus Dulcis', 'Dexpanthenol', 'Tocopherol', 'Citrus Limon', 'Melaleuca Alternifolia', 'Cymbopogon Martini Oil', 'Glycerol', 'Mangifera Indica'],
+      usage: 'Naneti na mokru kosu, nežno masirati kožu glave kružnim pokretima, isprati.',
+      volume: '200 ml ℮',
+    },
+    ...spec,
+  }))
   group.add(contactShadow(r))
 
   return finish(group, h + 0.3)
@@ -178,7 +211,20 @@ export function oilBottle(spec = {}) {
   tip.position.y = h + 0.45
   group.add(tip)
 
-  group.add(labelMesh(r + 0.003, h * 0.48, h * 0.66, { number: '8', script: 'hair & lashes', name: 'Ulje za seboreju', ...spec }))
+  group.add(labelMesh(r + 0.003, h * 0.48, h * 0.66, {
+    number: '8',
+    script: 'hair & lashes',
+    care: 'WE CARE',
+    kind: 'OIL',
+    name: 'Ulje za seboreju',
+    back: {
+      title: 'Ulje za seboreju',
+      ingredients: ['Prunus amygdalus dulcis', 'Glycerinum', 'Acidum salicylicum', 'Melaleuca alternifolia', 'Citrus limon'],
+      usage: 'Naneti na teme dva sata pre pranja kose, dva puta nedeljno.',
+      volume: '50 ml ℮',
+    },
+    ...spec,
+  }))
   group.add(contactShadow(r))
 
   return finish(group, h + 0.58)
@@ -186,22 +232,37 @@ export function oilBottle(spec = {}) {
 
 /** 50 ml cream jar with a flat lid. */
 export function creamJar(spec = {}) {
-  const r = 0.48
-  const h = 0.5
+  const r = 0.44
+  const h = 0.58
   const group = new THREE.Group()
 
   const body = new THREE.Mesh(new THREE.CylinderGeometry(r, r * 0.97, h, 96), plastic)
   body.position.y = h / 2
   group.add(body)
 
-  const lid = new THREE.Mesh(new THREE.CylinderGeometry(r * 1.01, r * 1.01, 0.28, 96), plastic)
-  lid.position.y = h + 0.14
+  const lid = new THREE.Mesh(new THREE.CylinderGeometry(r * 1.015, r * 1.015, 0.3, 96), frosted)
+  lid.position.y = h + 0.16
   group.add(lid)
 
-  group.add(labelMesh(r + 0.003, h * 0.5, h * 0.8, { number: '4', script: 'natural', name: 'Krema za seboreju', ritual: 'skin care ritual', numberColor: '#d48b9c', front: 0.55, ...spec }, 0.7))
+  group.add(labelMesh(r + 0.003, h * 0.5, h * 0.82, {
+    number: '4',
+    script: '',
+    care: 'SKIN CARE',
+    kind: 'RITUAL',
+    name: 'Krema za seboreju — dan',
+    numberColor: '#d48b9c',
+    frame: true,
+    back: {
+      title: 'Dnevna krema za seboreju',
+      ingredients: ['Aqua', 'Glycerin', 'Cetearyl Olivate', 'Sorbitan Olivate', 'Prunus Amygdalus Dulcis Oil', 'Helianthus Annuus Seed Oil', 'Simmondsia Chinensis Seed Oil', 'Calendula Officinalis Flower Oil', 'Allantoin', 'Panthenol', 'Tocopherol', 'Salicylic Acid'],
+      usage: 'Naneti ujutru na čistu kožu lica.',
+      volume: '50 ml ℮',
+    },
+    ...spec,
+  }))
   group.add(contactShadow(r))
 
-  return finish(group, h + 0.28)
+  return finish(group, h + 0.31)
 }
 
 /** 30 ml amber glass serum with a black dropper. */
@@ -220,7 +281,7 @@ export function serumBottle(spec = {}) {
   bulb.position.y = h + 0.55
   group.add(bulb)
 
-  group.add(labelMesh(r + 0.003, h * 0.42, h * 0.6, { number: 'B3', script: '', name: 'Retinol + B3 serum', ritual: 'skin care ritual', numberColor: '#d48b9c', ...spec }, 0.7))
+  group.add(labelMesh(r + 0.003, h * 0.42, h * 0.6, { number: 'B3', script: '', care: 'SKIN CARE', kind: 'RITUAL', name: 'Retinol + B3 serum', numberColor: '#d48b9c', ...spec }))
   group.add(contactShadow(r))
 
   return finish(group, h + 0.7)

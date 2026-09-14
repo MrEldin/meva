@@ -3,8 +3,11 @@ import Magnetic from '@/components/ui/Magnetic.vue'
 import { gsap, prefersReducedMotion, ScrollTrigger } from '@/lib/motion'
 import { useCartStore } from '@/stores/cart'
 import { useCatalogStore } from '@/stores/catalog'
+import { BACK_ROTATION } from '@/three/bottles'
 import { defaultState, Stage } from '@/three/Stage'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+
+const clamp = (v) => Math.max(0, Math.min(1, v))
 
 /**
  * The opening scene. The section is five screens tall; a sticky viewport
@@ -17,19 +20,17 @@ const cart = useCartStore()
 const root = ref(null)
 const canvas = ref(null)
 const calloutEls = ref([])
-const lineEls = ref([])
-const dotEls = ref([])
 
 const hero = computed(() => catalog.products.find((p) => p.slug === 'losion-za-seboreicni-dermatitis'))
 const set = computed(() => catalog.products.find((p) => p.slug === 'set-za-seboreju-sa-manjim-uljem'))
 
-// Ingredient callouts sit in fixed slots either side of the bottle; a leader
-// line runs from each to its point on the label.
+// Ingredient callouts hang off leaders fixed to the label in 3D, so they turn
+// with the bottle and fade as their point on the label turns away.
 const callouts = [
-  { key: 'lavanda', name: 'Hidrolat lavande', role: 'smiruje i dezinfikuje', side: 'left', top: '46%' },
-  { key: 'salicilna', name: 'Salicilna kiselina', role: 'skida perut, otvara folikule', side: 'left', top: '70%' },
-  { key: 'niacinamid', name: 'Niacinamid (B3)', role: 'obnavlja barijeru kože', side: 'right', top: '36%' },
-  { key: 'cajevac', name: 'Ulje čajevca', role: 'protiv gljivica i bakterija', side: 'right', top: '66%' },
+  { key: 'lavanda', name: 'Hidrolat lavande', role: 'smiruje i dezinfikuje' },
+  { key: 'salicilna', name: 'Salicilna kiselina', role: 'skida perut, otvara folikule' },
+  { key: 'niacinamid', name: 'Niacinamid (B3)', role: 'obnavlja barijeru kože' },
+  { key: 'cajevac', name: 'Ulje čajevca', role: 'protiv gljivica i bakterija' },
 ]
 
 const added = ref('')
@@ -77,6 +78,7 @@ onMounted(() => {
     gsap.set(s, { lift: 0, offsetX: desktop ? 1.35 : 0 })
     gsap.timeline({ delay: 0.15 })
       .to(s, { lift: 1, rotation: -0.3, duration: reduced ? 0 : 1.8, ease: 'power3.out' }, 0)
+      .to(s, { particles: 1, duration: 2.4, ease: 'power2.out' }, 0.4)
       .from(q('.wordmark-in'), { opacity: 0, scale: 1.12, duration: 1.6, ease: 'power3.out' }, 0.1)
       .from(q('.ch-0 .rise'), { yPercent: 110, opacity: 0, stagger: 0.09, duration: 1.1, ease: 'power3.out' }, 0.45)
       .from(q('.hint-in'), { opacity: 0, duration: 1 }, 1.2)
@@ -97,47 +99,37 @@ onMounted(() => {
 
     // 1 → 2: ingredients.
     tl.fromTo(q('.ch-1 .rise'), { yPercent: 100, opacity: 0 }, { yPercent: 0, opacity: 1, stagger: 0.08, duration: 0.5 }, 1.0)
-      .fromTo(q('.callout'), { opacity: 0, x: (i) => (callouts[i].side === 'left' ? -30 : 30) }, { opacity: 1, x: 0, stagger: 0.12, duration: 0.35 }, 1.25)
-      .fromTo(q('.leaders'), { opacity: 0 }, { opacity: 1, duration: 0.4 }, 1.3)
-      .to(s, { rotation: 0.02, duration: 1.0 }, 1.2)
+      .to(s, { scanAlpha: 1, duration: 0.15 }, 1.0)
+      .fromTo(s, { scan: 0 }, { scan: 1, duration: 0.9, ease: 'power1.inOut' }, 1.05)
+      .to(s, { leaders: 1, duration: 0.4 }, 1.3)
+      .to(q('.callout'), { opacity: 1, stagger: 0.1, duration: 0.3 }, 1.35)
+      .to(s, { rotation: -0.15, duration: 1.0 }, 1.2)
+      .to(s, { scan: 0.35, duration: 0.5, ease: 'power1.inOut' }, 1.95)
+      .to(s, { scanAlpha: 0, duration: 0.25 }, 2.2)
       .to(q('.ch-1'), { opacity: 0, y: -40, duration: 0.5 }, 2.3)
-      .to([q('.callout'), q('.leaders')], { opacity: 0, duration: 0.3 }, 2.25)
+      .to(q('.callout'), { opacity: 0, duration: 0.3 }, 2.25)
+      .to(s, { leaders: 0, duration: 0.3 }, 2.25)
 
     // 2 → 3: how it is used; the bottle moves left, leans and turns, the light warms.
-    tl.to(s, { rotation: -0.62, tilt: -0.22, offsetX: desktop ? -1.2 : 0, cameraZ: 6.4, cameraY: -0.1, lookY: -0.1, glow: 1.1, duration: 1.2 }, 2.4)
+    tl.to(s, { rotation: BACK_ROTATION, tilt: -0.12, offsetX: desktop ? -1.1 : 0, cameraZ: 5.2, cameraY: 0.05, lookY: 0.05, glow: 1.1, duration: 1.2 }, 2.4)
       .fromTo(q('.ch-2 .rise'), { yPercent: 100, opacity: 0 }, { yPercent: 0, opacity: 1, stagger: 0.08, duration: 0.5 }, 2.8)
       .to(q('.ch-2'), { opacity: 0, y: -40, duration: 0.5 }, 3.7)
 
     // 3 → 4: the set arrives around the hero, framed from further back.
-    tl.to(s, { rotation: Math.PI * 2.05, tilt: 0, offsetX: desktop ? 0.3 : 0, cameraZ: 10.2, cameraY: 0.6, lookY: 0.15, spread: 1, glow: 0.8, duration: 1.2 }, 3.75)
+    tl.to(s, { rotation: 0, tilt: 0, offsetX: desktop ? -0.65 : 0, cameraZ: 10.4, cameraY: 0.45, lookY: 0.1, spread: 1, glow: 0.8, duration: 1.2 }, 3.75)
       .fromTo(q('.ch-3 .rise'), { yPercent: 100, opacity: 0 }, { yPercent: 0, opacity: 1, stagger: 0.08, duration: 0.5 }, 4.15)
       .to({}, { duration: 0.6 })
 
-    // Leader lines follow their anchor points on the bottle every frame.
-    const stageEl = canvas.value.parentElement
+    // Callouts sit at the tips of their 3D leaders every frame.
     const follow = () => {
-      const stageRect = stageEl.getBoundingClientRect()
-
+      const centre = stage.size.width / 2
       callouts.forEach((c, i) => {
         const el = calloutEls.value[i]
-        const line = lineEls.value[i]
-        const dot = dotEls.value[i]
-        if (!el || !line || !dot) return
-
+        if (!el) return
         const { x, y, facing } = stage.project(c.key)
-        const rect = el.getBoundingClientRect()
-        const fromX = (c.side === 'left' ? rect.right : rect.left) - stageRect.left
-        const fromY = rect.top + rect.height / 2 - stageRect.top
-        const alpha = Math.max(0, Math.min(1, facing * 1.6))
-
-        line.setAttribute('x1', fromX)
-        line.setAttribute('y1', fromY)
-        line.setAttribute('x2', x)
-        line.setAttribute('y2', y)
-        line.style.opacity = alpha
-        dot.setAttribute('cx', x)
-        dot.setAttribute('cy', y)
-        dot.style.opacity = alpha
+        el.style.transform = `translate(${x}px, ${y}px)`
+        el.style.setProperty('--facing', clamp(facing * 1.6))
+        el.classList.toggle('is-left', x < centre)
       })
     }
     gsap.ticker.add(follow)
@@ -161,6 +153,9 @@ onBeforeUnmount(() => {
       <!-- Ground glow -->
       <div class="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-[radial-gradient(60%_60%_at_50%_100%,rgba(179,97,126,0.22),transparent_70%)]" />
 
+      <!-- Vignette and a whisper of grain, so the black reads as a room, not a void -->
+      <div class="stage-vignette pointer-events-none absolute inset-0 z-10" />
+
       <!-- Word-mark, behind the bottle -->
       <div class="wordmark pointer-events-none absolute inset-0 flex items-center justify-center">
         <span class="wordmark-in font-display text-[34vw] font-semibold leading-none tracking-[-0.04em] text-paper/[0.045] select-none lg:text-[26vw]">MEVA</span>
@@ -173,6 +168,7 @@ onBeforeUnmount(() => {
 
       <!-- Chapter 0: the bottle stands right; the copy takes the left half -->
       <div class="ch ch-0">
+        <div class="ch-scrim lg:hidden" />
         <div class="shell flex h-full flex-col justify-end pb-28 lg:justify-center lg:pb-0">
           <div class="max-w-[30rem]">
             <p class="eyebrow overflow-hidden text-blush-300"><span class="rise block">N°15+ · Losion za seboreični dermatitis</span></p>
@@ -197,8 +193,9 @@ onBeforeUnmount(() => {
 
       <!-- Chapter 1: ingredients, bottle centred, callouts either side -->
       <div class="ch ch-1">
-        <div class="shell hidden pt-28 lg:block lg:pt-32">
-          <div class="lg:max-w-xs">
+        <div class="ch-scrim lg:hidden" />
+        <div class="shell absolute inset-x-0 bottom-0 hidden pb-16 lg:block">
+          <div class="lg:max-w-sm">
             <p class="eyebrow overflow-hidden text-blush-300"><span class="rise block">Sastav</span></p>
             <h2 class="mt-3 font-display text-3xl font-medium leading-[1.05] lg:text-4xl">
               <span class="block overflow-hidden"><span class="rise block">Sedam sastojaka.</span></span>
@@ -224,37 +221,34 @@ onBeforeUnmount(() => {
           </ul>
         </div>
 
-        <!-- Desktop: fixed slots with leader lines to the label -->
-        <svg class="leaders pointer-events-none absolute inset-0 hidden h-full w-full lg:block" aria-hidden="true">
-          <g v-for="(c, i) in callouts" :key="c.key">
-            <line :ref="(el) => (lineEls[i] = el)" stroke="rgba(255,255,255,0.45)" stroke-width="1" />
-            <circle :ref="(el) => (dotEls[i] = el)" r="5" fill="#e5b6c6" stroke="rgba(229,182,198,0.25)" stroke-width="8" />
-          </g>
-        </svg>
+        <!-- Desktop: labels at the tips of the 3D leaders -->
         <div
           v-for="(c, i) in callouts"
           :key="c.key"
           :ref="(el) => (calloutEls[i] = el)"
           class="callout hidden lg:block"
-          :class="c.side === 'left' ? 'left-[max(2.5rem,calc((100vw-88rem)/2+4rem))] text-right' : 'right-[max(2.5rem,calc((100vw-88rem)/2+4rem))] text-left'"
-          :style="{ top: c.top }"
         >
-          <p class="text-lg leading-tight">{{ c.name }}</p>
-          <p class="mt-1 text-sm text-paper/65">{{ c.role }}</p>
+          <div class="callout-text">
+            <p class="text-lg leading-tight">{{ c.name }}</p>
+            <p class="mt-1 text-sm text-paper/65">{{ c.role }}</p>
+          </div>
         </div>
-
       </div>
 
       <!-- Chapter 2: ritual, bottle left, copy right -->
       <div class="ch ch-2">
+        <div class="ch-scrim lg:hidden" />
         <div class="shell flex h-full flex-col justify-end pb-24 lg:items-end lg:justify-center lg:pb-0">
           <div class="lg:max-w-md">
-            <p class="eyebrow overflow-hidden text-blush-300"><span class="rise block">Ritual</span></p>
+            <p class="eyebrow overflow-hidden text-blush-300"><span class="rise block">Način upotrebe</span></p>
             <h2 class="mt-4 font-display text-4xl font-medium leading-[1.02] lg:text-5xl">
               <span class="block overflow-hidden"><span class="rise block">Uveče.</span></span>
               <span class="block overflow-hidden"><span class="rise block">Direktno na kožu glave.</span></span>
               <span class="block overflow-hidden"><span class="rise block italic font-normal text-blush-300">Ne ispira se.</span></span>
             </h2>
+            <p class="rise mt-5 max-w-sm text-[0.95rem] leading-relaxed text-paper/70 lg:ml-auto">
+              Sedam sastojaka, bez sulfata, parabena i silikona — sve piše na poleđini. 100 ml traje oko dva meseca redovne upotrebe.
+            </p>
             <div class="mt-8 flex gap-12">
               <div class="rise">
                 <p class="font-display text-4xl font-medium">1,4</p>
@@ -271,6 +265,7 @@ onBeforeUnmount(() => {
 
       <!-- Chapter 3: the set -->
       <div class="ch ch-3">
+        <div class="ch-scrim lg:hidden" />
         <div class="shell flex h-full flex-col justify-end pb-14 lg:pb-16">
           <div class="pointer-events-auto flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
             <div class="max-w-lg">
