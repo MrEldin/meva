@@ -162,9 +162,14 @@ function contactShadow(radius) {
  * Every bottle is a Group whose origin is the centre of its body, with a
  * `.height` so the stage can place it on the floor and frame it.
  */
-function finish(group, height) {
+function finish(group, height, cap = null) {
   group.userData.height = height
+  group.userData.cap = cap
   group.children.forEach((child) => (child.position.y -= height / 2))
+  group.traverse((o) => {
+    if (o.isMesh && o.material !== undefined && !o.material.map?.isCanvasTexture) o.castShadow = true
+    if (o.isMesh && o.geometry?.type === 'PlaneGeometry') o.castShadow = false // contact shadows
+  })
 
   return group
 }
@@ -198,7 +203,7 @@ export function lotionBottle(spec = {}) {
   }))
   group.add(contactShadow(r))
 
-  return finish(group, h + 0.37)
+  return finish(group, h + 0.37, cap)
 }
 
 /** 200 ml shampoo, taller, with a low flip cap and two black bands. */
@@ -231,7 +236,7 @@ export function shampooBottle(spec = {}) {
   }))
   group.add(contactShadow(r))
 
-  return finish(group, h + 0.3)
+  return finish(group, h + 0.3, cap)
 }
 
 /** 50 ml oil with a ribbed screw cap and dropper tip. */

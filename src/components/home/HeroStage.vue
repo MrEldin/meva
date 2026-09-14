@@ -75,9 +75,18 @@ onMounted(() => {
     const s = stage.state
 
     // Entrance: the bottle rises on the right, the word-mark and first chapter fade in.
-    gsap.set(s, { lift: 0, offsetX: desktop ? 1.35 : 0 })
+    gsap.set(s, { lift: 0, offsetX: desktop ? 1.35 : 0, cameraZ: 9.4 })
+    const cap = stage.hero?.userData?.cap
+    if (cap && !reduced) {
+      cap.position.y += 1.8
+      cap.rotation.y = -1.2
+    }
     gsap.timeline({ delay: 0.15 })
       .to(s, { lift: 1, rotation: -0.3, duration: reduced ? 0 : 1.8, ease: 'power3.out' }, 0)
+      .to(s, { cameraZ: 7.2, duration: reduced ? 0 : 2.6, ease: 'power2.inOut' }, 0)
+      .to(cap ? cap.position : {}, { y: '-=1.8', duration: 1.1, ease: 'power3.in' }, 0.9)
+      .to(cap ? cap.rotation : {}, { y: 0, duration: 1.1, ease: 'power2.inOut' }, 0.9)
+      .to(cap ? cap.position : {}, { y: '-=0.03', duration: 0.08, yoyo: true, repeat: 1, ease: 'power1.inOut' }, 2.0)
       .to(s, { particles: 1, duration: 2.4, ease: 'power2.out' }, 0.4)
       .from(q('.wordmark-in'), { opacity: 0, scale: 1.12, duration: 1.6, ease: 'power3.out' }, 0.1)
       .from(q('.ch-0 .rise'), { yPercent: 110, opacity: 0, stagger: 0.09, duration: 1.1, ease: 'power3.out' }, 0.45)
@@ -156,18 +165,15 @@ onBeforeUnmount(() => {
 <template>
   <section ref="root" class="relative h-[520vh] px-5 pt-2 text-cream sm:px-10 lg:px-16">
     <div class="sticky top-4 mx-auto h-[calc(100vh-2rem)] max-w-[90rem] overflow-hidden rounded-[2rem] bg-forest">
-      <!-- Ground glow -->
-      <div class="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-[radial-gradient(60%_60%_at_50%_100%,rgba(179,97,126,0.22),transparent_70%)]" />
-
       <!-- Vignette and a whisper of grain, so the black reads as a room, not a void -->
       <div class="stage-vignette pointer-events-none absolute inset-0 z-10" />
 
       <!-- Word-mark, behind the bottle -->
-      <div class="wordmark pointer-events-none absolute inset-0 flex items-center justify-center">
-        <span class="wordmark-in font-display text-[34vw] font-semibold leading-none tracking-[-0.04em] text-cream/[0.05] select-none lg:text-[26vw]">MEVA</span>
-      </div>
-
       <canvas ref="canvas" class="absolute inset-0 h-full w-full touch-pan-y" :class="!webgl && 'hidden'" data-cursor="drag" />
+
+      <div class="wordmark pointer-events-none absolute inset-0 z-[1] flex items-center justify-center mix-blend-screen">
+        <span class="wordmark-in font-display text-[34vw] font-semibold leading-none tracking-[-0.04em] text-cream/[0.07] select-none lg:text-[26vw]">MEVA</span>
+      </div>
       <div v-if="!webgl && hero?.image" class="pointer-events-none absolute inset-0 flex items-center justify-center">
         <img :src="hero.image" :alt="hero.name" class="h-[70vh] w-auto object-contain mix-blend-lighten opacity-90" />
       </div>

@@ -1,10 +1,15 @@
 import * as THREE from 'three'
 import { Reflector } from 'three/addons/objects/Reflector.js'
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js'
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js'
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js'
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 
 import { gsap } from '@/lib/motion'
 
 import { creamJar, lotionBottle, oilBottle, shampooBottle } from './bottles'
 import { createFloorFadeTexture, createSpriteTexture } from './label'
+import { createBackdrop, createPetals } from './backdrop'
 import { createStudioScene } from './studio'
 
 const lerp = (a, b, t) => a + (b - a) * t
@@ -62,23 +67,28 @@ export class Stage {
   constructor(canvas) {
     this.canvas = canvas
 
-    this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' })
+    this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: 'high-performance' })
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping
-    this.renderer.toneMappingExposure = 1.05
+    this.renderer.toneMappingExposure = 1.0
     this.renderer.outputColorSpace = THREE.SRGBColorSpace
+    this.renderer.setClearColor(0x121c17, 1)
+    this.renderer.shadowMap.enabled = true
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap
 
     this.scene = new THREE.Scene()
-    this.camera = new THREE.PerspectiveCamera(26, 1, 0.1, 50)
+    this.camera = new THREE.PerspectiveCamera(26, 1, 0.1, 80)
 
     const pmrem = new THREE.PMREMGenerator(this.renderer)
     this.scene.environment = pmrem.fromScene(createStudioScene(), 0.04).texture
-    this.scene.environmentIntensity = 1.0
+    this.scene.environmentIntensity = 0.85
     pmrem.dispose()
 
     this.buildLights()
     this.buildProducts()
     this.buildFloor()
+    this.buildRoom()
+    this.buildComposer()
     this.buildLeaders()
     this.buildScan()
     this.buildParticles()
@@ -93,8 +103,16 @@ export class Stage {
   }
 
   buildLights() {
-    this.key = new THREE.DirectionalLight(0xffffff, 1.8)
+    this.key = new THREE.DirectionalLight(0xffffff, 1.5)
     this.key.position.set(3, 3.5, 4)
+    this.key.castShadow = true
+    this.key.shadow.mapSize.set(2048, 2048)
+    this.key.shadow.camera.near = 1
+    this.key.shadow.camera.far = 20
+    this.key.shadow.camera.left = this.key.shadow.camera.bottom = -5
+    this.key.shadow.camera.right = this.key.shadow.camera.top = 5
+    this.key.shadow.radius = 6
+    this.key.shadow.bias = -0.0005
     this.scene.add(this.key)
 
     // Soft top light, the studio softbox that gives white plastic its gradient.
@@ -164,6 +182,35 @@ export class Stage {
     this.floorFade.rotation.x = -Math.PI / 2
     this.floorFade.position.set(0, this.floorY - 0.001, sheetZ)
     this.scene.add(this.floorFade)
+
+    // Soft shadows from the key light fall on this invisible sheet.
+    this.shadowCatcher = new THREE.Mesh(
+      new THREE.PlaneGeometry(...sheet),
+      new THREE.ShadowMaterial({ opacity: 0.35, color: 0x000000 }),
+    )
+    this.shadowCatcher.rotation.x = -Math.PI / 2
+    this.shadowCatcher.position.set(0, this.floorY + 0.0005, sheetZ)
+    this.shadowCatcher.receiveShadow = true
+    this.scene.add(this.shadowCatcher)
+  }
+
+  /** The room: a breathing backdrop and dried petals strewn on the floor. */
+  buildRoom() {
+    this.backdrop = createBackdrop()
+    this.scene.add(this.backdrop)
+
+    // Petals avoid the spots where the bottles stand.
+    this.petals = createPetals(85, this.floorY, [[0, 0.65], [-1.7, 0.7], [1.55, 0.55], [3.0, 0.7]])
+    this.products.add(this.petals)
+  }
+
+  /** Bloom for the highlights, orbs and ring; the output pass tone-maps. */
+  buildComposer() {
+    this.composer = new EffectComposer(this.renderer)
+    this.composer.addPass(new RenderPass(this.scene, this.camera))
+    this.bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.22, 0.45, 1.0)
+    this.composer.addPass(this.bloom)
+    this.composer.addPass(new OutputPass())
   }
 
   /**
@@ -324,6 +371,8 @@ export class Stage {
     this.size = { width, height }
     this.compact = width < 1024
     this.renderer.setSize(width, height, false)
+    this.composer?.setSize(width, height)
+    this.composer?.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     this.camera.aspect = width / height
     this.camera.updateProjectionMatrix()
   }
@@ -382,7 +431,7 @@ export class Stage {
       line.visible = dot.visible = tip.visible = halo.visible = alpha > 0.01
     })
 
-    this.floorFade.position.x = this.mirror.position.x = this.products.position.x + (this.compact ? 0 : s.spread * 0.65)
+    this.floorFade.position.x = this.mirror.position.x = this.shadowCatcher.position.x = this.products.position.x + (this.compact ? 0 : s.spread * 0.65)
 
     // Scan ring, sweeping the hero from base to cap.
     const { ring, halo, glow } = this.scan.userData
@@ -431,7 +480,10 @@ export class Stage {
     const lookX = (this.compact ? 0 : s.offsetX * 0.5) * (1 - s.spread) + lineCentre * s.spread
     this.camera.lookAt(lookX, s.lookY + (this.compact ? 0.4 : 0), 0)
 
-    this.renderer.render(this.scene, this.camera)
+    this.backdrop.material.uniforms.uTime.value = t
+    this.backdrop.material.uniforms.uPointer.value.set(this.pointer.x, this.pointer.y)
+
+    this.composer.render()
   }
 
   dispose() {
@@ -452,6 +504,7 @@ export class Stage {
         o.material.dispose()
       }
     })
+    this.composer.dispose()
     this.renderer.dispose()
   }
 }
