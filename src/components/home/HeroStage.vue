@@ -10,9 +10,11 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 const clamp = (v) => Math.max(0, Math.min(1, v))
 
 /**
- * The opening scene. The section is five screens tall; a sticky viewport
+ * The opening scene. The section is several screens tall; a sticky card
  * holds the WebGL stage while the scroll position drives one timeline that
- * spins and re-frames the bottle and hands the copy from chapter to chapter.
+ * spins and re-frames the bottle and hands the copy from chapter to chapter:
+ * the bottle, its ingredients, what it does to the scalp, how it is used,
+ * and the set it belongs to.
  */
 const catalog = useCatalogStore()
 const cart = useCartStore()
@@ -31,6 +33,13 @@ const callouts = [
   { key: 'salicilna', name: 'Salicilna kiselina', role: 'skida perut, otvara folikule' },
   { key: 'niacinamid', name: 'Niacinamid (B3)', role: 'obnavlja barijeru kože' },
   { key: 'cajevac', name: 'Ulje čajevca', role: 'protiv gljivica i bakterija' },
+]
+
+// What happens on the scalp, in the order the demonstration shows it.
+const steps = [
+  { n: '01', title: 'Salicilna kiselina omekšava perut', text: 'i odvaja je od kože glave, pa se ispira umesto da se češe.' },
+  { n: '02', title: 'Niacinamid i lavanda smiruju', text: 'crvenilo i svrab, i vraćaju barijeru kože.' },
+  { n: '03', title: 'Čajevac drži gljivice pod kontrolom,', text: 'pa se perut ne vraća posle prvog pranja.' },
 ]
 
 const added = ref('')
@@ -74,7 +83,7 @@ onMounted(() => {
     const q = gsap.utils.selector(root.value)
     const s = stage.state
 
-    // Entrance: the bottle rises on the right, the word-mark and first chapter fade in.
+    // Entrance: camera dollies in, the bottle rises on the right, the cap drops onto it.
     gsap.set(s, { lift: 0, offsetX: desktop ? 1.35 : 0, cameraZ: 9.4 })
     const cap = stage.hero?.userData?.cap
     if (cap && !reduced) {
@@ -84,10 +93,10 @@ onMounted(() => {
     gsap.timeline({ delay: 0.15 })
       .to(s, { lift: 1, rotation: -0.3, duration: reduced ? 0 : 1.8, ease: 'power3.out' }, 0)
       .to(s, { cameraZ: 7.2, duration: reduced ? 0 : 2.6, ease: 'power2.inOut' }, 0)
+      .to(s, { particles: 1, duration: 2.4, ease: 'power2.out' }, 0.4)
       .to(cap ? cap.position : {}, { y: '-=1.8', duration: 1.1, ease: 'power3.in' }, 0.9)
       .to(cap ? cap.rotation : {}, { y: 0, duration: 1.1, ease: 'power2.inOut' }, 0.9)
       .to(cap ? cap.position : {}, { y: '-=0.03', duration: 0.08, yoyo: true, repeat: 1, ease: 'power1.inOut' }, 2.0)
-      .to(s, { particles: 1, duration: 2.4, ease: 'power2.out' }, 0.4)
       .from(q('.wordmark-in'), { opacity: 0, scale: 1.12, duration: 1.6, ease: 'power3.out' }, 0.1)
       .from(q('.ch-0 .rise'), { yPercent: 110, opacity: 0, stagger: 0.09, duration: 1.1, ease: 'power3.out' }, 0.45)
       .from(q('.hint-in'), { opacity: 0, duration: 1 }, 1.2)
@@ -100,6 +109,10 @@ onMounted(() => {
       scrollTrigger: { trigger: root.value, start: 'top top', end: 'bottom bottom', scrub: 0.65 },
     })
 
+    const rise = (sel, at, stagger = 0.08) =>
+      tl.fromTo(q(sel), { yPercent: 100, opacity: 0 }, { yPercent: 0, opacity: 1, stagger, duration: 0.5 }, at)
+    const leave = (sel, at) => tl.to(q(sel), { opacity: 0, y: -40, duration: 0.5 }, at)
+
     // 0 → 1: word-mark recedes, chapter one leaves, the bottle centres and the camera moves in.
     tl.to(q('.wordmark'), { scale: 1.6, opacity: 0, duration: 1 }, 0)
       .to(q('.ch-0'), { opacity: 0, y: -60, duration: 0.6 }, 0.1)
@@ -108,32 +121,49 @@ onMounted(() => {
       .fromTo(s, { sweep: -1 }, { sweep: 1, duration: 1.0, ease: 'power1.inOut' }, 0.3)
       .to(s, { sweep: 0, duration: 0.4 }, 1.3)
 
-    // 1 → 2: ingredients.
-    tl.fromTo(q('.ch-1 .rise'), { yPercent: 100, opacity: 0 }, { yPercent: 0, opacity: 1, stagger: 0.08, duration: 0.5 }, 1.0)
-      .to(s, { scanAlpha: 1, duration: 0.15 }, 1.0)
+    // 1 → 2.3: ingredients — the scan ring reads the label, leaders point at it.
+    rise('.ch-1 .rise', 1.0)
+    tl.to(s, { scanAlpha: 1, duration: 0.15 }, 1.0)
       .fromTo(s, { scan: 0 }, { scan: 1, duration: 0.9, ease: 'power1.inOut' }, 1.05)
       .to(s, { leaders: 1, duration: 0.4 }, 1.3)
       .to(q('.callout'), { opacity: 1, stagger: 0.1, duration: 0.3 }, 1.35)
       .to(s, { rotation: -0.15, duration: 1.0 }, 1.2)
       .to(s, { scan: 0.35, duration: 0.5, ease: 'power1.inOut' }, 1.95)
       .to(s, { scanAlpha: 0, duration: 0.25 }, 2.2)
-      .to(q('.ch-1'), { opacity: 0, y: -40, duration: 0.5 }, 2.3)
-      .to(q('.callout'), { opacity: 0, duration: 0.3 }, 2.25)
+    leave('.ch-1', 2.3)
+    tl.to(q('.callout'), { opacity: 0, duration: 0.3 }, 2.25)
       .to(s, { leaders: 0, duration: 0.3 }, 2.25)
 
-    // 2 → 3: how it is used; the bottle moves left, leans and turns, the light warms.
-    tl.fromTo(s, { sweep: 1 }, { sweep: -1, duration: 1.0, ease: 'power1.inOut' }, 2.5)
-      .to(s, { sweep: 0, duration: 0.4 }, 3.5)
-      .to(s, { rotation: BACK_ROTATION, tilt: -0.12, offsetX: desktop ? -1.1 : 0, cameraZ: 5.2, cameraY: 0.05, lookY: 0.05, glow: 1.1, duration: 1.2 }, 2.4)
-      .fromTo(q('.ch-2 .rise'), { yPercent: 100, opacity: 0 }, { yPercent: 0, opacity: 1, stagger: 0.08, duration: 0.5 }, 2.8)
-      .to(q('.ch-2'), { opacity: 0, y: -40, duration: 0.5 }, 3.7)
+    // 2.4 → 4.9: what it does — the scalp rises, the bottle leans and a drop falls;
+    // the film spreads, the flakes lift away, the redness calms.
+    tl.to(s, { skinLift: 1, duration: 0.6, ease: 'power2.out' }, 2.4)
+      .to(s, { cameraZ: desktop ? 7.2 : 6.8, cameraY: 0.55, lookY: -0.35, lookX: desktop ? 0.9 : 1.35, offsetX: 0, sway: 0, duration: 0.8, ease: 'power1.inOut' }, 2.4)
+      .to(s, { rotation: 0.35, tilt: -2.0, pour: 1, duration: 0.8, ease: 'power2.inOut' }, 2.9)
+      .fromTo(s, { drop: 0 }, { drop: 1, duration: 0.3, ease: 'none' }, 3.55)
+      .to(s, { film: 1, duration: 0.7, ease: 'power1.out' }, 3.85)
+      .to(s, { flakes: 0, duration: 0.7, ease: 'power1.inOut' }, 3.95)
+      .to(s, { redness: 0, duration: 0.8, ease: 'power1.inOut' }, 4.15)
+    rise('.ch-2 .rise', 2.8)
+    rise('.ch-2 .step-1', 3.7, 0)
+    rise('.ch-2 .step-2', 4.1, 0)
+    rise('.ch-2 .step-3', 4.45, 0)
+    leave('.ch-2', 4.95)
 
-    // 3 → 4: the set arrives around the hero, framed from further back.
-    tl.to(s, { sway: 0, duration: 0.6 }, 3.75)
-      .fromTo(s, { sweep: -1 }, { sweep: 1, duration: 1.2, ease: 'power1.inOut' }, 3.9)
-      .to(s, { rotation: 0, tilt: 0, offsetX: desktop ? -0.65 : 0, cameraZ: 10.4, cameraY: 0.45, lookY: 0.1, spread: 1, glow: 0.8, duration: 1.2 }, 3.75)
-      .fromTo(q('.ch-3 .rise'), { yPercent: 100, opacity: 0 }, { yPercent: 0, opacity: 1, stagger: 0.08, duration: 0.5 }, 4.15)
-      .to({}, { duration: 0.6 })
+    // 5.0 → 6.3: how it is used — the bottle rights itself and turns round to its back panel.
+    tl.to(s, { pour: 0, tilt: -0.12, lookX: 0, duration: 0.7, ease: 'power2.inOut' }, 4.95)
+      .to(s, { skinLift: 0, duration: 0.5, ease: 'power2.in' }, 5.45)
+      .to(s, { flakes: 1, redness: 1, film: 0, drop: 0, duration: 0.01 }, 6.0)
+      .fromTo(s, { sweep: 1 }, { sweep: -1, duration: 1.0, ease: 'power1.inOut' }, 5.1)
+      .to(s, { sweep: 0, duration: 0.4 }, 6.1)
+      .to(s, { rotation: BACK_ROTATION, offsetX: desktop ? -1.1 : 0, cameraZ: 5.2, cameraY: 0.05, lookY: 0.05, glow: 1.1, duration: 1.2 }, 5.0)
+    rise('.ch-3 .rise', 5.5)
+    leave('.ch-3', 6.35)
+
+    // 6.4 → 7.7: the set arrives around the hero, framed from further back.
+    tl.fromTo(s, { sweep: -1 }, { sweep: 1, duration: 1.2, ease: 'power1.inOut' }, 6.55)
+      .to(s, { rotation: 0, tilt: 0, offsetX: desktop ? -0.65 : 0, cameraZ: 10.4, cameraY: 0.45, lookY: 0.1, spread: 1, glow: 0.8, duration: 1.2 }, 6.4)
+    rise('.ch-4 .rise', 6.85)
+    tl.to({}, { duration: 0.6 })
 
     // Callouts sit at the tips of their 3D leaders every frame.
     const follow = () => {
@@ -163,12 +193,11 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <section ref="root" class="relative h-[520vh] px-5 pt-2 text-cream sm:px-10 lg:px-16">
+  <section ref="root" class="relative h-[760vh] px-5 pt-2 text-cream sm:px-10 lg:px-16">
     <div class="sticky top-4 mx-auto h-[calc(100vh-2rem)] max-w-[90rem] overflow-hidden rounded-[2rem] bg-forest">
       <!-- Vignette and a whisper of grain, so the black reads as a room, not a void -->
       <div class="stage-vignette pointer-events-none absolute inset-0 z-10" />
 
-      <!-- Word-mark, behind the bottle -->
       <canvas ref="canvas" class="absolute inset-0 h-full w-full touch-pan-y" :class="!webgl && 'hidden'" data-cursor="drag" />
 
       <div class="wordmark pointer-events-none absolute inset-0 z-[1] flex items-center justify-center mix-blend-screen">
@@ -185,11 +214,11 @@ onBeforeUnmount(() => {
           <div class="max-w-[30rem]">
             <p class="eyebrow line-mask text-sage"><span class="rise block">Prirodna kozmetika · Novi Pazar</span></p>
             <h1 class="mt-5 font-display text-[2.75rem] font-medium leading-[1] tracking-tight sm:text-6xl lg:text-[4.5rem]">
-              <span class="block line-mask"><span class="rise block">Koža glave</span></span>
-              <span class="block line-mask"><span class="rise block">koja se, konačno,</span></span>
-              <span class="block line-mask"><span class="rise block italic font-normal text-blush-300">smirila.</span></span>
+              <span class="line-mask block"><span class="rise block">Koža glave</span></span>
+              <span class="line-mask block"><span class="rise block">koja se, konačno,</span></span>
+              <span class="line-mask block"><span class="rise block italic font-normal text-blush-300">smirila.</span></span>
             </h1>
-            <p class="mt-7 max-w-sm overflow-hidden text-base leading-relaxed text-cream/75 lg:text-lg">
+            <p class="mt-7 max-w-sm line-mask text-base leading-relaxed text-cream/75 lg:text-lg">
               <span class="rise block">Poručen 2.763 puta. Ručno rađen u Novom Pazaru, u malim serijama, od 2010.</span>
             </p>
           </div>
@@ -197,21 +226,21 @@ onBeforeUnmount(() => {
         <div class="hint pointer-events-none absolute inset-x-0 bottom-6 lg:bottom-10">
           <div class="hint-in flex items-center justify-center gap-6 text-cream/60">
             <span class="eyebrow hidden lg:inline">Prevuci da okreneš</span>
-            <span class="h-9 w-px overflow-hidden bg-cream/20"><span class="scroll-line block h-full w-full bg-paper/90" /></span>
+            <span class="h-9 w-px overflow-hidden bg-cream/20"><span class="scroll-line block h-full w-full bg-cream/90" /></span>
             <span class="eyebrow">Skroluj</span>
           </div>
         </div>
       </div>
 
-      <!-- Chapter 1: ingredients, bottle centred, callouts either side -->
+      <!-- Chapter 1: ingredients, bottle centred, callouts on 3D leaders -->
       <div class="ch ch-1">
         <div class="ch-scrim lg:hidden" />
         <div class="shell absolute inset-x-0 bottom-0 hidden pb-16 lg:block">
           <div class="lg:max-w-sm">
             <p class="eyebrow line-mask text-sage"><span class="rise block">Sastav</span></p>
             <h2 class="mt-3 font-display text-3xl font-medium leading-[1.05] lg:text-4xl">
-              <span class="block line-mask"><span class="rise block">Sedam sastojaka.</span></span>
-              <span class="block line-mask"><span class="rise block">Nijedan slučajan.</span></span>
+              <span class="line-mask block"><span class="rise block">Sedam sastojaka.</span></span>
+              <span class="line-mask block"><span class="rise block">Nijedan slučajan.</span></span>
             </h2>
             <p class="rise mt-4 hidden text-[0.95rem] leading-relaxed text-cream/60 lg:block">
               Uz hidrolat ruže, proteine pšenice i ekstrakt zelenog čaja. Bez sulfata, parabena i silikona.
@@ -219,21 +248,19 @@ onBeforeUnmount(() => {
           </div>
         </div>
 
-        <!-- Mobile: a plain list under the bottle -->
         <div class="shell absolute inset-x-0 bottom-0 pb-14 lg:hidden">
           <p class="eyebrow line-mask text-sage"><span class="rise block">Sastav</span></p>
           <h2 class="mb-6 mt-3 font-display text-3xl font-medium leading-[1.05]">
-            <span class="block line-mask"><span class="rise block">Sedam sastojaka. Nijedan slučajan.</span></span>
+            <span class="line-mask block"><span class="rise block">Sedam sastojaka. Nijedan slučajan.</span></span>
           </h2>
           <ul class="grid grid-cols-2 gap-x-6 gap-y-4">
-            <li v-for="c in callouts" :key="c.key" class="rise border-l border-clay-300/60 pl-3">
+            <li v-for="c in callouts" :key="c.key" class="rise border-l border-blush-300/60 pl-3">
               <p class="text-[0.95rem]">{{ c.name }}</p>
               <p class="text-sm text-cream/60">{{ c.role }}</p>
             </li>
           </ul>
         </div>
 
-        <!-- Desktop: labels at the tips of the 3D leaders -->
         <div
           v-for="(c, i) in callouts"
           :key="c.key"
@@ -247,16 +274,38 @@ onBeforeUnmount(() => {
         </div>
       </div>
 
-      <!-- Chapter 2: ritual, bottle left, copy right -->
+      <!-- Chapter 2: what it does — the demonstration on the scalp -->
       <div class="ch ch-2">
+        <div class="ch-scrim lg:hidden" />
+        <div class="shell flex h-full flex-col justify-end pb-14 lg:justify-center lg:pb-0">
+          <div class="lg:max-w-md">
+            <p class="eyebrow line-mask text-sage"><span class="rise block">Kako deluje</span></p>
+            <h2 class="mt-4 font-display text-3xl font-medium leading-[1.05] sm:text-4xl lg:text-5xl">
+              <span class="line-mask block"><span class="rise block">Perut ne treba sakriti.</span></span>
+              <span class="line-mask block"><span class="rise block italic font-normal text-blush-300">Treba je skinuti.</span></span>
+            </h2>
+            <ol class="mt-8 space-y-4 lg:mt-10 lg:space-y-5">
+              <li v-for="(st, i) in steps" :key="st.n" class="flex gap-4" :class="`step-${i + 1}`">
+                <span class="eyebrow mt-1 shrink-0 text-blush-300">{{ st.n }}</span>
+                <p class="text-[0.95rem] leading-relaxed text-cream/85 lg:text-base">
+                  <span class="font-semibold text-cream">{{ st.title }}</span> {{ st.text }}
+                </p>
+              </li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chapter 3: how it is used — bottle left, its back panel readable, copy right -->
+      <div class="ch ch-3">
         <div class="ch-scrim lg:hidden" />
         <div class="shell flex h-full flex-col justify-end pb-24 lg:items-end lg:justify-center lg:pb-0">
           <div class="lg:max-w-md">
             <p class="eyebrow line-mask text-sage"><span class="rise block">Način upotrebe</span></p>
             <h2 class="mt-4 font-display text-4xl font-medium leading-[1.02] lg:text-5xl">
-              <span class="block line-mask"><span class="rise block">Uveče.</span></span>
-              <span class="block line-mask"><span class="rise block">Direktno na kožu glave.</span></span>
-              <span class="block line-mask"><span class="rise block italic font-normal text-blush-300">Ne ispira se.</span></span>
+              <span class="line-mask block"><span class="rise block">Uveče.</span></span>
+              <span class="line-mask block"><span class="rise block">Direktno na kožu glave.</span></span>
+              <span class="line-mask block"><span class="rise block italic font-normal text-blush-300">Ne ispira se.</span></span>
             </h2>
             <p class="rise mt-5 max-w-sm text-[0.95rem] leading-relaxed text-cream/70 lg:ml-auto">
               Sedam sastojaka, bez sulfata, parabena i silikona — sve piše na poleđini. 100 ml traje oko dva meseca redovne upotrebe.
@@ -275,15 +324,15 @@ onBeforeUnmount(() => {
         </div>
       </div>
 
-      <!-- Chapter 3: the set -->
-      <div class="ch ch-3">
+      <!-- Chapter 4: the set -->
+      <div class="ch ch-4">
         <div class="ch-scrim lg:hidden" />
         <div class="shell flex h-full flex-col justify-end pb-14 lg:pb-16">
           <div class="pointer-events-auto flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
             <div class="max-w-lg">
               <p class="eyebrow line-mask text-sage"><span class="rise block">Sam, ili u setu</span></p>
               <h2 class="mt-4 font-display text-4xl font-medium leading-[1.02] lg:text-5xl">
-                <span class="block line-mask"><span class="rise block">Set za seboreju.</span></span>
+                <span class="line-mask block"><span class="rise block">Set za seboreju.</span></span>
               </h2>
               <p class="rise mt-4 text-[0.95rem] leading-relaxed text-cream/75 lg:text-base">
                 Šampon N°10, losion N°15+, ulje za seboreju, ulje za kosu i detox čaj — kompletna rutina za kožu glave, po ceni nižoj od zbira.

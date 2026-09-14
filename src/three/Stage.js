@@ -10,6 +10,7 @@ import { gsap } from '@/lib/motion'
 import { creamJar, lotionBottle, oilBottle, shampooBottle } from './bottles'
 import { createFloorFadeTexture, createSpriteTexture } from './label'
 import { createBackdrop, createPetals } from './backdrop'
+import { createSkinPatch } from './skin'
 import { createStudioScene } from './studio'
 
 const lerp = (a, b, t) => a + (b - a) * t
@@ -35,6 +36,14 @@ export const defaultState = {
   leaders: 0, // ingredient leader lines visibility
   sweep: 0, // key light slides across the bottle: −1 left … +1 right
   sway: 1, // how much the hero rocks in place
+  lookX: 0, // extra look-at offset, in the products' own units
+  // The demonstration: a patch of scalp beside the bottle
+  skinLift: 0, // patch rises through the floor
+  pour: 0, // bottle leans over the patch
+  drop: 0, // the drop's fall, mouth → skin
+  film: 0, // lotion spreading over the skin
+  flakes: 1, // flakes present → gone
+  redness: 1, // redness present → calmed
 }
 
 /**
@@ -199,8 +208,13 @@ export class Stage {
     this.backdrop = createBackdrop()
     this.scene.add(this.backdrop)
 
+    // The scalp patch stands to the bottle's right, below the floor until called.
+    this.skin = createSkinPatch()
+    this.skinAt = new THREE.Vector3(1.8, 0, 0.3)
+    this.products.add(this.skin)
+
     // Petals avoid the spots where the bottles stand.
-    this.petals = createPetals(85, this.floorY, [[0, 0.65], [-1.7, 0.7], [1.55, 0.55], [3.0, 0.7]])
+    this.petals = createPetals(85, this.floorY, [[0, 0.65], [-1.7, 0.7], [1.55, 0.55], [3.0, 0.7], [1.75, 1.15]])
     this.products.add(this.petals)
   }
 
@@ -208,7 +222,7 @@ export class Stage {
   buildComposer() {
     this.composer = new EffectComposer(this.renderer)
     this.composer.addPass(new RenderPass(this.scene, this.camera))
-    this.bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.22, 0.45, 1.0)
+    this.bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.1, 0.3, 1.05)
     this.composer.addPass(this.bloom)
     this.composer.addPass(new OutputPass())
   }
@@ -224,32 +238,19 @@ export class Stage {
 
     const lineMaterial = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0 })
     const dotMaterial = new THREE.MeshBasicMaterial({ color: BLUSH, transparent: true, opacity: 0 })
-    const orbMaterial = new THREE.MeshPhysicalMaterial({
-      color: 0xf6dfe6,
-      roughness: 0.08,
-      clearcoat: 1,
-      transparent: true,
-      opacity: 0,
-      envMapIntensity: 1.6,
-    })
-    const haloMaterial = new THREE.SpriteMaterial({ map: createSpriteTexture(), color: PINK, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending })
 
     Object.entries(this.anchors).forEach(([name, { angle, y }]) => {
       const start = new THREE.Vector3(Math.sin(angle) * r, y, Math.cos(angle) * r)
       const end = new THREE.Vector3(Math.sin(angle) * reach, y + 0.12, Math.cos(angle) * reach)
 
       const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints([start, end]), lineMaterial.clone())
-      const dot = new THREE.Mesh(new THREE.SphereGeometry(0.03, 16, 16), dotMaterial.clone())
+      const dot = new THREE.Mesh(new THREE.SphereGeometry(0.022, 16, 16), dotMaterial.clone())
       dot.position.copy(start)
-      // A glass orb at the tip, with a soft pink halo behind it.
-      const tip = new THREE.Mesh(new THREE.SphereGeometry(0.075, 32, 32), orbMaterial.clone())
+      const tip = new THREE.Mesh(new THREE.SphereGeometry(0.016, 12, 12), dotMaterial.clone())
       tip.position.copy(end)
-      const halo = new THREE.Sprite(haloMaterial.clone())
-      halo.scale.setScalar(0.5)
-      halo.position.copy(end)
 
-      this.hero.add(line, dot, tip, halo)
-      this.leaders[name] = { start, end, line, dot, tip, halo, normal: new THREE.Vector3(Math.sin(angle), 0, Math.cos(angle)) }
+      this.hero.add(line, dot, tip)
+      this.leaders[name] = { start, end, line, dot, tip, normal: new THREE.Vector3(Math.sin(angle), 0, Math.cos(angle)) }
     })
   }
 
@@ -258,26 +259,13 @@ export class Stage {
     this.scan = new THREE.Group()
 
     const ring = new THREE.Mesh(
-      new THREE.TorusGeometry(0.52, 0.006, 8, 96),
+      new THREE.TorusGeometry(0.52, 0.005, 8, 96),
       new THREE.MeshBasicMaterial({ color: BLUSH, transparent: true, opacity: 0 }),
     )
     ring.rotation.x = Math.PI / 2
 
-    const halo = new THREE.Mesh(
-      new THREE.RingGeometry(0.36, 0.78, 96),
-      new THREE.MeshBasicMaterial({ color: PINK, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending }),
-    )
-    halo.rotation.x = Math.PI / 2
-
-    // A faint second ring, a touch wider, for glow.
-    const glow = new THREE.Mesh(
-      new THREE.TorusGeometry(0.53, 0.02, 8, 96),
-      new THREE.MeshBasicMaterial({ color: PINK, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false }),
-    )
-    glow.rotation.x = Math.PI / 2
-
-    this.scan.add(ring, halo, glow)
-    this.scan.userData = { ring, halo, glow }
+    this.scan.add(ring)
+    this.scan.userData = { ring }
     this.products.add(this.scan)
   }
 
@@ -406,7 +394,8 @@ export class Stage {
     // Hero bottle.
     const float = Math.sin(t * 1.1) * 0.035
     const heroY = this.floorY + this.hero.userData.height / 2
-    this.hero.position.y = heroY + float + (1 - s.lift) * -3.2
+    this.hero.position.x = s.pour * 0.9
+    this.hero.position.y = heroY + float + (1 - s.lift) * -3.2 + s.pour * 0.05
     // The hero rocks gently in place, so the light keeps moving over it.
     const sway = Math.sin(t * 0.45) * 0.07 * s.sway
     this.hero.rotation.y = s.rotation + this.drag.offset + this.pointer.x * 0.08 + sway
@@ -415,31 +404,33 @@ export class Stage {
 
     // Leaders fade with how squarely their point on the label faces the camera.
     const heroQuat = this.hero.getWorldQuaternion(new THREE.Quaternion())
-    Object.values(this.leaders).forEach(({ line, dot, tip, halo, normal, start, end }, i) => {
+    Object.values(this.leaders).forEach(({ line, dot, tip, normal, start }) => {
       const world = this.hero.localToWorld(start.clone())
       const facing = normal.clone().applyQuaternion(heroQuat).dot(this.camera.position.clone().sub(world).normalize())
       const alpha = clamp01(facing * 1.6) * s.leaders
-      line.material.opacity = alpha * 0.55
+      line.material.opacity = alpha * 0.6
       dot.material.opacity = alpha
-      tip.material.opacity = alpha * 0.85
-      halo.material.opacity = alpha * 0.55
-      // Orbs bob and grow in as the leaders appear.
-      const bob = Math.sin(t * 1.4 + i * 1.7) * 0.03
-      tip.position.set(end.x, end.y + bob, end.z)
-      halo.position.copy(tip.position)
-      tip.scale.setScalar(0.2 + 0.8 * s.leaders)
-      line.visible = dot.visible = tip.visible = halo.visible = alpha > 0.01
+      tip.material.opacity = alpha
+      line.visible = dot.visible = tip.visible = alpha > 0.01
     })
 
     this.floorFade.position.x = this.mirror.position.x = this.shadowCatcher.position.x = this.products.position.x + (this.compact ? 0 : s.spread * 0.65)
 
     // Scan ring, sweeping the hero from base to cap.
-    const { ring, halo, glow } = this.scan.userData
+    const { ring } = this.scan.userData
     this.scan.position.set(this.hero.position.x, this.floorY + 0.05 + s.scan * (this.hero.userData.height - 0.1) + float, 0)
-    ring.material.opacity = s.scanAlpha
-    halo.material.opacity = s.scanAlpha * 0.18
-    glow.material.opacity = s.scanAlpha * 0.35
+    ring.material.opacity = s.scanAlpha * 0.9
     this.scan.visible = s.scanAlpha > 0.01
+
+    // The scalp patch rises, then plays the demonstration.
+    this.skin.position.set(this.skinAt.x, this.floorY - 1.2 * (1 - s.skinLift), this.skinAt.z)
+    this.skin.visible = s.skinLift > 0.01
+    if (this.skin.visible) {
+      // The bottle's mouth, in the patch's local space, is where the drop starts.
+      const mouth = this.hero.localToWorld(new THREE.Vector3(0, this.hero.userData.height / 2 + 0.02, 0))
+      this.skin.worldToLocal(mouth)
+      this.skin.userData.apply(s, t, mouth)
+    }
 
     // The set rises through the floor into an even line beside the hero.
     this.set.forEach(({ mesh, x, rotation }, i) => {
@@ -477,7 +468,7 @@ export class Stage {
     const cameraZ = baseZ + s.spread * Math.max(0, fitZ - baseZ)
     this.camera.position.set(this.pointer.x * 0.12, s.cameraY - this.pointer.y * 0.08, cameraZ)
     const lineCentre = this.compact ? 0.45 : 0
-    const lookX = (this.compact ? 0 : s.offsetX * 0.5) * (1 - s.spread) + lineCentre * s.spread
+    const lookX = (this.compact ? 0 : s.offsetX * 0.5) * (1 - s.spread) + lineCentre * s.spread + s.lookX * scale + (this.compact ? 0 : 0)
     this.camera.lookAt(lookX, s.lookY + (this.compact ? 0.4 : 0), 0)
 
     this.backdrop.material.uniforms.uTime.value = t
