@@ -1,37 +1,48 @@
 <script setup>
 import Closing from '@/components/home/Closing.vue'
-import Hero from '@/components/home/Hero.vue'
-import IntroReveal from '@/components/home/IntroReveal.vue'
-import Marquee from '@/components/home/Marquee.vue'
-import ProblemSelector from '@/components/home/ProblemSelector.vue'
-import Process from '@/components/home/Process.vue'
+import Finder from '@/components/home/Finder.vue'
+import HeroStage from '@/components/home/HeroStage.vue'
 import Proof from '@/components/home/Proof.vue'
-import SetsFeature from '@/components/home/SetsFeature.vue'
-import Showcase from '@/components/home/Showcase.vue'
+import Rail from '@/components/home/Rail.vue'
+import { ScrollTrigger } from '@/lib/motion'
 import { useCatalogStore } from '@/stores/catalog'
-import { onMounted, ref } from 'vue'
+import { useUiStore } from '@/stores/ui'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 
 const catalog = useCatalogStore()
-const ready = ref(false)
+const ui = useUiStore()
+const root = ref(null)
 
-onMounted(() => catalog.load())
+let triggers = []
+
+onMounted(() => {
+  catalog.load()
+
+  // Tell the header which kind of surface is under it as sections pass. A
+  // trigger per section, so it stays in step with the smooth scroller.
+  triggers = [...root.value.querySelectorAll('[data-surface]')].map((el) =>
+    ScrollTrigger.create({
+      trigger: el,
+      start: 'top 48px',
+      end: 'bottom 48px',
+      onToggle: (self) => self.isActive && (ui.surface = el.dataset.surface),
+    }),
+  )
+  ui.surface = 'dark'
+})
+
+onBeforeUnmount(() => {
+  triggers.forEach((t) => t.kill())
+  ui.surface = 'light'
+})
 </script>
 
 <template>
-  <div>
-    <IntroReveal @done="ready = true" />
-    <Hero :ready="ready" />
-    <Marquee />
-    <!-- These sections build their motion from product elements, so they mount
-         only once the catalogue is in — a GSAP setup over an empty list would
-         leave later-rendered panels stacked and unanimated. -->
-    <template v-if="catalog.loaded">
-      <ProblemSelector />
-      <Showcase />
-      <Proof />
-      <Process />
-      <SetsFeature />
-    </template>
+  <div ref="root" class="bg-ink">
+    <HeroStage />
+    <Rail />
+    <Finder />
+    <Proof />
     <Closing />
   </div>
 </template>

@@ -1,49 +1,127 @@
 <script setup>
-import { useMotion } from '@/lib/motion'
-import { ref } from 'vue'
+import TiltCard from '@/components/ui/TiltCard.vue'
+import { reviews } from '@/data/reviews'
+import { gsap, prefersReducedMotion, ScrollTrigger } from '@/lib/motion'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 
+/**
+ * Evidence: the sales figures counting up, and customers in their own words
+ * on a rail the visitor can drag.
+ */
 const root = ref(null)
+const rail = ref(null)
 
-// Real figures from the shop's own history, nothing rounded up for effect.
-const facts = [
-  { value: 5480, suffix: '', label: 'porudžbina', note: 'od januara 2024.' },
-  { value: 3964, suffix: '', label: 'kupaca', note: 'koji su se vratili u proseku 1,4 puta' },
-  { value: 73, suffix: '', label: 'preparata', note: 'svaki rađen ručno' },
-  { value: 0, suffix: ' din', label: 'dostava', note: 'na celoj teritoriji Srbije' },
+const figures = [
+  { value: 5480, label: 'porudžbina', note: 'od januara 2024.' },
+  { value: 3964, label: 'kupaca', note: 'koji se vraćaju 1,4 puta' },
+  { value: 73, label: 'preparata', note: 'svaki rađen ručno' },
+  { value: 16, label: 'godina', note: 'od 2010. u Novom Pazaru' },
 ]
 
-const format = (n) => new Intl.NumberFormat('sr-RS').format(Math.round(n))
+let ctx
+let drag
 
-useMotion(
-  root,
-  (gsap, el) => {
-    gsap.utils.toArray('.proof-number', el).forEach((node) => {
-      const target = Number(node.dataset.value)
-      const suffix = node.dataset.suffix ?? ''
-      const state = { n: 0 }
+onMounted(() => {
+  if (prefersReducedMotion()) return
 
+  ctx = gsap.context(() => {
+    // Numbers count up once, when they arrive.
+    root.value.querySelectorAll('.figure').forEach((el) => {
+      const target = Number(el.dataset.value)
+      const state = { v: 0 }
       gsap.to(state, {
-        n: target, duration: 2.2, ease: 'power3.out',
-        scrollTrigger: { trigger: node, start: 'top 85%', once: true },
-        onUpdate: () => { node.textContent = format(state.n) + suffix },
+        v: target,
+        duration: 1.8,
+        ease: 'power3.out',
+        scrollTrigger: { trigger: el, start: 'top 85%' },
+        onUpdate: () => (el.textContent = new Intl.NumberFormat('sr-RS').format(Math.round(state.v))),
       })
     })
 
-    gsap.from('.proof-item', { y: 40, opacity: 0, stagger: 0.12, duration: 1.1, scrollTrigger: { trigger: el, start: 'top 75%' } })
-  },
-  (el) => el.querySelectorAll('.proof-number').forEach((n) => (n.textContent = format(n.dataset.value) + (n.dataset.suffix ?? ''))),
-)
+    gsap.from(root.value.querySelectorAll('.review'), {
+      y: 50,
+      opacity: 0,
+      stagger: 0.08,
+      duration: 1,
+      scrollTrigger: { trigger: rail.value, start: 'top 80%' },
+    })
+  }, root.value)
+
+  // Grab-to-scroll on the review rail.
+  const el = rail.value
+  let startX = 0
+  let startScroll = 0
+  const down = (e) => {
+    drag = true
+    startX = e.clientX
+    startScroll = el.scrollLeft
+    el.classList.add('is-dragging')
+  }
+  const move = (e) => {
+    if (!drag) return
+    el.scrollLeft = startScroll - (e.clientX - startX)
+  }
+  const up = () => {
+    drag = false
+    el.classList.remove('is-dragging')
+  }
+  el.addEventListener('pointerdown', down)
+  window.addEventListener('pointermove', move)
+  window.addEventListener('pointerup', up)
+  ctx.add(() => () => {
+    el.removeEventListener('pointerdown', down)
+    window.removeEventListener('pointermove', move)
+    window.removeEventListener('pointerup', up)
+  })
+
+  requestAnimationFrame(() => ScrollTrigger.refresh())
+})
+
+onBeforeUnmount(() => ctx?.revert())
 </script>
 
 <template>
-  <section ref="root" class="border-b border-ink/10 bg-paper">
-    <div class="shell grid grid-cols-2 divide-x divide-ink/10 lg:grid-cols-4">
-      <div v-for="(fact, i) in facts" :key="fact.label" class="proof-item px-5 py-12 md:px-8 md:py-16" :class="i % 2 === 0 ? 'pl-0' : ''">
-        <p class="font-display text-5xl leading-none tabular-nums text-ink md:text-7xl">
-          <span class="proof-number" :data-value="fact.value" :data-suffix="fact.suffix">0{{ fact.suffix }}</span>
-        </p>
-        <p class="eyebrow mt-4 text-blush-500">{{ fact.label }}</p>
-        <p class="mt-2 text-xs font-light text-mist-400">{{ fact.note }}</p>
+  <section ref="root" class="bg-paper text-ink" data-surface="light">
+    <div class="shell pt-24 lg:pt-36">
+      <div class="grid gap-10 border-b border-ink/10 pb-16 lg:grid-cols-12 lg:gap-6">
+        <div class="lg:col-span-4">
+          <p class="eyebrow text-blush-500">Dokazano</p>
+          <h2 class="mt-5 font-display text-4xl leading-[1] lg:text-6xl">Brojke,<br />ne obećanja.</h2>
+        </div>
+        <dl class="grid grid-cols-2 gap-x-6 gap-y-10 lg:col-span-8 lg:grid-cols-4">
+          <div v-for="f in figures" :key="f.label">
+            <dt class="eyebrow text-[0.6rem] text-mist-500">{{ f.label }}</dt>
+            <dd class="figure mt-3 font-display text-5xl tabular-nums leading-none lg:text-6xl" :data-value="f.value">0</dd>
+            <dd class="mt-3 text-xs font-light text-mist-500">{{ f.note }}</dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+
+    <div class="pt-16 lg:pt-20">
+      <div class="shell flex items-end justify-between">
+        <h3 class="font-display text-3xl lg:text-4xl">Rečeno o preparatima</h3>
+        <span class="eyebrow hidden text-mist-400 lg:inline">Prevuci →</span>
+      </div>
+      <div
+        ref="rail"
+        class="review-rail mt-10 flex cursor-grab gap-5 overflow-x-auto px-5 pb-24 scrollbar-none select-none lg:px-10 xl:px-16"
+        data-cursor="drag"
+      >
+        <TiltCard v-for="(r, i) in reviews" :key="i" :max="5" class="review w-[80vw] shrink-0 sm:w-[24rem]">
+          <blockquote class="flex h-full min-h-[18rem] flex-col justify-between border border-ink/10 bg-paper p-8">
+            <div>
+              <div class="flex gap-1 text-blush-500" aria-label="5 od 5">
+                <svg v-for="n in r.rating" :key="n" viewBox="0 0 20 20" class="h-3.5 w-3.5 fill-current"><path d="M10 1.5l2.6 5.6 6.1.7-4.5 4.2 1.2 6-5.4-3-5.4 3 1.2-6L1.3 7.8l6.1-.7z" /></svg>
+              </div>
+              <p class="mt-6 font-display text-xl leading-snug">“{{ r.text }}”</p>
+            </div>
+            <footer class="mt-8 flex items-center justify-between">
+              <span class="text-sm">{{ r.name }}</span>
+              <span class="eyebrow text-[0.6rem] text-mist-400">{{ r.product }}</span>
+            </footer>
+          </blockquote>
+        </TiltCard>
       </div>
     </div>
   </section>

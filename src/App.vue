@@ -1,7 +1,9 @@
 <script setup>
 import SiteFooter from '@/components/layout/SiteFooter.vue'
 import SiteHeader from '@/components/layout/SiteHeader.vue'
-import { computed } from 'vue'
+import Cursor from '@/components/ui/Cursor.vue'
+import { initSmoothScroll } from '@/lib/scroll'
+import { computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
@@ -9,9 +11,12 @@ const route = useRoute()
 // The admin panel is its own world and wears neither the shop header nor footer.
 const bare = computed(() => route.meta.bare === true)
 const overHero = computed(() => route.meta.overHero === true)
+
+onMounted(() => initSmoothScroll())
 </script>
 
 <template>
+  <Cursor />
   <SiteHeader v-if="!bare" :over-hero="overHero" />
 
   <main :class="!bare && !overHero && 'pt-[4.5rem] md:pt-[5.5rem]'">

@@ -35,7 +35,7 @@
   --color-mist-500: #7c7175;
   --color-mist-600: #574f52;
 
-  --font-display: "Bodoni Moda", "Didot", "Times New Roman", serif;
+  --font-display: "Playfair Display", "Didot", "Times New Roman", serif;
   --font-sans: "Jost", ui-sans-serif, system-ui, sans-serif;
 
   --radius-card: 2px;
@@ -72,14 +72,14 @@
   body {
     @apply bg-paper text-ink antialiased;
     font-family: var(--font-sans);
-    font-weight: 300;
+    font-weight: 400;
     font-synthesis-weight: none;
   }
 
   h1, h2, h3, h4 {
     font-family: var(--font-display);
-    font-weight: 400;
-    letter-spacing: -0.015em;
+    font-weight: 500;
+    letter-spacing: -0.01em;
   }
 
   ::selection {
@@ -100,9 +100,9 @@
 @utility eyebrow {
   /* The wide-tracked caps used throughout the brand, as in the logo's word-mark. */
   font-family: var(--font-sans);
-  font-size: 0.6875rem;
-  font-weight: 400;
-  letter-spacing: 0.28em;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.24em;
   text-transform: uppercase;
 }
 
@@ -166,4 +166,101 @@
 
   .scrollbar-none { scrollbar-width: none; }
   .scrollbar-none::-webkit-scrollbar { display: none; }
+}
+
+/*
+|--------------------------------------------------------------------------
+| Interaction primitives
+|--------------------------------------------------------------------------
+*/
+
+@layer utilities {
+  /* Custom pointer for mouse users; the native one hides everywhere. */
+  .has-cursor, .has-cursor * { cursor: none !important; }
+
+  .cursor-dot {
+    position: fixed;
+    top: 0; left: 0;
+    width: 6px; height: 6px;
+    margin: -3px 0 0 -3px;
+    border-radius: 999px;
+    background: #fff;
+    transition: transform 0.3s var(--ease-silk), opacity 0.3s;
+  }
+  .cursor-dot.hover, .cursor-dot.label, .cursor-dot.label-down { transform: scale(0); }
+
+  .cursor-ring {
+    position: fixed;
+    top: 0; left: 0;
+    width: 36px; height: 36px;
+    margin: -18px 0 0 -18px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.7);
+    display: grid;
+    place-items: center;
+    transition: width 0.4s var(--ease-silk), height 0.4s var(--ease-silk), margin 0.4s var(--ease-silk), background-color 0.4s, border-color 0.4s;
+  }
+  .cursor-ring.hover { width: 56px; height: 56px; margin: -28px 0 0 -28px; background: rgba(255,255,255,0.12); }
+  .cursor-ring.down { width: 28px; height: 28px; margin: -14px 0 0 -14px; }
+  .cursor-ring.label, .cursor-ring.label-down {
+    width: 88px; height: 88px; margin: -44px 0 0 -44px;
+    background: #fff; border-color: #fff;
+  }
+  .cursor-ring.label-down { width: 76px; height: 76px; margin: -38px 0 0 -38px; }
+  .cursor-label {
+    font-family: var(--font-sans);
+    font-size: 0.6rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: #000;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .cursor-ring.label .cursor-label, .cursor-ring.label-down .cursor-label { opacity: 1; }
+
+  /* Tilt cards */
+  .tilt { perspective: 1200px; }
+  .tilt-card {
+    position: relative;
+    transform-style: preserve-3d;
+    will-change: transform;
+    --mx: 50%; --my: 50%;
+  }
+  .tilt-sheen {
+    pointer-events: none;
+    position: absolute; inset: 0;
+    background: radial-gradient(circle at var(--mx) var(--my), rgba(255,255,255,0.28), transparent 55%);
+    opacity: 0;
+    transition: opacity 0.5s;
+    mix-blend-mode: soft-light;
+  }
+  .tilt:hover .tilt-sheen { opacity: 1; }
+
+  /* Buttons whose blush fill slides up on hover */
+  .btn-fill::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: var(--color-blush-500);
+    transform: translateY(101%);
+    transition: transform 0.55s var(--ease-silk);
+  }
+  .btn-fill:hover::before { transform: translateY(0); }
+
+  /* Hero chapters: full-viewport overlays the timeline fades between */
+  .ch { position: absolute; inset: 0; pointer-events: none; }
+  .ch-1, .ch-2, .ch-3 { opacity: 1; }
+  .ch .rise { will-change: transform, opacity; }
+
+  .scroll-line { animation: scroll-line 1.8s var(--ease-silk) infinite; }
+  @keyframes scroll-line {
+    0% { transform: translateY(-100%); }
+    50% { transform: translateY(0); }
+    100% { transform: translateY(100%); }
+  }
+
+  /* Ingredient callouts: fixed slots either side of the bottle */
+  .callout { position: absolute; width: 16rem; opacity: 0; }
+
+  .review-rail.is-dragging { cursor: grabbing; scroll-snap-type: none; }
+  .review-rail.is-dragging * { pointer-events: none; }
 }
