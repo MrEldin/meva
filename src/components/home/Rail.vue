@@ -30,7 +30,7 @@ const order = [
   'hijaluronska-krema-sa-vitaminom-e',
 ]
 
-const tiles = ['bg-rose', 'bg-wheat', 'bg-mint', 'bg-sky', 'bg-linen', 'bg-sage']
+const tiles = ['bg-blush-200', 'bg-wheat', 'bg-mint', 'bg-sky', 'bg-linen', 'bg-sage', 'bg-rose']
 
 const items = computed(() =>
   order.map((slug) => catalog.products.find((p) => p.slug === slug)).filter((p) => p?.image),
@@ -104,8 +104,8 @@ onBeforeUnmount(() => ctx?.revert())
           <div>
             <p class="eyebrow text-clay-500">01 / Kolekcija</p>
             <h2 class="mt-4 font-display text-5xl leading-[1] tracking-tight sm:text-7xl">
-              <span class="block overflow-hidden"><span class="rise block">Ono što se</span></span>
-              <span class="block overflow-hidden"><span class="rise block">stalno <em class="italic text-clay-500">vraća</em>.</span></span>
+              <span class="block line-mask"><span class="rise block">Ono što se</span></span>
+              <span class="block line-mask"><span class="rise block">stalno <em class="italic text-blush-500">vraća</em>.</span></span>
             </h2>
           </div>
           <p class="max-w-xs text-sm leading-relaxed text-forest/65">

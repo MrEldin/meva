@@ -111,7 +111,7 @@ function onLeave(el, done) {
           <div>
             <p class="eyebrow text-sage-deep">02 / Pronađi svoj preparat</p>
             <h2 class="mt-5 font-display text-5xl leading-[0.95] tracking-tight sm:text-7xl">
-              Kaži nam<br />šta te <em class="italic">muči</em>.
+              Kaži nam<br />šta te <em class="italic text-blush-600">muči</em>.
             </h2>
             <p class="mt-6 max-w-xs text-sm leading-relaxed text-forest/70">
               Dva pitanja. Isti odgovor koji biste dobili preko pulta u Novom Pazaru.
@@ -180,7 +180,7 @@ function onLeave(el, done) {
                   class="f-item group rounded-[1.5rem] bg-sand p-4"
                 >
                   <RouterLink :to="{ name: 'product', params: { slug: product.slug } }" class="block" data-cursor="view">
-                    <div class="aspect-square overflow-hidden rounded-[1.25rem]" :class="i === 0 ? 'bg-rose' : 'bg-sky'">
+                    <div class="aspect-square overflow-hidden rounded-[1.25rem]" :class="i === 0 ? 'bg-blush-200' : 'bg-sky'">
                       <img v-if="product.image" :src="product.image" :alt="product.name" class="h-full w-full object-cover mix-blend-multiply transition-transform duration-700 ease-[var(--ease-silk)] group-hover:scale-105" />
                     </div>
                   </RouterLink>

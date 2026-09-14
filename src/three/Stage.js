@@ -9,9 +9,10 @@ import { createFloorFadeTexture, createSpriteTexture } from './label'
 
 const lerp = (a, b, t) => a + (b - a) * t
 const clamp01 = (v) => Math.max(0, Math.min(1, v))
-const SAGE = 0xd9e4c6
+const BLUSH = 0xe5b6c6
+const PINK = 0xb3617e
 const CLAY = 0xc56d59
-const ROSE = 0xe8c8c1
+const ROSE = 0xf2d7e0
 
 export const defaultState = {
   rotation: -0.7, // hero bottle spin, radians
@@ -99,7 +100,7 @@ export class Stage {
     this.top.position.set(-1, 6, 1)
     this.scene.add(this.top)
 
-    this.rim = new THREE.DirectionalLight(CLAY, 1.6)
+    this.rim = new THREE.DirectionalLight(PINK, 1.6)
     this.rim.position.set(-3.5, 2, -3)
     this.scene.add(this.rim)
 
@@ -108,7 +109,7 @@ export class Stage {
     this.scene.add(this.fill)
 
     // A pink pool of light on the floor behind the products.
-    this.pool = new THREE.PointLight(CLAY, 12, 8, 2)
+    this.pool = new THREE.PointLight(PINK, 12, 8, 2)
     this.pool.position.set(0, -0.6, -2.4)
     this.scene.add(this.pool)
   }
@@ -136,10 +137,12 @@ export class Stage {
    * their feet reflect, the way a studio's black acrylic sheet does.
    */
   buildFloor() {
-    // The sheet reaches only a little behind the products, so its far edge —
-    // which is the page's own ink — stays below the word-mark behind them.
-    const sheet = [16, 9]
-    const sheetZ = 1.5
+    // The sheet reaches only a little behind the products, so its far edge
+    // stays below the word-mark behind them, and far enough towards the
+    // camera that its near edge never shows however far the camera backs off.
+    const sheet = [20, 16]
+    const sheetZ = 5 // spans z −3 … 13; the products stand at z 0
+    const centreV = 0.5 + sheetZ / sheet[1]
 
     this.mirror = new Reflector(new THREE.PlaneGeometry(...sheet), {
       clipBias: 0.003,
@@ -153,7 +156,7 @@ export class Stage {
 
     if (import.meta.env.DEV && new URLSearchParams(location.search).has('nomirror')) this.mirror.visible = false
 
-    const fade = new THREE.MeshBasicMaterial({ map: createFloorFadeTexture(), transparent: true, depthWrite: false })
+    const fade = new THREE.MeshBasicMaterial({ map: createFloorFadeTexture(512, centreV), transparent: true, depthWrite: false })
     fade.toneMapped = false
     this.floorFade = new THREE.Mesh(new THREE.PlaneGeometry(...sheet), fade)
     this.floorFade.rotation.x = -Math.PI / 2
@@ -171,7 +174,7 @@ export class Stage {
     const reach = 1.0
 
     const lineMaterial = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0 })
-    const dotMaterial = new THREE.MeshBasicMaterial({ color: SAGE, transparent: true, opacity: 0 })
+    const dotMaterial = new THREE.MeshBasicMaterial({ color: BLUSH, transparent: true, opacity: 0 })
 
     Object.entries(this.anchors).forEach(([name, { angle, y }]) => {
       const start = new THREE.Vector3(Math.sin(angle) * r, y, Math.cos(angle) * r)
@@ -194,13 +197,13 @@ export class Stage {
 
     const ring = new THREE.Mesh(
       new THREE.TorusGeometry(0.52, 0.006, 8, 96),
-      new THREE.MeshBasicMaterial({ color: SAGE, transparent: true, opacity: 0 }),
+      new THREE.MeshBasicMaterial({ color: BLUSH, transparent: true, opacity: 0 }),
     )
     ring.rotation.x = Math.PI / 2
 
     const halo = new THREE.Mesh(
       new THREE.RingGeometry(0.36, 0.7, 96),
-      new THREE.MeshBasicMaterial({ color: SAGE, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false }),
+      new THREE.MeshBasicMaterial({ color: BLUSH, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false }),
     )
     halo.rotation.x = Math.PI / 2
 
@@ -235,7 +238,7 @@ export class Stage {
 
     this.particleLayers = [
       make(150, 0.14, ROSE, 0.7, [-3.5, 1.5]),
-      make(28, 0.42, CLAY, 0.3, [1.8, 4.2]),
+      make(28, 0.42, PINK, 0.3, [1.8, 4.2]),
     ]
   }
 
@@ -362,7 +365,7 @@ export class Stage {
     this.set.forEach(({ mesh, x, rotation }, i) => {
       const eased = s.spread * s.spread * (3 - 2 * s.spread)
       mesh.position.set(
-        x,
+        x * (this.compact ? 0.7 : 1),
         this.floorY + mesh.userData.height / 2 + Math.sin(t * 1.1 + i) * 0.02 - (1 - eased) * (mesh.userData.height + 1.4),
         0,
       )
@@ -386,10 +389,15 @@ export class Stage {
       layer.visible = s.particles > 0.01
     })
 
-    // Camera; phones frame the set from further back and centre on the line-up.
-    const cameraZ = s.cameraZ * (this.compact ? 1.3 : 1) + (this.compact ? s.spread * 5 : 0)
+    // Camera. When the set is out, back off far enough for the whole line-up
+    // to fit whatever shape the viewport is, and look at its middle.
+    const baseZ = s.cameraZ * (this.compact ? 1.3 : 1)
+    const halfWidth = this.compact ? 1.5 : 3.25
+    const fitZ = halfWidth / (Math.tan(THREE.MathUtils.degToRad(this.camera.fov / 2)) * this.camera.aspect)
+    const cameraZ = baseZ + s.spread * Math.max(0, fitZ - baseZ)
     this.camera.position.set(this.pointer.x * 0.12, s.cameraY - this.pointer.y * 0.08, cameraZ)
-    const lookX = this.compact ? s.spread * 0.45 : s.offsetX * 0.5 + s.spread * 0.9
+    const lineCentre = this.compact ? 0.45 : 0
+    const lookX = (this.compact ? 0 : s.offsetX * 0.5) * (1 - s.spread) + lineCentre * s.spread
     this.camera.lookAt(lookX, s.lookY + (this.compact ? 0.4 : 0), 0)
 
     this.renderer.render(this.scene, this.camera)

@@ -32,8 +32,8 @@ const links = [
         </div>
         <div class="flex flex-col gap-4 md:items-end">
           <nav class="flex flex-wrap gap-x-5 gap-y-2 md:justify-end">
-            <RouterLink v-for="link in links" :key="link.label" :to="link.to" class="eyebrow transition-colors hover:text-clay-500">{{ link.label }}</RouterLink>
-            <a href="https://www.instagram.com/meva.cosmetics/" target="_blank" rel="noopener" class="eyebrow transition-colors hover:text-clay-500">Instagram</a>
+            <RouterLink v-for="link in links" :key="link.label" :to="link.to" class="eyebrow transition-colors hover:text-blush-500">{{ link.label }}</RouterLink>
+            <a href="https://www.instagram.com/meva.cosmetics/" target="_blank" rel="noopener" class="eyebrow transition-colors hover:text-blush-500">Instagram</a>
           </nav>
         </div>
       </div>

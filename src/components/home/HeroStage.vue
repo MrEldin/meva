@@ -151,7 +151,7 @@ onBeforeUnmount(() => {
   <section ref="root" class="relative h-[520vh] px-5 pt-2 text-cream sm:px-10 lg:px-16">
     <div class="sticky top-4 mx-auto h-[calc(100vh-2rem)] max-w-[90rem] overflow-hidden rounded-[2rem] bg-forest">
       <!-- Ground glow -->
-      <div class="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-[radial-gradient(60%_60%_at_50%_100%,rgba(197,109,89,0.22),transparent_70%)]" />
+      <div class="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-[radial-gradient(60%_60%_at_50%_100%,rgba(179,97,126,0.22),transparent_70%)]" />
 
       <!-- Vignette and a whisper of grain, so the black reads as a room, not a void -->
       <div class="stage-vignette pointer-events-none absolute inset-0 z-10" />
@@ -171,11 +171,11 @@ onBeforeUnmount(() => {
         <div class="ch-scrim lg:hidden" />
         <div class="shell flex h-full flex-col justify-end pb-28 lg:justify-center lg:pb-0">
           <div class="max-w-[30rem]">
-            <p class="eyebrow overflow-hidden text-sage"><span class="rise block">Prirodna kozmetika · Novi Pazar</span></p>
+            <p class="eyebrow line-mask text-sage"><span class="rise block">Prirodna kozmetika · Novi Pazar</span></p>
             <h1 class="mt-5 font-display text-[2.75rem] font-medium leading-[1] tracking-tight sm:text-6xl lg:text-[4.5rem]">
-              <span class="block overflow-hidden"><span class="rise block">Koža glave</span></span>
-              <span class="block overflow-hidden"><span class="rise block">koja se, konačno,</span></span>
-              <span class="block overflow-hidden"><span class="rise block italic font-normal text-sage">smirila.</span></span>
+              <span class="block line-mask"><span class="rise block">Koža glave</span></span>
+              <span class="block line-mask"><span class="rise block">koja se, konačno,</span></span>
+              <span class="block line-mask"><span class="rise block italic font-normal text-blush-300">smirila.</span></span>
             </h1>
             <p class="mt-7 max-w-sm overflow-hidden text-base leading-relaxed text-cream/75 lg:text-lg">
               <span class="rise block">Poručen 2.763 puta. Ručno rađen u Novom Pazaru, u malim serijama, od 2010.</span>
@@ -196,10 +196,10 @@ onBeforeUnmount(() => {
         <div class="ch-scrim lg:hidden" />
         <div class="shell absolute inset-x-0 bottom-0 hidden pb-16 lg:block">
           <div class="lg:max-w-sm">
-            <p class="eyebrow overflow-hidden text-sage"><span class="rise block">Sastav</span></p>
+            <p class="eyebrow line-mask text-sage"><span class="rise block">Sastav</span></p>
             <h2 class="mt-3 font-display text-3xl font-medium leading-[1.05] lg:text-4xl">
-              <span class="block overflow-hidden"><span class="rise block">Sedam sastojaka.</span></span>
-              <span class="block overflow-hidden"><span class="rise block">Nijedan slučajan.</span></span>
+              <span class="block line-mask"><span class="rise block">Sedam sastojaka.</span></span>
+              <span class="block line-mask"><span class="rise block">Nijedan slučajan.</span></span>
             </h2>
             <p class="rise mt-4 hidden text-[0.95rem] leading-relaxed text-cream/60 lg:block">
               Uz hidrolat ruže, proteine pšenice i ekstrakt zelenog čaja. Bez sulfata, parabena i silikona.
@@ -209,9 +209,9 @@ onBeforeUnmount(() => {
 
         <!-- Mobile: a plain list under the bottle -->
         <div class="shell absolute inset-x-0 bottom-0 pb-14 lg:hidden">
-          <p class="eyebrow overflow-hidden text-sage"><span class="rise block">Sastav</span></p>
+          <p class="eyebrow line-mask text-sage"><span class="rise block">Sastav</span></p>
           <h2 class="mb-6 mt-3 font-display text-3xl font-medium leading-[1.05]">
-            <span class="block overflow-hidden"><span class="rise block">Sedam sastojaka. Nijedan slučajan.</span></span>
+            <span class="block line-mask"><span class="rise block">Sedam sastojaka. Nijedan slučajan.</span></span>
           </h2>
           <ul class="grid grid-cols-2 gap-x-6 gap-y-4">
             <li v-for="c in callouts" :key="c.key" class="rise border-l border-clay-300/60 pl-3">
@@ -240,11 +240,11 @@ onBeforeUnmount(() => {
         <div class="ch-scrim lg:hidden" />
         <div class="shell flex h-full flex-col justify-end pb-24 lg:items-end lg:justify-center lg:pb-0">
           <div class="lg:max-w-md">
-            <p class="eyebrow overflow-hidden text-sage"><span class="rise block">Način upotrebe</span></p>
+            <p class="eyebrow line-mask text-sage"><span class="rise block">Način upotrebe</span></p>
             <h2 class="mt-4 font-display text-4xl font-medium leading-[1.02] lg:text-5xl">
-              <span class="block overflow-hidden"><span class="rise block">Uveče.</span></span>
-              <span class="block overflow-hidden"><span class="rise block">Direktno na kožu glave.</span></span>
-              <span class="block overflow-hidden"><span class="rise block italic font-normal text-sage">Ne ispira se.</span></span>
+              <span class="block line-mask"><span class="rise block">Uveče.</span></span>
+              <span class="block line-mask"><span class="rise block">Direktno na kožu glave.</span></span>
+              <span class="block line-mask"><span class="rise block italic font-normal text-blush-300">Ne ispira se.</span></span>
             </h2>
             <p class="rise mt-5 max-w-sm text-[0.95rem] leading-relaxed text-cream/70 lg:ml-auto">
               Sedam sastojaka, bez sulfata, parabena i silikona — sve piše na poleđini. 100 ml traje oko dva meseca redovne upotrebe.
@@ -269,9 +269,9 @@ onBeforeUnmount(() => {
         <div class="shell flex h-full flex-col justify-end pb-14 lg:pb-16">
           <div class="pointer-events-auto flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
             <div class="max-w-lg">
-              <p class="eyebrow overflow-hidden text-sage"><span class="rise block">Sam, ili u setu</span></p>
+              <p class="eyebrow line-mask text-sage"><span class="rise block">Sam, ili u setu</span></p>
               <h2 class="mt-4 font-display text-4xl font-medium leading-[1.02] lg:text-5xl">
-                <span class="block overflow-hidden"><span class="rise block">Set za seboreju.</span></span>
+                <span class="block line-mask"><span class="rise block">Set za seboreju.</span></span>
               </h2>
               <p class="rise mt-4 text-[0.95rem] leading-relaxed text-cream/75 lg:text-base">
                 Šampon N°10, losion N°15+, ulje za seboreju, ulje za kosu i detox čaj — kompletna rutina za kožu glave, po ceni nižoj od zbira.

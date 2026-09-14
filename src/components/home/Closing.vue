@@ -24,8 +24,8 @@ onBeforeUnmount(() => ctx?.revert())
       <div>
         <p class="closing-item eyebrow">Pismo iz Meve</p>
         <h2 class="closing-title mt-4 max-w-2xl font-display text-5xl leading-[0.92] tracking-tight sm:text-7xl">
-          <span class="block overflow-hidden pb-[0.14em] -mb-[0.14em]"><span class="rise block">Vaša koža zna</span></span>
-          <span class="block overflow-hidden pb-[0.14em] -mb-[0.14em]"><span class="rise block">šta joj <em class="italic">treba</em>.</span></span>
+          <span class="block line-mask"><span class="rise block">Vaša koža zna</span></span>
+          <span class="block line-mask"><span class="rise block">šta joj <em class="italic text-blush-100">treba</em>.</span></span>
         </h2>
       </div>
       <div class="mt-10 flex flex-wrap items-center gap-4 lg:mt-0">

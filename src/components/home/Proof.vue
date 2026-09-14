@@ -111,7 +111,7 @@ onBeforeUnmount(() => ctx?.revert())
         <TiltCard v-for="(r, i) in reviews" :key="i" :max="5" class="review w-[80vw] shrink-0 sm:w-[24rem]">
           <blockquote class="flex h-full min-h-[18rem] flex-col justify-between rounded-[1.5rem] bg-sand p-8">
             <div>
-              <div class="flex gap-1 text-clay-500" aria-label="5 od 5">
+              <div class="flex gap-1 text-blush-500" aria-label="5 od 5">
                 <svg v-for="n in r.rating" :key="n" viewBox="0 0 20 20" class="h-3.5 w-3.5 fill-current"><path d="M10 1.5l2.6 5.6 6.1.7-4.5 4.2 1.2 6-5.4-3-5.4 3 1.2-6L1.3 7.8l6.1-.7z" /></svg>
               </div>
               <p class="mt-6 font-display text-xl leading-snug">“{{ r.text }}”</p>

@@ -25,6 +25,16 @@
   --color-ink-soft: #2e4238;
   --color-paper: #f2efe8;
 
+  /* Powder pink — the brand's own colour, from the logo and the labels. */
+  --color-blush-50: #fdf7f9;
+  --color-blush-100: #faedf1;
+  --color-blush-200: #f2d7e0;
+  --color-blush-300: #e5b6c6;
+  --color-blush-400: #cf8ba4;
+  --color-blush-500: #b3617e;
+  --color-blush-600: #9a4d69;
+  --color-blush-700: #7d3d54;
+
   /* Terracotta and its tints. */
   --color-clay-50: #fbf4f1;
   --color-clay-100: #f4e3dd;
@@ -281,7 +291,9 @@
   /* Hero chapters: full-viewport overlays the timeline fades between */
   .ch { position: absolute; inset: 0; pointer-events: none; }
   .ch-1, .ch-2, .ch-3 { opacity: 1; }
-  .ch .rise { will-change: transform, opacity; }
+  .ch .rise, .rise { will-change: transform, opacity; }
+  /* A reveal mask that leaves room for descenders, so g, j and p keep their tails. */
+  .line-mask { overflow: hidden; padding-bottom: 0.16em; margin-bottom: -0.16em; }
   .ch > .shell { z-index: 1; }
   .ch > .shell:not(.absolute) { position: relative; }
   .ch-scrim {
