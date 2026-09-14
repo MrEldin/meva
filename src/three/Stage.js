@@ -58,7 +58,10 @@ export const defaultState = {
  * the scroll has given it.
  */
 export class Stage {
+  /** Targets, tweened by the page. */
   state = { ...defaultState }
+  /** What is actually rendered: eases towards `state` every frame. */
+  view = { ...defaultState }
 
   pointer = { x: 0, y: 0, tx: 0, ty: 0 }
   drag = { active: false, lastX: 0, velocity: 0, offset: 0 }
@@ -149,6 +152,7 @@ export class Stage {
     this.floorY = -1.02
 
     this.hero = lotionBottle()
+    this.hero.rotation.order = 'ZXY'
     this.products.add(this.hero)
 
     // The set: a line beside the hero on wide screens; on phones two rows,
@@ -367,11 +371,27 @@ export class Stage {
     this.camera.updateProjectionMatrix()
   }
 
-  tick() {
+  /** Jump the rendered state to the targets (used by the screenshot harness). */
+  settle() {
+    Object.assign(this.view, this.state)
+  }
+
+  tick(_time, deltaMs = 16) {
     if (!this.visible) return
 
     const t = (performance.now() - this.started) / 1000
-    const s = this.state
+
+    // Ease the rendered state towards the targets, so scroll-scrubbed jumps
+    // land softly. Time-based, so it settles the same at any frame rate;
+    // snaps when close, so nothing drifts forever.
+    const k = 1 - Math.exp(-Math.min(deltaMs, 100) / 1000 * 9)
+    for (const key in this.state) {
+      const target = this.state[key]
+      const current = this.view[key]
+      const next = current + (target - current) * k
+      this.view[key] = Math.abs(target - next) < 0.0005 ? target : next
+    }
+    const s = this.view
 
     // Pointer eases in; the key light and a slight lean follow it.
     this.pointer.x = lerp(this.pointer.x, this.pointer.tx, 0.06)
@@ -394,7 +414,7 @@ export class Stage {
     this.products.position.y = this.compact ? 0.9 + Math.max(0, 7.2 - s.cameraZ) * 0.12 : 0
 
     // Hero bottle.
-    const float = Math.sin(t * 1.1) * 0.035
+    const float = 0 // bottles stand on the floor; nothing hovers
     const heroY = this.floorY + this.hero.userData.height / 2
     this.hero.position.x = s.pour * 0.9 + (this.compact ? s.spread * this.heroCompact.x : 0)
     this.hero.position.z = this.compact ? s.spread * this.heroCompact.z : 0
@@ -440,7 +460,7 @@ export class Stage {
       const eased = s.spread * s.spread * (3 - 2 * s.spread)
       mesh.position.set(
         this.compact ? cx : x,
-        this.floorY + mesh.userData.height / 2 + Math.sin(t * 1.1 + i) * 0.02 - (1 - eased) * (mesh.userData.height + 1.4),
+        this.floorY + mesh.userData.height / 2 - (1 - eased) * (mesh.userData.height + 1.4),
         this.compact ? cz : 0,
       )
       mesh.rotation.y = rotation + this.drag.offset * 0.3 + (1 - eased) * 1.4

@@ -72,6 +72,8 @@ onMounted(() => {
     }
   }
 
+  if (import.meta.env.DEV) window.__motion.stage = stage
+
   // Render only while on screen.
   observer = new IntersectionObserver(([entry]) => (stage.visible = entry.isIntersecting), { threshold: 0 })
   observer.observe(root.value)
@@ -87,10 +89,11 @@ onMounted(() => {
     gsap.set(s, { lift: 0, offsetX: desktop ? 1.35 : 0, cameraZ: 9.4 })
     const cap = stage.hero?.userData?.cap
     if (cap && !reduced) {
+      cap.userData.restY = cap.position.y
       cap.position.y += 1.8
       cap.rotation.y = -1.2
     }
-    gsap.timeline({ delay: 0.15 })
+    const intro = gsap.timeline({ delay: 0.15 })
       .to(s, { lift: 1, rotation: -0.3, duration: reduced ? 0 : 1.8, ease: 'power3.out' }, 0)
       .to(s, { cameraZ: 7.2, duration: reduced ? 0 : 2.6, ease: 'power2.inOut' }, 0)
       .to(s, { particles: 1, duration: 2.4, ease: 'power2.out' }, 0.4)
@@ -100,28 +103,51 @@ onMounted(() => {
       .from(q('.wordmark-in'), { opacity: 0, scale: 1.12, duration: 1.6, ease: 'power3.out' }, 0.1)
       .from(q('.ch-0 .rise'), { yPercent: 110, opacity: 0, stagger: 0.09, duration: 1.1, ease: 'power3.out' }, 0.45)
       .from(q('.hint-in'), { opacity: 0, duration: 1 }, 1.2)
+    if (import.meta.env.DEV) window.__motion.intro = intro
 
     if (reduced) return
 
-    // The scroll story. Time units are progress through the section.
+    // The scroll story. Time units are progress through the section. Its
+    // opening tweens state explicit start values, and scrolling cuts the
+    // entrance short, so a visitor who scrolls at once — and later returns to
+    // the top — finds the scene exactly as a fresh load shows it.
+    const rest = { rotation: -0.3, offsetX: desktop ? 1.35 : 0, cameraZ: 7.2, cameraY: 0.1, lookY: 0, sweep: 0 }
     const tl = gsap.timeline({
       defaults: { ease: 'none' },
-      scrollTrigger: { trigger: root.value, start: 'top top', end: 'bottom bottom', scrub: 0.65 },
+      scrollTrigger: {
+        trigger: root.value,
+        start: 'top top',
+        end: 'bottom bottom',
+        // Progress maps straight to scroll; the stage smooths the state itself.
+        scrub: true,
+        onUpdate: (self) => {
+          if (self.progress > 0.02 && intro.progress() < 1) {
+            intro.progress(1)
+            if (cap) {
+              cap.position.y = cap.userData.restY
+              cap.rotation.y = 0
+            }
+          }
+        },
+      },
     })
 
     const rise = (sel, at, stagger = 0.08) =>
       tl.fromTo(q(sel), { yPercent: 100, opacity: 0 }, { yPercent: 0, opacity: 1, stagger, duration: 0.5 }, at)
+    // A chapter is invisible until its turn, so its mobile scrim never covers another's copy.
+    const enter = (sel, at) => tl.fromTo(q(sel), { opacity: 0, y: 0 }, { opacity: 1, y: 0, duration: 0.2, immediateRender: false }, at)
     const leave = (sel, at) => tl.to(q(sel), { opacity: 0, y: -40, duration: 0.5 }, at)
 
     // 0 → 1: word-mark recedes, chapter one leaves, the bottle centres and the camera moves in.
-    tl.to(q('.wordmark'), { scale: 1.6, opacity: 0, duration: 1 }, 0)
-      .to(q('.ch-0'), { opacity: 0, y: -60, duration: 0.6 }, 0.1)
-      .to(q('.hint'), { opacity: 0, duration: 0.3 }, 0)
-      .to(s, { rotation: 0.2, offsetX: 0, cameraZ: 6.2, cameraY: 0.1, lookY: 0.05, duration: 1.2 }, 0.2)
+    tl.fromTo(q('.wordmark'), { scale: 1, opacity: 1 }, { scale: 1.6, opacity: 0, duration: 1 }, 0)
+      .fromTo(q('.ch-0'), { opacity: 1, y: 0 }, { opacity: 0, y: -60, duration: 0.6 }, 0.1)
+      .fromTo(q('.hint'), { opacity: 1 }, { opacity: 0, duration: 0.3 }, 0)
+      .fromTo(s, rest, { rotation: 0.2, offsetX: 0, cameraZ: 6.2, cameraY: 0.1, lookY: 0.05, duration: 1.2, immediateRender: false }, 0.2)
       .fromTo(s, { sweep: -1 }, { sweep: 1, duration: 1.0, ease: 'power1.inOut' }, 0.3)
       .to(s, { sweep: 0, duration: 0.4 }, 1.3)
 
     // 1 → 2.3: ingredients — the scan ring reads the label, leaders point at it.
+    enter('.ch-1', 0.9)
     rise('.ch-1 .rise', 1.0)
     tl.to(s, { scanAlpha: 1, duration: 0.15 }, 1.0)
       .fromTo(s, { scan: 0 }, { scan: 1, duration: 0.9, ease: 'power1.inOut' }, 1.05)
@@ -143,6 +169,7 @@ onMounted(() => {
       .to(s, { film: 1, duration: 0.7, ease: 'power1.out' }, 3.85)
       .to(s, { flakes: 0, duration: 0.7, ease: 'power1.inOut' }, 3.95)
       .to(s, { redness: 0, duration: 0.8, ease: 'power1.inOut' }, 4.15)
+    enter('.ch-2', 2.7)
     rise('.ch-2 .rise', 2.8)
     rise('.ch-2 .step-1', 3.7, 0)
     rise('.ch-2 .step-2', 4.1, 0)
@@ -156,12 +183,14 @@ onMounted(() => {
       .fromTo(s, { sweep: 1 }, { sweep: -1, duration: 1.0, ease: 'power1.inOut' }, 5.1)
       .to(s, { sweep: 0, duration: 0.4 }, 6.1)
       .to(s, { rotation: BACK_ROTATION, offsetX: desktop ? -1.1 : 0, cameraZ: 5.2, cameraY: 0.05, lookY: 0.05, glow: 1.1, duration: 1.2 }, 5.0)
+    enter('.ch-3', 5.4)
     rise('.ch-3 .rise', 5.5)
     leave('.ch-3', 6.35)
 
     // 6.4 → 7.7: the set arrives around the hero, framed from further back.
     tl.fromTo(s, { sweep: -1 }, { sweep: 1, duration: 1.2, ease: 'power1.inOut' }, 6.55)
       .to(s, { rotation: 0, tilt: 0, offsetX: desktop ? -0.65 : 0, cameraZ: 10.4, cameraY: 0.45, lookY: 0.1, spread: 1, glow: 0.8, duration: 1.2 }, 6.4)
+    enter('.ch-4', 6.75)
     rise('.ch-4 .rise', 6.85)
     tl.to({}, { duration: 0.6 })
 

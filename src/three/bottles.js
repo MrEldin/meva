@@ -12,6 +12,7 @@ export const BACK_ROTATION = -(BACK_CENTRE - FRONT_CENTRE) * TAU * WRAP
 // Shared materials, so every bottle in the scene catches the light the same way.
 const roughness = createRoughnessTexture()
 
+// White HDPE: opaque but faintly translucent, so light softens through the walls.
 const plastic = new THREE.MeshPhysicalMaterial({
   color: 0xf4f3f1,
   roughness: 0.42,
@@ -22,6 +23,10 @@ const plastic = new THREE.MeshPhysicalMaterial({
   sheen: 0.35,
   sheenRoughness: 0.6,
   sheenColor: new THREE.Color(0xfff4ee),
+  transmission: 0.06,
+  thickness: 0.9,
+  attenuationColor: new THREE.Color(0xf6efe9),
+  attenuationDistance: 2.5,
   envMapIntensity: 1.0,
 })
 
@@ -29,15 +34,18 @@ const plastic = new THREE.MeshPhysicalMaterial({
 const seam = new THREE.MeshStandardMaterial({ color: 0x8a8580, roughness: 0.7 })
 
 // Frosted polypropylene flip cap: milky, a touch greyer than the body.
+// Frosted polypropylene: milky, letting light through as a real flip cap does.
 const frosted = new THREE.MeshPhysicalMaterial({
-  color: 0xe9e9e7,
-  roughness: 0.6,
+  color: 0xf2f2f0,
+  roughness: 0.55,
   roughnessMap: roughness,
-  clearcoat: 0.25,
-  clearcoatRoughness: 0.5,
-  sheen: 0.5,
-  sheenRoughness: 0.8,
-  sheenColor: new THREE.Color(0xffffff),
+  clearcoat: 0.2,
+  clearcoatRoughness: 0.6,
+  transmission: 0.4,
+  thickness: 0.35,
+  ior: 1.45,
+  attenuationColor: new THREE.Color(0xffffff),
+  attenuationDistance: 1,
   envMapIntensity: 0.8,
 })
 

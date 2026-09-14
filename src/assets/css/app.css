@@ -290,7 +290,7 @@
 
   /* Hero chapters: full-viewport overlays the timeline fades between */
   .ch { position: absolute; inset: 0; pointer-events: none; }
-  .ch-1, .ch-2, .ch-3, .ch-4 { opacity: 1; }
+  .ch-1, .ch-2, .ch-3, .ch-4 { opacity: 0; }
   .ch .rise, .rise { will-change: transform, opacity; }
   /* A reveal mask that leaves room for descenders, so g, j and p keep their tails. */
   .line-mask { overflow: hidden; padding-bottom: 0.16em; margin-bottom: -0.16em; }
