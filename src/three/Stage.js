@@ -151,12 +151,14 @@ export class Stage {
     this.hero = lotionBottle()
     this.products.add(this.hero)
 
-    // The set, lined up on the floor at even intervals around the hero.
+    // The set: a line beside the hero on wide screens; on phones two rows,
+    // the tall pair behind and the small pair in front.
     this.set = [
-      { mesh: shampooBottle(), x: -1.7, rotation: 0.12 },
-      { mesh: oilBottle(), x: 1.55, rotation: -0.12 },
-      { mesh: creamJar(), x: 3.0, rotation: -0.1 },
+      { mesh: shampooBottle(), x: -1.7, rotation: 0.12, cx: -0.5, cz: -0.75 },
+      { mesh: oilBottle(), x: 1.55, rotation: -0.12, cx: -1.0, cz: 0.65 },
+      { mesh: creamJar(), x: 3.0, rotation: -0.1, cx: 1.0, cz: 0.65 },
     ]
+    this.heroCompact = new THREE.Vector3(0.55, 0, -0.75)
 
     this.set.forEach(({ mesh }) => this.products.add(mesh))
   }
@@ -394,7 +396,8 @@ export class Stage {
     // Hero bottle.
     const float = Math.sin(t * 1.1) * 0.035
     const heroY = this.floorY + this.hero.userData.height / 2
-    this.hero.position.x = s.pour * 0.9
+    this.hero.position.x = s.pour * 0.9 + (this.compact ? s.spread * this.heroCompact.x : 0)
+    this.hero.position.z = this.compact ? s.spread * this.heroCompact.z : 0
     this.hero.position.y = heroY + float + (1 - s.lift) * -3.2 + s.pour * 0.05
     // The hero rocks gently in place, so the light keeps moving over it.
     const sway = Math.sin(t * 0.45) * 0.07 * s.sway
@@ -433,12 +436,12 @@ export class Stage {
     }
 
     // The set rises through the floor into an even line beside the hero.
-    this.set.forEach(({ mesh, x, rotation }, i) => {
+    this.set.forEach(({ mesh, x, rotation, cx, cz }, i) => {
       const eased = s.spread * s.spread * (3 - 2 * s.spread)
       mesh.position.set(
-        x * (this.compact ? 0.7 : 1),
+        this.compact ? cx : x,
         this.floorY + mesh.userData.height / 2 + Math.sin(t * 1.1 + i) * 0.02 - (1 - eased) * (mesh.userData.height + 1.4),
-        0,
+        this.compact ? cz : 0,
       )
       mesh.rotation.y = rotation + this.drag.offset * 0.3 + (1 - eased) * 1.4
       mesh.visible = s.spread > 0.01
@@ -463,13 +466,15 @@ export class Stage {
     // Camera. When the set is out, back off far enough for the whole line-up
     // to fit whatever shape the viewport is, and look at its middle.
     const baseZ = s.cameraZ * (this.compact ? 1.3 : 1)
-    const halfWidth = this.compact ? 1.5 : 3.25
+    const halfWidth = this.compact ? 1.2 : 3.25
     const fitZ = halfWidth / (Math.tan(THREE.MathUtils.degToRad(this.camera.fov / 2)) * this.camera.aspect)
     const cameraZ = baseZ + s.spread * Math.max(0, fitZ - baseZ)
-    this.camera.position.set(this.pointer.x * 0.12, s.cameraY - this.pointer.y * 0.08, cameraZ)
-    const lineCentre = this.compact ? 0.45 : 0
+    // Phones look down on the two rows so they read as two rows.
+    const cameraY = s.cameraY - this.pointer.y * 0.08 + (this.compact ? s.spread * 1.6 : 0)
+    this.camera.position.set(this.pointer.x * 0.12, cameraY, cameraZ)
+    const lineCentre = 0
     const lookX = (this.compact ? 0 : s.offsetX * 0.5) * (1 - s.spread) + lineCentre * s.spread + s.lookX * scale + (this.compact ? 0 : 0)
-    this.camera.lookAt(lookX, s.lookY + (this.compact ? 0.4 : 0), 0)
+    this.camera.lookAt(lookX, s.lookY + (this.compact ? 0.4 - s.spread * 0.75 : 0), 0)
 
     this.backdrop.material.uniforms.uTime.value = t
     this.backdrop.material.uniforms.uPointer.value.set(this.pointer.x, this.pointer.y)
