@@ -7,3 +7,8 @@ dist
 !.env.example
 .idea
 .vscode
+
+# Yarn (node-modules linker)
+.yarn/*
+!.yarn/patches
+.pnp.*
