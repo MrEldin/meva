@@ -96,11 +96,13 @@ export function createSkinPatch() {
   const color = new THREE.Color()
   const lean = new THREE.Quaternion()
   const hairColours = [0x3a2b23, 0x2e211b, 0x4a3529, 0x261a15]
+  const hairBase = []
   for (let i = 0; i < HAIRS; i++) {
     const r = Math.sqrt(Math.random()) * RIM * 0.9
     const a = Math.random() * Math.PI * 2
     const x = Math.cos(a) * r
     const z = Math.sin(a) * r
+    hairBase.push({ reach: r / (RIM * 0.9), colour: new THREE.Color(hairColours[i % hairColours.length]) })
     dummy.position.set(x, surfaceY(r) - 0.01, z)
     dummy.quaternion.setFromUnitVectors(UP, normalAt(x, z))
     // Grow towards −x with scatter.
@@ -114,6 +116,18 @@ export function createSkinPatch() {
   }
   hairs.castShadow = true
   group.add(hairs)
+  const wetColour = new THREE.Color(0x120c09)
+  let lastWet = -1
+
+  // A ripple where the stream meets the skin.
+  const ripple = new THREE.Mesh(
+    new THREE.RingGeometry(0.85, 1, 64),
+    new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0, depthWrite: false }),
+  )
+  ripple.rotation.x = -Math.PI / 2
+  ripple.position.y = TOP + 0.004
+  ripple.visible = false
+  group.add(ripple)
 
   // Flakes: irregular little scales, pale and dry, lying on the skin.
   const FLAKES = 120
@@ -164,6 +178,25 @@ export function createSkinPatch() {
     film.visible = state.film > 0.005
     filmMaterial.alphaTest = filmMaterial.opacity * (1 - Math.min(0.999, state.film))
 
+    // Hair darkens and clumps as the lotion wets it.
+    if (Math.abs(state.film - lastWet) > 0.004) {
+      lastWet = state.film
+      for (let i = 0; i < hairBase.length; i++) {
+        const h = hairBase[i]
+        const wet = clamp01((state.film * 1.05 - h.reach) * 4)
+        hairs.setColorAt(i, color.copy(h.colour).lerp(wetColour, wet * 0.65))
+      }
+      hairs.instanceColor.needsUpdate = true
+    }
+
+    // Ripple: rings out from the landing while the film is young.
+    const young = clamp01(state.film / 0.28)
+    ripple.visible = state.film > 0.005 && young < 1
+    if (ripple.visible) {
+      ripple.scale.setScalar(0.06 + young * 0.32)
+      ripple.material.opacity = (1 - young) * 0.55
+    }
+
     // Flakes shrink, twist and lift off along the surface normal as the film reaches them.
     for (let i = 0; i < base.length; i++) {
       const b = base[i]
@@ -182,8 +215,9 @@ export function createSkinPatch() {
     // The pour: the stream reaches down from the mouth as `drop` advances, a
     // bead leading it; once it lands it keeps flowing while the film spreads,
     // then thins away.
+    // It flows only while the bottle is actually tipped; lift the bottle and it stops.
     const d = state.drop
-    const flowing = d > 0.02 && state.film < 0.8
+    const flowing = state.pour > 0.85 && d > 0.02 && state.film < 0.8
     stream.visible = drop.visible = flowing && !!from
     if (stream.visible) {
       landing.set(0, TOP + 0.01, 0)

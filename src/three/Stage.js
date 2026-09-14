@@ -391,6 +391,11 @@ export class Stage {
       const next = current + (target - current) * k
       this.view[key] = Math.abs(target - next) < 0.0005 ? target : next
     }
+    // While the scalp is out of sight its demonstration resets instantly,
+    // so nothing is ever seen flowing back into the bottle.
+    if (this.state.skinLift < 0.01 && this.view.skinLift < 0.05) {
+      for (const key of ['film', 'drop', 'flakes', 'redness']) this.view[key] = this.state[key]
+    }
     const s = this.view
 
     // Pointer eases in; the key light and a slight lean follow it.
@@ -457,14 +462,17 @@ export class Stage {
 
     // The set rises through the floor into an even line beside the hero.
     this.set.forEach(({ mesh, x, rotation, cx, cz }, i) => {
-      const eased = s.spread * s.spread * (3 - 2 * s.spread)
+      // Each rises a beat after the last and settles with a small overshoot.
+      const local = clamp01((s.spread - i * 0.08) / (1 - i * 0.08))
+      const c = 0.9
+      const eased = local >= 1 ? 1 : 1 + (c + 1) * Math.pow(local - 1, 3) + c * Math.pow(local - 1, 2)
       mesh.position.set(
         this.compact ? cx : x,
         this.floorY + mesh.userData.height / 2 - (1 - eased) * (mesh.userData.height + 1.4),
         this.compact ? cz : 0,
       )
-      mesh.rotation.y = rotation + this.drag.offset * 0.3 + (1 - eased) * 1.4
-      mesh.visible = s.spread > 0.01
+      mesh.rotation.y = rotation + this.drag.offset * 0.3 + (1 - Math.min(1, eased)) * 1.4
+      mesh.visible = local > 0.001
     })
 
     // Particles drift, and follow the pointer a little for depth.

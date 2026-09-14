@@ -179,7 +179,7 @@ onMounted(() => {
     // 5.0 → 6.3: how it is used — the bottle rights itself and turns round to its back panel.
     tl.to(s, { pour: 0, tilt: -0.12, lookX: 0, duration: 0.7, ease: 'power2.inOut' }, 4.95)
       .to(s, { skinLift: 0, duration: 0.5, ease: 'power2.in' }, 5.45)
-      .to(s, { flakes: 1, redness: 1, film: 0, drop: 0, duration: 0.01 }, 6.0)
+      .to(s, { flakes: 1, redness: 1, film: 0, drop: 0, duration: 0.01 }, 6.3)
       .fromTo(s, { sweep: 1 }, { sweep: -1, duration: 1.0, ease: 'power1.inOut' }, 5.1)
       .to(s, { sweep: 0, duration: 0.4 }, 6.1)
       .to(s, { rotation: BACK_ROTATION, offsetX: desktop ? -1.1 : 0, cameraZ: 5.2, cameraY: 0.05, lookY: 0.05, glow: 1.1, duration: 1.2 }, 5.0)
