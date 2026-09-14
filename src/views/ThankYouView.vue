@@ -1,0 +1,33 @@
+<script setup>
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+</script>
+
+<template>
+  <div class="shell flex min-h-[70svh] items-center py-20">
+    <div class="mx-auto max-w-lg text-center">
+      <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-blush-100">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" class="h-7 w-7 text-blush-600">
+          <path d="m5 12.5 4.5 4.5L19 7.5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </div>
+
+      <h1 class="mt-8 font-display text-4xl text-ink md:text-5xl">Hvala na porudžbini</h1>
+
+      <p class="mt-5 text-base font-light leading-relaxed text-mist-600">
+        Vaša porudžbina je primljena pod brojem
+        <span class="font-medium text-ink">{{ route.params.reference }}</span>.
+        Zvaćemo vas radi potvrde pre nego što paket krene.
+      </p>
+
+      <p class="mt-4 text-sm font-light text-mist-500">
+        Plaćate kuriru pri preuzimanju. Dostava je besplatna.
+      </p>
+
+      <RouterLink :to="{ name: 'catalog' }" class="eyebrow mt-10 inline-block border border-ink px-9 py-4 text-ink transition-colors hover:bg-ink hover:text-paper">
+        Nastavi kupovinu
+      </RouterLink>
+    </div>
+  </div>
+</template>
