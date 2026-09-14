@@ -12,3 +12,4 @@ dist
 .yarn/*
 !.yarn/patches
 .pnp.*
+public/_shot.html

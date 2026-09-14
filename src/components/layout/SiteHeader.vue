@@ -19,6 +19,8 @@ const menuOpen = ref(false)
 
 const scrolled = computed(() => y.value > 24)
 const solid = computed(() => !props.overHero || scrolled.value || menuOpen.value)
+// Over the hero the header is quiet: no nav row, just the mark and the cart.
+const quiet = computed(() => props.overHero && !scrolled.value && !menuOpen.value)
 
 // Any navigation closes the panel; leaving it open across routes is a classic
 // mobile annoyance.
@@ -56,14 +58,14 @@ const links = [
             <span
               class="absolute left-0 block h-px w-5 transition-all duration-400"
               :class="[
-                solid ? 'bg-ink' : 'bg-paper',
+                'bg-ink',
                 menuOpen ? 'top-1.5 rotate-45' : 'top-0',
               ]"
             />
             <span
               class="absolute left-0 block h-px w-5 transition-all duration-400"
               :class="[
-                solid ? 'bg-ink' : 'bg-paper',
+                'bg-ink',
                 menuOpen ? 'top-1.5 -rotate-45' : 'top-3',
               ]"
             />
@@ -71,13 +73,15 @@ const links = [
         </button>
 
         <!-- Navigation (desktop) -->
-        <nav class="hidden items-center gap-9 lg:flex">
+        <nav
+          class="hidden items-center gap-9 transition-all duration-500 ease-[var(--ease-silk)] lg:flex"
+          :class="quiet ? '-translate-y-2 opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'"
+        >
           <RouterLink
             v-for="link in links"
             :key="link.label"
             :to="link.to"
-            class="eyebrow relative py-1 transition-colors duration-300"
-            :class="solid ? 'text-ink-soft hover:text-blush-500' : 'text-paper/85 hover:text-paper'"
+            class="eyebrow relative py-1 text-ink-soft transition-colors duration-300 hover:text-blush-500"
           >
             {{ link.label }}
           </RouterLink>
@@ -99,8 +103,8 @@ const links = [
             class="absolute inset-0 flex flex-col items-center justify-center transition-opacity duration-500"
             :class="solid ? 'opacity-0' : 'opacity-100'"
           >
-            <span class="font-display text-2xl leading-none tracking-tight text-paper md:text-3xl">MEVA</span>
-            <span class="eyebrow mt-1 text-[0.5rem] text-paper/70">cosmetics</span>
+            <span class="font-display text-2xl leading-none tracking-tight text-ink md:text-3xl">MEVA</span>
+            <span class="eyebrow mt-1 text-[0.5rem] text-ink/60">cosmetics</span>
           </span>
         </RouterLink>
 
@@ -109,7 +113,7 @@ const links = [
           <RouterLink
             :to="{ name: 'login' }"
             class="hidden h-11 w-11 items-center justify-center transition-colors duration-300 sm:flex"
-            :class="solid ? 'text-ink hover:text-blush-500' : 'text-paper hover:text-blush-200'"
+            :class="'text-ink hover:text-blush-500'"
             aria-label="Nalog"
           >
             <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5" stroke="currentColor" stroke-width="1.2">
@@ -121,7 +125,7 @@ const links = [
           <RouterLink
             :to="{ name: 'cart' }"
             class="relative -mr-2 flex h-11 w-11 items-center justify-center transition-colors duration-300"
-            :class="solid ? 'text-ink hover:text-blush-500' : 'text-paper hover:text-blush-200'"
+            :class="'text-ink hover:text-blush-500'"
             aria-label="Korpa"
           >
             <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5" stroke="currentColor" stroke-width="1.2">

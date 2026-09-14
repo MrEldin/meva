@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
 const routes = [
-  { path: '/', name: 'home', component: () => import('@/views/HomeView.vue'), meta: {} },
+  { path: '/', name: 'home', component: () => import('@/views/HomeView.vue'), meta: { overHero: true } },
   { path: '/proizvodi', name: 'catalog', component: () => import('@/views/CatalogView.vue') },
   { path: '/proizvod/:slug', name: 'product', component: () => import('@/views/ProductView.vue') },
   { path: '/korpa', name: 'cart', component: () => import('@/views/CartView.vue') },

@@ -35,7 +35,7 @@
   --color-mist-500: #7c7175;
   --color-mist-600: #574f52;
 
-  --font-display: "Playfair Display", "Times New Roman", serif;
+  --font-display: "Bodoni Moda", "Didot", "Times New Roman", serif;
   --font-sans: "Jost", ui-sans-serif, system-ui, sans-serif;
 
   --radius-card: 2px;
@@ -133,4 +133,37 @@
 @utility reveal-in {
   opacity: 1;
   transform: none;
+}
+
+/*
+|--------------------------------------------------------------------------
+| Motion primitives
+|--------------------------------------------------------------------------
+*/
+
+@layer utilities {
+  /* SplitText line masks. The mask clips; the inner line translates. */
+  .split-line { will-change: transform; }
+
+  /* Infinite strip. Duplicated content scrolls half its width, seamlessly. */
+  .marquee-track {
+    display: flex;
+    width: max-content;
+    animation: marquee var(--marquee-duration, 40s) linear infinite;
+  }
+  @keyframes marquee {
+    to { transform: translateX(-50%); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .marquee-track { animation: none; }
+  }
+
+  /* Vertical eyebrow, read bottom to top like a book spine. */
+  .writing-vertical {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+  }
+
+  .scrollbar-none { scrollbar-width: none; }
+  .scrollbar-none::-webkit-scrollbar { display: none; }
 }
