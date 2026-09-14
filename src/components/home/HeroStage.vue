@@ -96,6 +96,8 @@ onMounted(() => {
       .to(q('.ch-0'), { opacity: 0, y: -60, duration: 0.6 }, 0.1)
       .to(q('.hint'), { opacity: 0, duration: 0.3 }, 0)
       .to(s, { rotation: 0.2, offsetX: 0, cameraZ: 6.2, cameraY: 0.1, lookY: 0.05, duration: 1.2 }, 0.2)
+      .fromTo(s, { sweep: -1 }, { sweep: 1, duration: 1.0, ease: 'power1.inOut' }, 0.3)
+      .to(s, { sweep: 0, duration: 0.4 }, 1.3)
 
     // 1 → 2: ingredients.
     tl.fromTo(q('.ch-1 .rise'), { yPercent: 100, opacity: 0 }, { yPercent: 0, opacity: 1, stagger: 0.08, duration: 0.5 }, 1.0)
@@ -111,12 +113,16 @@ onMounted(() => {
       .to(s, { leaders: 0, duration: 0.3 }, 2.25)
 
     // 2 → 3: how it is used; the bottle moves left, leans and turns, the light warms.
-    tl.to(s, { rotation: BACK_ROTATION, tilt: -0.12, offsetX: desktop ? -1.1 : 0, cameraZ: 5.2, cameraY: 0.05, lookY: 0.05, glow: 1.1, duration: 1.2 }, 2.4)
+    tl.fromTo(s, { sweep: 1 }, { sweep: -1, duration: 1.0, ease: 'power1.inOut' }, 2.5)
+      .to(s, { sweep: 0, duration: 0.4 }, 3.5)
+      .to(s, { rotation: BACK_ROTATION, tilt: -0.12, offsetX: desktop ? -1.1 : 0, cameraZ: 5.2, cameraY: 0.05, lookY: 0.05, glow: 1.1, duration: 1.2 }, 2.4)
       .fromTo(q('.ch-2 .rise'), { yPercent: 100, opacity: 0 }, { yPercent: 0, opacity: 1, stagger: 0.08, duration: 0.5 }, 2.8)
       .to(q('.ch-2'), { opacity: 0, y: -40, duration: 0.5 }, 3.7)
 
     // 3 → 4: the set arrives around the hero, framed from further back.
-    tl.to(s, { rotation: 0, tilt: 0, offsetX: desktop ? -0.65 : 0, cameraZ: 10.4, cameraY: 0.45, lookY: 0.1, spread: 1, glow: 0.8, duration: 1.2 }, 3.75)
+    tl.to(s, { sway: 0, duration: 0.6 }, 3.75)
+      .fromTo(s, { sweep: -1 }, { sweep: 1, duration: 1.2, ease: 'power1.inOut' }, 3.9)
+      .to(s, { rotation: 0, tilt: 0, offsetX: desktop ? -0.65 : 0, cameraZ: 10.4, cameraY: 0.45, lookY: 0.1, spread: 1, glow: 0.8, duration: 1.2 }, 3.75)
       .fromTo(q('.ch-3 .rise'), { yPercent: 100, opacity: 0 }, { yPercent: 0, opacity: 1, stagger: 0.08, duration: 0.5 }, 4.15)
       .to({}, { duration: 0.6 })
 

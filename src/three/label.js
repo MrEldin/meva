@@ -78,6 +78,11 @@ function draw(canvas, spec) {
   ctx.textBaseline = 'alphabetic'
   ctx.textAlign = 'left'
 
+  // The paper's edge: a hair of shadow at the top and bottom of the label.
+  ctx.fillStyle = 'rgba(0,0,0,0.12)'
+  ctx.fillRect(0, 0, W, 3)
+  ctx.fillRect(0, H - 3, W, 3)
+
   drawFront(ctx, W, H, { number, script, care, kind, name, ritual, handle, numberColor, bands, frame })
 
   // Divider between front and back

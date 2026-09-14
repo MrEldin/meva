@@ -1,11 +1,11 @@
 import * as THREE from 'three'
-import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js'
 import { Reflector } from 'three/addons/objects/Reflector.js'
 
 import { gsap } from '@/lib/motion'
 
 import { creamJar, lotionBottle, oilBottle, shampooBottle } from './bottles'
 import { createFloorFadeTexture, createSpriteTexture } from './label'
+import { createStudioScene } from './studio'
 
 const lerp = (a, b, t) => a + (b - a) * t
 const clamp01 = (v) => Math.max(0, Math.min(1, v))
@@ -28,6 +28,8 @@ export const defaultState = {
   scan: 0, // scan ring position along the bottle, 0 = base, 1 = cap
   scanAlpha: 0, // scan ring visibility
   leaders: 0, // ingredient leader lines visibility
+  sweep: 0, // key light slides across the bottle: −1 left … +1 right
+  sway: 1, // how much the hero rocks in place
 }
 
 /**
@@ -70,8 +72,8 @@ export class Stage {
     this.camera = new THREE.PerspectiveCamera(26, 1, 0.1, 50)
 
     const pmrem = new THREE.PMREMGenerator(this.renderer)
-    this.scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture
-    this.scene.environmentIntensity = 0.6
+    this.scene.environment = pmrem.fromScene(createStudioScene(), 0.04).texture
+    this.scene.environmentIntensity = 1.0
     pmrem.dispose()
 
     this.buildLights()
@@ -91,7 +93,7 @@ export class Stage {
   }
 
   buildLights() {
-    this.key = new THREE.DirectionalLight(0xffffff, 2.6)
+    this.key = new THREE.DirectionalLight(0xffffff, 1.8)
     this.key.position.set(3, 3.5, 4)
     this.scene.add(this.key)
 
@@ -175,6 +177,15 @@ export class Stage {
 
     const lineMaterial = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0 })
     const dotMaterial = new THREE.MeshBasicMaterial({ color: BLUSH, transparent: true, opacity: 0 })
+    const orbMaterial = new THREE.MeshPhysicalMaterial({
+      color: 0xf6dfe6,
+      roughness: 0.08,
+      clearcoat: 1,
+      transparent: true,
+      opacity: 0,
+      envMapIntensity: 1.6,
+    })
+    const haloMaterial = new THREE.SpriteMaterial({ map: createSpriteTexture(), color: PINK, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending })
 
     Object.entries(this.anchors).forEach(([name, { angle, y }]) => {
       const start = new THREE.Vector3(Math.sin(angle) * r, y, Math.cos(angle) * r)
@@ -183,11 +194,15 @@ export class Stage {
       const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints([start, end]), lineMaterial.clone())
       const dot = new THREE.Mesh(new THREE.SphereGeometry(0.03, 16, 16), dotMaterial.clone())
       dot.position.copy(start)
-      const tip = new THREE.Mesh(new THREE.SphereGeometry(0.018, 12, 12), dotMaterial.clone())
+      // A glass orb at the tip, with a soft pink halo behind it.
+      const tip = new THREE.Mesh(new THREE.SphereGeometry(0.075, 32, 32), orbMaterial.clone())
       tip.position.copy(end)
+      const halo = new THREE.Sprite(haloMaterial.clone())
+      halo.scale.setScalar(0.5)
+      halo.position.copy(end)
 
-      this.hero.add(line, dot, tip)
-      this.leaders[name] = { start, end, line, dot, tip, normal: new THREE.Vector3(Math.sin(angle), 0, Math.cos(angle)) }
+      this.hero.add(line, dot, tip, halo)
+      this.leaders[name] = { start, end, line, dot, tip, halo, normal: new THREE.Vector3(Math.sin(angle), 0, Math.cos(angle)) }
     })
   }
 
@@ -202,13 +217,20 @@ export class Stage {
     ring.rotation.x = Math.PI / 2
 
     const halo = new THREE.Mesh(
-      new THREE.RingGeometry(0.36, 0.7, 96),
-      new THREE.MeshBasicMaterial({ color: BLUSH, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false }),
+      new THREE.RingGeometry(0.36, 0.78, 96),
+      new THREE.MeshBasicMaterial({ color: PINK, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending }),
     )
     halo.rotation.x = Math.PI / 2
 
-    this.scan.add(ring, halo)
-    this.scan.userData = { ring, halo }
+    // A faint second ring, a touch wider, for glow.
+    const glow = new THREE.Mesh(
+      new THREE.TorusGeometry(0.53, 0.02, 8, 96),
+      new THREE.MeshBasicMaterial({ color: PINK, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false }),
+    )
+    glow.rotation.x = Math.PI / 2
+
+    this.scan.add(ring, halo, glow)
+    this.scan.userData = { ring, halo, glow }
     this.products.add(this.scan)
   }
 
@@ -315,7 +337,7 @@ export class Stage {
     // Pointer eases in; the key light and a slight lean follow it.
     this.pointer.x = lerp(this.pointer.x, this.pointer.tx, 0.06)
     this.pointer.y = lerp(this.pointer.y, this.pointer.ty, 0.06)
-    this.key.position.set(3 + this.pointer.x * 2.2, 3.5 - this.pointer.y * 1.4, 4)
+    this.key.position.set(3 + this.pointer.x * 2.2 + s.sweep * 6, 3.5 - this.pointer.y * 1.4, 4)
     this.rim.intensity = s.glow * 2.6
     this.pool.intensity = s.glow * 20
 
@@ -336,29 +358,38 @@ export class Stage {
     const float = Math.sin(t * 1.1) * 0.035
     const heroY = this.floorY + this.hero.userData.height / 2
     this.hero.position.y = heroY + float + (1 - s.lift) * -3.2
-    this.hero.rotation.y = s.rotation + this.drag.offset + this.pointer.x * 0.08
+    // The hero rocks gently in place, so the light keeps moving over it.
+    const sway = Math.sin(t * 0.45) * 0.07 * s.sway
+    this.hero.rotation.y = s.rotation + this.drag.offset + this.pointer.x * 0.08 + sway
     this.hero.rotation.z = s.tilt
     this.hero.rotation.x = this.pointer.y * 0.04
 
     // Leaders fade with how squarely their point on the label faces the camera.
     const heroQuat = this.hero.getWorldQuaternion(new THREE.Quaternion())
-    Object.values(this.leaders).forEach(({ line, dot, tip, normal, start }) => {
+    Object.values(this.leaders).forEach(({ line, dot, tip, halo, normal, start, end }, i) => {
       const world = this.hero.localToWorld(start.clone())
       const facing = normal.clone().applyQuaternion(heroQuat).dot(this.camera.position.clone().sub(world).normalize())
       const alpha = clamp01(facing * 1.6) * s.leaders
       line.material.opacity = alpha * 0.55
       dot.material.opacity = alpha
-      tip.material.opacity = alpha
-      line.visible = dot.visible = tip.visible = alpha > 0.01
+      tip.material.opacity = alpha * 0.85
+      halo.material.opacity = alpha * 0.55
+      // Orbs bob and grow in as the leaders appear.
+      const bob = Math.sin(t * 1.4 + i * 1.7) * 0.03
+      tip.position.set(end.x, end.y + bob, end.z)
+      halo.position.copy(tip.position)
+      tip.scale.setScalar(0.2 + 0.8 * s.leaders)
+      line.visible = dot.visible = tip.visible = halo.visible = alpha > 0.01
     })
 
     this.floorFade.position.x = this.mirror.position.x = this.products.position.x + (this.compact ? 0 : s.spread * 0.65)
 
     // Scan ring, sweeping the hero from base to cap.
-    const { ring, halo } = this.scan.userData
+    const { ring, halo, glow } = this.scan.userData
     this.scan.position.set(this.hero.position.x, this.floorY + 0.05 + s.scan * (this.hero.userData.height - 0.1) + float, 0)
     ring.material.opacity = s.scanAlpha
-    halo.material.opacity = s.scanAlpha * 0.12
+    halo.material.opacity = s.scanAlpha * 0.18
+    glow.material.opacity = s.scanAlpha * 0.35
     this.scan.visible = s.scanAlpha > 0.01
 
     // The set rises through the floor into an even line beside the hero.

@@ -314,11 +314,11 @@
   .callout-text {
     position: absolute; top: 0; left: 0;
     width: 15rem;
-    transform: translate(1.1rem, -50%);
+    transform: translate(2rem, -50%);
     opacity: var(--facing);
     transition: opacity 0.2s linear;
   }
-  .callout.is-left .callout-text { transform: translate(calc(-100% - 1.1rem), -50%); text-align: right; }
+  .callout.is-left .callout-text { transform: translate(calc(-100% - 2rem), -50%); text-align: right; }
 
   /* Stage vignette + grain */
   .stage-vignette {
