@@ -7,11 +7,16 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 
 import { gsap } from '@/lib/motion'
 
+import { defaultState } from './constants'
+
 import { creamJar, lotionBottle, oilBottle, shampooBottle } from './bottles'
 import { createFloorFadeTexture, createSpriteTexture } from './label'
 import { createBackdrop, createPetals } from './backdrop'
 import { createSkinPatch } from './skin'
 import { createStudioScene } from './studio'
+import { qualitySettings } from './quality'
+
+export { defaultState } from './constants'
 
 const lerp = (a, b, t) => a + (b - a) * t
 const clamp01 = (v) => Math.max(0, Math.min(1, v))
@@ -20,31 +25,6 @@ const PINK = 0xb3617e
 const CLAY = 0xc56d59
 const ROSE = 0xf2d7e0
 
-export const defaultState = {
-  rotation: -0.7, // hero bottle spin, radians
-  tilt: 0, // hero bottle lean, radians
-  offsetX: 0, // where the hero stands, left/right of centre (desktop only)
-  cameraZ: 7.2,
-  cameraY: 0.1,
-  lookY: 0,
-  spread: 0, // 0 = set hidden below the floor, 1 = lined up beside the hero
-  lift: 0, // hero rises in from below on load
-  glow: 0.6, // rim light strength
-  particles: 0, // floating powder, 0..1
-  scan: 0, // scan ring position along the bottle, 0 = base, 1 = cap
-  scanAlpha: 0, // scan ring visibility
-  leaders: 0, // ingredient leader lines visibility
-  sweep: 0, // key light slides across the bottle: −1 left … +1 right
-  sway: 1, // how much the hero rocks in place
-  lookX: 0, // extra look-at offset, in the products' own units
-  // The demonstration: a patch of scalp beside the bottle
-  skinLift: 0, // patch rises through the floor
-  pour: 0, // bottle leans over the patch
-  drop: 0, // the drop's fall, mouth → skin
-  film: 0, // lotion spreading over the skin
-  flakes: 1, // flakes present → gone
-  redness: 1, // redness present → calmed
-}
 
 /**
  * The hero stage: one hero bottle under studio light, joined by the rest of
@@ -78,15 +58,28 @@ export class Stage {
 
   constructor(canvas) {
     this.canvas = canvas
+    this.quality = qualitySettings()
 
-    this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: 'high-performance' })
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+    this.renderer = new THREE.WebGLRenderer({
+      canvas,
+      // Multisampling is wasted when the picture goes through a composer, and
+      // on a phone it is the single most expensive switch here.
+      antialias: this.quality.antialias,
+      alpha: false,
+      powerPreference: 'high-performance',
+    })
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, this.quality.pixelRatio))
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping
     this.renderer.toneMappingExposure = 1.0
     this.renderer.outputColorSpace = THREE.SRGBColorSpace
     this.renderer.setClearColor(0x121c17, 1)
     this.renderer.shadowMap.enabled = true
     this.renderer.shadowMap.type = THREE.PCFShadowMap
+    // A phone renders thirty frames a second by choice rather than by
+    // struggling to hold sixty; a steady thirty reads as smooth, a swinging
+    // fifty does not.
+    this.frameInterval = this.quality.fps ? 1000 / this.quality.fps : 0
+    this.lastFrame = 0
 
     this.scene = new THREE.Scene()
     this.camera = new THREE.PerspectiveCamera(26, 1, 0.1, 80)
@@ -118,12 +111,12 @@ export class Stage {
     this.key = new THREE.DirectionalLight(0xffffff, 1.5)
     this.key.position.set(3, 3.5, 4)
     this.key.castShadow = true
-    this.key.shadow.mapSize.set(2048, 2048)
+    this.key.shadow.mapSize.set(this.quality.shadowMap, this.quality.shadowMap)
     this.key.shadow.camera.near = 1
     this.key.shadow.camera.far = 20
     this.key.shadow.camera.left = this.key.shadow.camera.bottom = -5
     this.key.shadow.camera.right = this.key.shadow.camera.top = 5
-    this.key.shadow.radius = 6
+    this.key.shadow.radius = this.quality.shadowRadius
     this.key.shadow.bias = -0.0005
     this.scene.add(this.key)
 
@@ -179,17 +172,37 @@ export class Stage {
     const sheetZ = 5 // spans z −3 … 13; the products stand at z 0
     const centreV = 0.5 + sheetZ / sheet[1]
 
-    this.mirror = new Reflector(new THREE.PlaneGeometry(...sheet), {
-      clipBias: 0.003,
-      textureWidth: 1024,
-      textureHeight: 1024,
-      color: 0x8a8a8a,
-    })
-    this.mirror.rotation.x = -Math.PI / 2
-    this.mirror.position.set(0, this.floorY - 0.003, sheetZ)
-    this.scene.add(this.mirror)
+    if (this.quality.mirror) {
+      this.mirror = new Reflector(new THREE.PlaneGeometry(...sheet), {
+        clipBias: 0.003,
+        textureWidth: this.quality.mirror,
+        textureHeight: this.quality.mirror,
+        color: 0x8a8a8a,
+      })
+      this.mirror.rotation.x = -Math.PI / 2
+      this.mirror.position.set(0, this.floorY - 0.003, sheetZ)
+      this.scene.add(this.mirror)
+      this.floorSheet = this.mirror
+    } else {
+      // Without the mirror the products would stand on nothing, so the floor
+      // keeps a dark sheet with the same fade over it. The reflection is gone;
+      // the room is not.
+      // Unlit on purpose. A lit plane facing straight up catches the key, the
+      // top light and the whole environment, and comes out pale grey -- where
+      // the mirror it replaces shows a dark room. This is set to the tone that
+      // reflection reads as, and the shadow sheet above still takes the
+      // bottle's shadow.
+      const material = new THREE.MeshBasicMaterial({ color: 0x151f1a })
+      material.toneMapped = false
 
-    if (import.meta.env.DEV && location.search.includes('nomirror')) this.mirror.visible = false
+      const plate = new THREE.Mesh(new THREE.PlaneGeometry(...sheet), material)
+      plate.rotation.x = -Math.PI / 2
+      plate.position.set(0, this.floorY - 0.003, sheetZ)
+      this.scene.add(plate)
+      this.floorSheet = plate
+    }
+
+    if (import.meta.env.DEV && location.search.includes('nomirror') && this.mirror) this.mirror.visible = false
 
     const fade = new THREE.MeshBasicMaterial({ map: createFloorFadeTexture(512, centreV), transparent: true, depthWrite: false })
     fade.toneMapped = false
@@ -220,7 +233,7 @@ export class Stage {
     this.products.add(this.skin)
 
     // Petals avoid the spots where the bottles stand.
-    this.petals = createPetals(85, this.floorY, [[0, 0.65], [-1.7, 0.7], [1.55, 0.55], [3.0, 0.7], [1.75, 1.15]])
+    this.petals = createPetals(this.quality.petals, this.floorY, [[0, 0.65], [-1.7, 0.7], [1.55, 0.55], [3.0, 0.7], [1.75, 1.15]])
     this.products.add(this.petals)
   }
 
@@ -228,8 +241,16 @@ export class Stage {
   buildComposer() {
     this.composer = new EffectComposer(this.renderer)
     this.composer.addPass(new RenderPass(this.scene, this.camera))
-    this.bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.1, 0.3, 1.05)
-    this.composer.addPass(this.bloom)
+
+    // The glow costs about a dozen full-screen passes, which is most of a
+    // phone's frame. The output pass stays at every tier: the backdrop is a
+    // raw shader writing linear colour, and that pass is what turns it into
+    // the room you can see.
+    if (this.quality.bloom) {
+      this.bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.1, 0.3, 1.05)
+      this.composer.addPass(this.bloom)
+    }
+
     this.composer.addPass(new OutputPass())
   }
 
@@ -299,9 +320,13 @@ export class Stage {
       return points
     }
 
+    // Fewer motes on a phone. The drift still reads; it is the count, not the
+    // idea, that costs.
+    const many = (n) => Math.max(8, Math.round(n * this.quality.particleScale))
+
     this.particleLayers = [
-      make(150, 0.14, ROSE, 0.7, [-3.5, 1.5]),
-      make(28, 0.42, PINK, 0.3, [1.8, 4.2]),
+      make(many(150), 0.14, ROSE, 0.7, [-3.5, 1.5]),
+      make(many(28), 0.42, PINK, 0.3, [1.8, 4.2]),
     ]
   }
 
@@ -366,7 +391,7 @@ export class Stage {
     this.compact = width < 1024
     this.renderer.setSize(width, height, false)
     this.composer?.setSize(width, height)
-    this.composer?.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+    this.composer?.setPixelRatio(Math.min(window.devicePixelRatio, this.quality.pixelRatio))
     this.camera.aspect = width / height
     this.camera.updateProjectionMatrix()
   }
@@ -376,10 +401,31 @@ export class Stage {
     Object.assign(this.view, this.state)
   }
 
+  /**
+   * Resolves once the first frame is actually on screen, so the page can take
+   * its loading state away at the moment there is something to look at rather
+   * than at the moment the code arrived.
+   */
+  ready() {
+    if (this.rendered) return Promise.resolve()
+
+    return this.firstFrame ??= new Promise((resolve) => (this.onFirstFrame = resolve))
+  }
+
   tick(_time, deltaMs = 16) {
     if (!this.visible) return
 
-    const t = (performance.now() - this.started) / 1000
+    const now = performance.now()
+
+    // On a capped tier, frames outside the budget are skipped whole: a steady
+    // thirty looks smoother than a sixty that keeps missing.
+    if (this.frameInterval) {
+      if (now - this.lastFrame < this.frameInterval - 1) return
+      deltaMs = Math.min(now - this.lastFrame, 100)
+      this.lastFrame = now
+    }
+
+    const t = (now - this.started) / 1000
 
     // Ease the rendered state towards the targets, so scroll-scrubbed jumps
     // land softly. Time-based, so it settles the same at any frame rate;
@@ -442,7 +488,7 @@ export class Stage {
       line.visible = dot.visible = tip.visible = alpha > 0.01
     })
 
-    this.floorFade.position.x = this.mirror.position.x = this.shadowCatcher.position.x = this.products.position.x + (this.compact ? 0 : s.spread * 0.65)
+    this.floorFade.position.x = this.floorSheet.position.x = this.shadowCatcher.position.x = this.products.position.x + (this.compact ? 0 : s.spread * 0.65)
 
     // Scan ring, sweeping the hero from base to cap.
     const { ring } = this.scan.userData
@@ -508,6 +554,10 @@ export class Stage {
     this.backdrop.material.uniforms.uPointer.value.set(this.pointer.x, this.pointer.y)
 
     this.composer.render()
+
+    this.rendered = true
+    this.onFirstFrame?.()
+    this.onFirstFrame = null
   }
 
   dispose() {
@@ -528,7 +578,7 @@ export class Stage {
         o.material.dispose()
       }
     })
-    this.composer.dispose()
+    this.composer?.dispose()
     this.renderer.dispose()
   }
 }

@@ -3,8 +3,7 @@ import Magnetic from '@/components/ui/Magnetic.vue'
 import { gsap, prefersReducedMotion, ScrollTrigger } from '@/lib/motion'
 import { useCartStore } from '@/stores/cart'
 import { useCatalogStore } from '@/stores/catalog'
-import { BACK_ROTATION } from '@/three/bottles'
-import { defaultState, Stage } from '@/three/Stage'
+import { BACK_ROTATION, defaultState } from '@/three/constants'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 
 const clamp = (v) => Math.max(0, Math.min(1, v))
@@ -43,6 +42,10 @@ const steps = [
 ]
 
 const added = ref('')
+// The scene weighs more than the rest of the page put together, so it is
+// fetched after the page has painted and the wait is shown rather than hidden.
+const loading = ref(true)
+const progress = ref(0)
 // Without WebGL (old GPU, privacy settings, some in-app browsers) the scene
 // gives way to the photograph, and the scroll story still runs on the copy.
 const webgl = ref(true)
@@ -57,20 +60,50 @@ function add(product) {
 let stage
 let ctx
 let observer
+// The scene arrives after the page; if the visitor has navigated away by then,
+// there is nothing left to attach it to and it must be thrown away at once.
+let gone = false
 
-onMounted(() => {
+/** A stand-in the page can animate while the real scene is still arriving. */
+function placeholder() {
+  return {
+    state: { ...defaultState, lift: 1 },
+    size: { width: 1, height: 1 },
+    project: () => ({ x: -999, y: -999, facing: 0 }),
+    dispose: () => {},
+  }
+}
+
+onMounted(async () => {
+  // The bar creeps while the scene downloads. It cannot know the real figure
+  // without a fetch of its own, so it eases towards ninety and finishes when
+  // the first frame is actually on screen -- an honest "nearly there" rather
+  // than a fake percentage.
+  const creep = setInterval(() => (progress.value = Math.min(90, progress.value + (90 - progress.value) * 0.12 + 1)), 120)
+
   try {
+    const { Stage } = await import('@/three/Stage')
     stage = new Stage(canvas.value)
+
+    // Wait for something to look at -- but never for longer than a moment. A
+    // tab opened in the background renders no frames at all, and the page must
+    // not sit behind a loading bar because of it.
+    await Promise.race([stage.ready(), new Promise((resolve) => setTimeout(resolve, 2500))])
   } catch (error) {
     console.warn('Meva: 3D scene unavailable, using the photograph instead.', error)
     webgl.value = false
-    stage = {
-      state: { ...defaultState, lift: 1 },
-      size: { width: 1, height: 1 },
-      project: () => ({ x: -999, y: -999, facing: 0 }),
-      dispose: () => {},
-    }
+    stage = placeholder()
   }
+
+  clearInterval(creep)
+
+  if (gone || !root.value) {
+    stage?.dispose?.()
+    return
+  }
+
+  progress.value = 100
+  setTimeout(() => (loading.value = false), 260)
 
   if (import.meta.env.DEV) window.__motion.stage = stage
 
@@ -215,6 +248,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  gone = true
   ctx?.revert()
   observer?.disconnect()
   stage?.dispose()
@@ -227,7 +261,32 @@ onBeforeUnmount(() => {
       <!-- Vignette and a whisper of grain, so the black reads as a room, not a void -->
       <div class="stage-vignette pointer-events-none absolute inset-0 z-10" />
 
-      <canvas ref="canvas" class="absolute inset-0 h-full w-full touch-pan-y" :class="!webgl && 'hidden'" data-cursor="drag" />
+      <canvas
+        ref="canvas"
+        class="absolute inset-0 h-full w-full touch-pan-y transition-opacity duration-700"
+        :class="[!webgl && 'hidden', loading ? 'opacity-0' : 'opacity-100']"
+        data-cursor="drag"
+      />
+
+      <!-- While the scene is on its way. The wordmark is already there, so the
+           card is never an empty rectangle, and the line underneath says the
+           wait is progress rather than a stall. -->
+      <Transition
+        enter-from-class="opacity-0"
+        enter-active-class="transition-opacity duration-300"
+        leave-to-class="opacity-0"
+        leave-active-class="transition-opacity duration-500"
+      >
+        <div v-if="loading" class="pointer-events-none absolute inset-0 z-[3] flex flex-col items-center justify-center gap-5">
+          <p class="eyebrow text-cream/45">Pripremamo scenu</p>
+          <div class="h-px w-40 overflow-hidden bg-cream/15">
+            <div
+              class="h-full bg-blush-300 transition-[width] duration-300 ease-out"
+              :style="{ width: `${progress}%` }"
+            />
+          </div>
+        </div>
+      </Transition>
 
       <div class="wordmark pointer-events-none absolute inset-0 z-[1] flex items-center justify-center mix-blend-screen">
         <span class="wordmark-in font-display text-[34vw] font-semibold leading-none tracking-[-0.04em] text-cream/[0.07] select-none lg:text-[26vw]">MEVA</span>

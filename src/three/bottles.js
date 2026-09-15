@@ -3,11 +3,10 @@ import * as THREE from 'three'
 import { BACK_CENTRE, createLabelTexture, createShadowTexture, FRONT_CENTRE } from './label'
 import { createRoughnessTexture } from './studio'
 
+export { BACK_ROTATION } from './constants'
+
 const TAU = Math.PI * 2
 const WRAP = 0.86 // share of the circumference the label covers
-
-/** Turn a bottle by this much to bring the back panel to the camera. */
-export const BACK_ROTATION = -(BACK_CENTRE - FRONT_CENTRE) * TAU * WRAP
 
 // Shared materials, so every bottle in the scene catches the light the same way.
 const roughness = createRoughnessTexture()

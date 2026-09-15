@@ -19,8 +19,8 @@ const PAPER = '#f9f9f8'
  * 0.50–0.88, the rest white. `FRONT_CENTRE` is what faces the camera at rest
  * and `BACK_CENTRE` what faces it when the bottle is turned round.
  */
-export const FRONT_CENTRE = 0.24
-export const BACK_CENTRE = 0.69
+export { BACK_CENTRE, FRONT_CENTRE } from './constants'
+import { BACK_CENTRE, FRONT_CENTRE } from './constants'
 
 export function createLabelTexture(spec, { width = 4096, height = 1400 } = {}) {
   const canvas = document.createElement('canvas')
