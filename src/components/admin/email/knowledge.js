@@ -373,7 +373,7 @@ export const CHAPTERS = [
   },
   {
     key: 'cake',
-    title: 'Sitne čake',
+    title: 'Sitne cake',
     tagline: 'Ono što se ne piše u vodičima',
     icon: '✧',
     accent: 'blush',

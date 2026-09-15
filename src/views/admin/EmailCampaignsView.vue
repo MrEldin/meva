@@ -11,6 +11,7 @@ const router = useRouter()
 const campaigns = ref([])
 const templates = ref([])
 const segments = ref([])
+const sizes = ref({})
 const loading = ref(true)
 const knowledgeOpen = ref(false)
 const pickerOpen = ref(false)
@@ -40,7 +41,7 @@ const stages = computed(() => {
 })
 
 const date = (value) =>
-  value ? new Intl.DateTimeFormat('sr-RS', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(value)) : '—'
+  value ? new Intl.DateTimeFormat('sr-Latn-RS', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(value)) : '—'
 
 const segmentName = (key) => segments.value.find((s) => s.key === key)?.name ?? key
 
@@ -54,7 +55,7 @@ function openPicker() {
 function choose(template) {
   chosen.value = template
   // A sensible working title, so nobody has to invent one to get started.
-  name.value = `${template.name} — ${new Intl.DateTimeFormat('sr-RS', { month: 'long', year: 'numeric' }).format(new Date())}`
+  name.value = `${template.name} — ${new Intl.DateTimeFormat('sr-Latn-RS', { month: 'long', year: 'numeric' }).format(new Date())}`
 }
 
 /** Create and go straight to the editor; that is the whole point of the flow. */
@@ -90,6 +91,7 @@ onMounted(async () => {
 
     templates.value = book.templates
     segments.value = book.segments
+    sizes.value = book.sizes
     campaigns.value = list.data
   } finally {
     loading.value = false
@@ -225,6 +227,10 @@ onMounted(async () => {
                 :class="chosen?.key === template.key ? 'text-cream/55' : 'text-forest/40'">
                 <span aria-hidden="true">✦</span>
                 <span>{{ template.advice }}</span>
+              </span>
+              <span class="mt-2.5 block text-[0.6875rem]"
+                :class="chosen?.key === template.key ? 'text-cream/45' : 'text-forest/35'">
+                Šalje se: {{ segmentName(template.audience) }} ({{ sizes[template.audience] ?? 0 }})
               </span>
             </button>
           </div>

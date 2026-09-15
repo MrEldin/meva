@@ -231,7 +231,7 @@ const savedLabel = computed(() => {
   if (saving.value) return 'Čuvam…'
   if (!savedAt.value) return null
 
-  return `Sačuvano u ${new Intl.DateTimeFormat('sr-RS', { hour: '2-digit', minute: '2-digit' }).format(savedAt.value)}`
+  return `Sačuvano u ${new Intl.DateTimeFormat('sr-Latn-RS', { hour: '2-digit', minute: '2-digit' }).format(savedAt.value)}`
 })
 
 watch(() => campaign.value?.audience, refreshAudience)
@@ -266,14 +266,14 @@ onBeforeUnmount(() => {
       <!-- Header: what it is called, and what happens to it -->
       <header class="flex flex-wrap items-start justify-between gap-4 border-b border-forest/10 pb-5">
         <div class="min-w-0 flex-1">
-          <RouterLink :to="{ name: 'admin.email' }" class="eyebrow inline-flex items-center gap-1.5 text-forest/40 transition-colors hover:text-clay-600">
+          <RouterLink :to="{ name: 'admin.email' }" class="eyebrow flex w-fit items-center gap-1.5 text-forest/40 transition-colors hover:text-clay-600">
             <span aria-hidden="true">←</span> Kampanje
           </RouterLink>
           <input
             v-model="campaign.name"
             type="text"
             :disabled="frozen"
-            class="mt-1.5 w-full max-w-xl bg-transparent font-display text-3xl tracking-tight outline-none disabled:opacity-70"
+            class="mt-1.5 block w-full max-w-xl bg-transparent font-display text-3xl tracking-tight outline-none disabled:opacity-70"
             @input="scheduleSave"
           />
           <p class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.8125rem] text-forest/45">
