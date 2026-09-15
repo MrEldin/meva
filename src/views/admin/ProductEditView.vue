@@ -1,20 +1,32 @@
 <script setup>
 import client from '@/api/client'
 import { setMeta } from '@/lib/meta'
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 const route = useRoute()
 const router = useRouter()
+
+// "novi" is the editor in its empty state; anything else is a product's id.
+const creating = computed(() => route.params.id === 'novi')
 
 const form = ref(null)
 const image = ref(null)
 const loading = ref(true)
 const saving = ref(false)
 const saved = ref(false)
+const uploading = ref(false)
 const errors = ref({})
 
 async function load() {
+  if (creating.value) {
+    form.value = { name: '', slug: '', short_description: '', description: '', price: 0, status: 'draft' }
+    setMeta({ title: 'Novi proizvod' })
+    loading.value = false
+
+    return
+  }
+
   const { data } = await client.get(`/admin/products/${route.params.id}`)
   const product = data.data
 
@@ -37,6 +49,15 @@ async function save() {
   errors.value = {}
 
   try {
+    if (creating.value) {
+      const { data } = await client.post('/admin/products', form.value)
+      // Carry on editing the product that was just made, so a photograph can
+      // be attached without hunting for it in the list.
+      router.replace({ name: 'admin.product', params: { id: data.data.id } })
+
+      return
+    }
+
     await client.put(`/admin/products/${route.params.id}`, form.value)
     saved.value = true
     setTimeout(() => (saved.value = false), 2500)
@@ -46,6 +67,33 @@ async function save() {
     saving.value = false
   }
 }
+
+/** Attach the photograph the storefront, share cards and adverts all use. */
+async function upload(event) {
+  const file = event.target.files?.[0]
+
+  if (!file || creating.value) return
+
+  uploading.value = true
+
+  const body = new FormData()
+  body.append('image', file)
+
+  try {
+    const { data } = await client.post(`/admin/products/${route.params.id}/slika`, body, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+    image.value = data.data.image
+  } catch (error) {
+    errors.value = error.response?.data?.errors ?? { image: ['Slika nije prihvaćena.'] }
+  } finally {
+    uploading.value = false
+    event.target.value = ''
+  }
+}
+
+// Reload when moving between "new" and a saved product.
+watch(() => route.params.id, load)
 
 onMounted(load)
 </script>
@@ -63,8 +111,8 @@ onMounted(load)
             <img :src="image" :alt="form.name" class="h-full w-full object-cover" />
           </div>
           <div>
-            <p class="eyebrow text-clay-500">Izmena</p>
-            <h1 class="mt-1 font-display text-2xl tracking-tight sm:text-3xl">{{ form.name }}</h1>
+            <p class="eyebrow text-clay-500">{{ creating ? 'Novi proizvod' : 'Izmena' }}</p>
+            <h1 class="mt-1 font-display text-2xl tracking-tight sm:text-3xl">{{ form.name || 'Bez naziva' }}</h1>
           </div>
         </div>
         <button type="submit" class="pill bg-forest text-cream hover:bg-forest-soft disabled:opacity-50" :disabled="saving">
@@ -116,6 +164,21 @@ onMounted(load)
           </div>
         </fieldset>
 
+        <div v-if="!creating">
+          <span class="eyebrow text-[0.5625rem] text-forest/55">Fotografija</span>
+          <div class="mt-2 flex flex-wrap items-center gap-4">
+            <div class="h-28 w-28 shrink-0 overflow-hidden rounded-2xl bg-sand">
+              <img v-if="image" :src="image" :alt="form.name" class="h-full w-full object-cover" />
+            </div>
+            <label class="pill cursor-pointer border border-forest/20 hover:bg-forest hover:text-cream">
+              {{ uploading ? 'Šaljem…' : (image ? 'Zameni sliku' : 'Dodaj sliku') }}
+              <input type="file" accept="image/jpeg,image/png,image/webp" class="sr-only" :disabled="uploading" @change="upload" />
+            </label>
+          </div>
+          <span v-if="errors.image" class="mt-1 block text-xs text-clay-600">{{ errors.image[0] }}</span>
+        </div>
+
+        <p v-if="creating" class="text-sm text-forest/55">Sliku možete dodati čim sačuvate proizvod.</p>
         <p v-if="saved" class="text-sm text-sage-deep">Sačuvano.</p>
       </div>
     </form>

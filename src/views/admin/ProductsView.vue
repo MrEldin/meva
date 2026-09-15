@@ -59,12 +59,17 @@ onMounted(() => {
         <p class="eyebrow text-clay-500">Katalog</p>
         <h1 class="mt-2 font-display text-3xl tracking-tight sm:text-4xl">Proizvodi</h1>
       </div>
+      <div class="flex flex-wrap items-center gap-3">
+        <RouterLink v-if="auth.can('products.manage')" :to="{ name: 'admin.product', params: { id: 'novi' } }" class="pill bg-forest text-cream hover:bg-forest-soft">
+          Novi proizvod
+        </RouterLink>
       <div class="flex flex-wrap gap-1 rounded-full border border-forest/15 bg-sand p-1">
         <button v-for="option in [{ v: '', l: 'Svi' }, { v: 'published', l: 'Objavljeni' }, { v: 'draft', l: 'Skice' }]" :key="option.v"
           type="button" class="eyebrow rounded-full px-4 py-2 text-[0.5625rem] transition-colors"
           :class="status === option.v ? 'bg-forest text-cream' : 'hover:bg-sage'" @click="status = option.v; page = 1">
           {{ option.l }}
         </button>
+      </div>
       </div>
     </header>
 
