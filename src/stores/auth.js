@@ -16,6 +16,11 @@ export const useAuthStore = defineStore('auth', () => {
   const user = ref(null)
   const loading = ref(false)
 
+  // The route guard and the app shell both ask who is signed in, often at the
+  // same moment; they must share one request rather than race, or whichever
+  // asked second carries on with nothing.
+  let pending = null
+
   const signedIn = computed(() => Boolean(token.value))
   const permissions = computed(() => user.value?.permissions ?? [])
   const roles = computed(() => user.value?.roles ?? [])
@@ -50,23 +55,31 @@ export const useAuthStore = defineStore('auth', () => {
    * Load the signed-in user. Called once on boot so a reloaded tab knows what
    * it may show before the first guarded route resolves.
    */
-  async function fetchUser() {
-    if (!token.value || loading.value) return user.value
+  function fetchUser() {
+    if (!token.value) return Promise.resolve(null)
+    if (user.value) return Promise.resolve(user.value)
+    if (pending) return pending
 
     loading.value = true
 
-    try {
-      const { data } = await client.get('/auth/user')
-      user.value = data.data
+    pending = client
+      .get('/auth/user')
+      .then(({ data }) => {
+        user.value = data.data
 
-      return user.value
-    } catch {
-      logout()
+        return user.value
+      })
+      .catch(() => {
+        logout()
 
-      return null
-    } finally {
-      loading.value = false
-    }
+        return null
+      })
+      .finally(() => {
+        loading.value = false
+        pending = null
+      })
+
+    return pending
   }
 
   async function updateProfile(payload) {
@@ -77,6 +90,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   function logout() {
+    pending = null
     token.value = null
     user.value = null
     localStorage.removeItem(TOKEN_KEY)
