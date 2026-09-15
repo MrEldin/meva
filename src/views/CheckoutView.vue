@@ -76,7 +76,7 @@ async function submit() {
 
     <div v-if="!cart.lines.length" class="py-20 text-center">
       <p class="font-display text-2xl text-mist-400">Korpa je prazna</p>
-      <RouterLink :to="{ name: 'catalog' }" class="eyebrow mt-8 inline-block bg-ink px-9 py-4 text-paper">
+      <RouterLink :to="{ name: 'catalog' }" class="eyebrow mt-8 inline-block bg-blush-500 px-9 py-4 text-paper">
         Pogledaj proizvode
       </RouterLink>
     </div>
@@ -153,7 +153,7 @@ async function submit() {
           <button
             type="submit"
             :disabled="submitting"
-            class="eyebrow mt-6 w-full bg-ink py-4.5 text-paper transition-colors duration-400 hover:bg-clay-500 disabled:opacity-55"
+            class="eyebrow mt-6 w-full bg-blush-500 py-4.5 text-paper transition-colors duration-400 hover:bg-blush-600 disabled:opacity-55"
           >
             {{ submitting ? 'Šaljem…' : 'Potvrdi porudžbinu' }}
           </button>

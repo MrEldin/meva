@@ -37,30 +37,22 @@ const items = computed(() => {
 </script>
 
 <template>
-  <section class="shell py-14 lg:py-20">
-    <SectionHead
-      number="03"
-      kicker="Po redosledu porudžbina"
-      title="Najtraženije"
-      note="Osam preparata koji čine većinu svega što je kuća ikad prodala."
-      :to="{ name: 'catalog' }"
-      link="Svih 68"
-    />
+  <section class="shell py-10 lg:py-16">
+    <SectionHead title="Najtraženije" note="Preparati koje kupci najčešće poručuju." :to="{ name: 'catalog' }" link="Svi proizvodi" />
 
-    <div v-if="!items.length" class="grid grid-cols-2 gap-x-3 gap-y-9 pt-9 lg:grid-cols-4 lg:gap-x-4">
+    <div v-if="!items.length" class="grid grid-cols-2 gap-3 pt-5 lg:grid-cols-4 lg:gap-4">
       <div v-for="n in 4" :key="n" class="animate-pulse">
-        <div class="aspect-[4/5] rounded-[1.25rem] bg-blush-50" />
+        <div class="aspect-square rounded-[1.25rem] bg-blush-50" />
         <div class="mt-3.5 h-4 w-3/4 rounded bg-blush-50" />
         <div class="mt-2 h-4 w-1/3 rounded bg-blush-50" />
       </div>
     </div>
 
-    <div v-else class="grid grid-cols-2 gap-x-3 gap-y-9 pt-9 lg:grid-cols-4 lg:gap-x-4">
+    <div v-else class="grid grid-cols-2 gap-3 pt-5 lg:grid-cols-4 lg:gap-4">
       <ProductCard
         v-for="(product, i) in items"
         :key="product.slug"
         :product="product"
-        :index="i"
         :badge="i === 0 ? 'Najprodavanije' : null"
       />
     </div>

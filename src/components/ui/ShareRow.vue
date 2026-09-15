@@ -52,7 +52,7 @@ async function copy() {
     <button
       v-if="canShareNatively"
       type="button"
-      class="flex h-10 items-center gap-2 rounded-full border border-forest/15 px-4 text-xs transition-colors hover:bg-forest hover:text-cream"
+      class="flex h-10 items-center gap-2 rounded-full border border-forest/15 px-4 text-xs transition-colors hover:bg-blush-500 hover:text-paper"
       @click="shareNatively"
     >
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" class="h-4 w-4" stroke-linecap="round" stroke-linejoin="round">
@@ -67,7 +67,7 @@ async function copy() {
       :href="target.href"
       target="_blank"
       rel="noopener"
-      class="flex h-10 w-10 items-center justify-center rounded-full border border-forest/15 transition-colors hover:bg-forest hover:text-cream"
+      class="flex h-10 w-10 items-center justify-center rounded-full border border-forest/15 transition-colors hover:bg-blush-500 hover:text-paper"
       :aria-label="`Podeli na ${target.name}`"
       :title="target.name"
       @click="track.share(target.channel, id)"
@@ -82,7 +82,7 @@ async function copy() {
 
     <button
       type="button"
-      class="flex h-10 items-center gap-2 rounded-full border border-forest/15 px-4 text-xs transition-colors hover:bg-forest hover:text-cream"
+      class="flex h-10 items-center gap-2 rounded-full border border-forest/15 px-4 text-xs transition-colors hover:bg-blush-500 hover:text-paper"
       @click="copy"
     >
       {{ copied ? 'Kopirano ✓' : 'Kopiraj link' }}

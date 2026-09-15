@@ -19,7 +19,7 @@ const TONE = {
   dispatched: 'bg-sky text-forest',
   delivered: 'bg-sage text-sage-deep',
   returned: 'bg-clay-100 text-clay-700',
-  cancelled: 'bg-forest/10 text-forest/60',
+  cancelled: 'bg-blush-500/10 text-forest/60',
 }
 
 function signOut() {
@@ -50,8 +50,8 @@ onMounted(async () => {
         <p class="mt-2 text-sm text-forest/60">{{ auth.user?.email }}</p>
       </div>
       <div class="flex flex-wrap gap-3">
-        <RouterLink v-if="auth.isStaff" :to="{ name: 'admin' }" class="pill border border-forest/20 hover:bg-forest hover:text-cream">Administracija</RouterLink>
-        <button type="button" class="pill border border-forest/20 hover:bg-forest hover:text-cream" @click="signOut">Odjava</button>
+        <RouterLink v-if="auth.isStaff" :to="{ name: 'admin' }" class="pill border border-forest/20 hover:bg-blush-500 hover:text-paper">Administracija</RouterLink>
+        <button type="button" class="pill border border-forest/20 hover:bg-blush-500 hover:text-paper" @click="signOut">Odjava</button>
       </div>
     </header>
 
@@ -61,7 +61,7 @@ onMounted(async () => {
 
     <div v-else-if="!orders.length" class="rounded-[1.5rem] bg-sand p-8 text-center">
       <p class="text-forest/70">Još nemate porudžbina.</p>
-      <RouterLink :to="{ name: 'catalog' }" class="pill mt-5 bg-forest text-cream hover:bg-forest-soft">Pogledaj preparate</RouterLink>
+      <RouterLink :to="{ name: 'catalog' }" class="pill mt-5 bg-blush-500 text-paper hover:bg-blush-500">Pogledaj preparate</RouterLink>
     </div>
 
     <ul v-else class="mt-5 space-y-4">
@@ -72,7 +72,7 @@ onMounted(async () => {
             <p class="mt-1 text-xs text-forest/55">{{ when(order.placed_at) }}</p>
           </div>
           <div class="flex items-center gap-3">
-            <span class="eyebrow rounded-full px-3 py-1.5 text-[0.5rem]" :class="TONE[order.status] ?? 'bg-forest/10'">{{ order.status_label }}</span>
+            <span class="eyebrow rounded-full px-3 py-1.5 text-[0.5rem]" :class="TONE[order.status] ?? 'bg-blush-500/10'">{{ order.status_label }}</span>
             <span class="font-display text-xl tabular-nums">{{ order.total_formatted }}</span>
           </div>
         </div>

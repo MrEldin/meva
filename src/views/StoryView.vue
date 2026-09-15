@@ -34,7 +34,7 @@ onMounted(() => {
       </p>
       <RouterLink
         :to="{ name: 'catalog' }"
-        class="mt-7 inline-block rounded-full bg-ink px-8 py-4 text-[0.9375rem] font-semibold text-paper transition-colors hover:bg-blush-500"
+        class="mt-7 inline-block rounded-full bg-blush-500 px-8 py-4 text-[0.9375rem] font-semibold text-paper transition-colors hover:bg-blush-500"
       >
         Pogledaj proizvode
       </RouterLink>

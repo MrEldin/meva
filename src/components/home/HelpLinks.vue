@@ -1,30 +1,25 @@
 <script setup>
 import SectionHead from '@/components/home/SectionHead.vue'
 
-/** The questions people ask before they order, each one a page away. */
 const LINKS = [
-  { to: 'faq', n: '01', title: 'Česta pitanja', text: 'Koliko traje pakovanje, kada se vide rezultati, može li uz terapiju.' },
-  { to: 'delivery', n: '02', title: 'Dostava', text: 'Besplatno u celoj Srbiji, jedan do tri radna dana, plaćate kuriru.' },
-  { to: 'returns', n: '03', title: 'Povrat i reklamacije', text: 'Četrnaest dana za odustajanje, i šta ako nešto nije u redu.' },
+  { to: 'faq', title: 'Česta pitanja', text: 'Koliko traje pakovanje, kada se vide rezultati.' },
+  { to: 'delivery', title: 'Dostava', text: 'Besplatno, 1–3 radna dana, plaćate kuriru.' },
+  { to: 'returns', title: 'Povrat i reklamacije', text: '14 dana za odustajanje.' },
 ]
 </script>
 
 <template>
-  <section class="shell py-14 lg:py-20">
-    <SectionHead number="06" kicker="Pre nego što poručite" title="Sve što se obično pita" />
+  <section class="shell py-10 lg:py-16">
+    <SectionHead title="Pre nego što poručite" />
 
-    <ul class="mt-9 divide-y divide-ink/10 border-b border-ink/10">
+    <ul class="mt-5 grid gap-3 sm:grid-cols-3 sm:gap-4">
       <li v-for="link in LINKS" :key="link.to">
-        <RouterLink
-          :to="{ name: link.to }"
-          class="group flex flex-wrap items-baseline gap-x-6 gap-y-2 py-6 transition-colors hover:bg-blush-50/60 sm:flex-nowrap sm:px-2"
-        >
-          <span class="font-display text-sm text-blush-400">{{ link.n }}</span>
-          <span class="min-w-0 flex-1">
-            <span class="block font-display text-2xl leading-tight transition-transform duration-500 ease-[var(--ease-silk)] group-hover:translate-x-1.5 sm:text-3xl">{{ link.title }}</span>
-            <span class="mt-1.5 block text-[0.9375rem] text-mist-500">{{ link.text }}</span>
+        <RouterLink :to="{ name: link.to }" class="flex h-full items-center justify-between gap-3 rounded-[1.25rem] border border-blush-100 p-5 transition-colors hover:bg-blush-50">
+          <span>
+            <span class="block text-[0.9375rem] font-bold text-ink">{{ link.title }}</span>
+            <span class="mt-1 block text-[0.875rem] text-mist-500">{{ link.text }}</span>
           </span>
-          <span class="shrink-0 text-xl text-ink transition-transform duration-500 ease-[var(--ease-silk)] group-hover:translate-x-2">→</span>
+          <span class="shrink-0 text-lg text-blush-500">→</span>
         </RouterLink>
       </li>
     </ul>

@@ -38,7 +38,7 @@ onMounted(() => setMeta({ title: 'Hvala na porudžbini' }))
         Plaćate kuriru pri preuzimanju. Dostava je besplatna.
       </p>
 
-      <RouterLink :to="{ name: 'catalog' }" class="eyebrow mt-10 inline-block border border-ink px-9 py-4 text-ink transition-colors hover:bg-ink hover:text-paper">
+      <RouterLink :to="{ name: 'catalog' }" class="eyebrow mt-10 inline-block border border-ink px-9 py-4 text-ink transition-colors hover:bg-blush-500 hover:text-paper">
         Nastavi kupovinu
       </RouterLink>
     </div>

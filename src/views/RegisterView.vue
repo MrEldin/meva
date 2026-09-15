@@ -68,7 +68,7 @@ onMounted(() => setMeta({
 
       <p v-if="errors.general" class="text-sm text-clay-600">{{ errors.general[0] }}</p>
 
-      <button type="submit" class="pill w-full justify-center bg-forest text-cream hover:bg-forest-soft disabled:opacity-50" :disabled="loading">
+      <button type="submit" class="pill w-full justify-center bg-blush-500 text-paper hover:bg-blush-500 disabled:opacity-50" :disabled="loading">
         {{ loading ? 'Pravim nalog…' : 'Otvori nalog' }}
       </button>
     </form>

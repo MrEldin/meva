@@ -79,7 +79,7 @@ async function submit() {
           <button
             type="submit"
             :disabled="submitting"
-            class="pill w-full justify-center bg-forest py-4 text-cream transition-colors hover:bg-forest-soft disabled:opacity-55"
+            class="pill w-full justify-center bg-blush-500 py-4 text-paper transition-colors hover:bg-blush-500 disabled:opacity-55"
           >
             {{ submitting ? 'Prijavljujem…' : 'Prijavi se' }}
           </button>

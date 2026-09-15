@@ -1,19 +1,26 @@
 <script setup>
-/** The three things people ask before ordering, numbered like a recipe. */
 const POINTS = [
-  { n: '01', title: 'Besplatna dostava', text: 'U celoj Srbiji, bez minimalnog iznosa. Paket stiže za jedan do tri radna dana.' },
-  { n: '02', title: 'Plaćate kuriru', text: 'Pouzećem, kad paket stigne na vrata. Ništa unapred, nikakva kartica ako je ne želite.' },
-  { n: '03', title: 'Sastav koji se čita', text: 'Svaki sastojak ispisan punim imenom, na etiketi i na stranici. Bez sulfata i parabena.' },
+  { title: 'Besplatna dostava', text: 'U celoj Srbiji, bez minimalnog iznosa. Stiže za 1–3 radna dana.', icon: 'van' },
+  { title: 'Plaćate kuriru', text: 'Pouzećem, kad paket stigne. Ništa unapred.', icon: 'cash' },
+  { title: 'Sastav koji se čita', text: 'Svaki sastojak punim imenom. Bez sulfata i parabena.', icon: 'leaf' },
 ]
 </script>
 
 <template>
-  <section class="shell py-14 lg:py-20">
-    <ul class="grid gap-px overflow-hidden rounded-[1.25rem] bg-ink/10 sm:grid-cols-3">
-      <li v-for="point in POINTS" :key="point.n" class="group bg-paper p-7 transition-colors duration-500 hover:bg-blush-50 lg:p-9">
-        <p class="font-display text-4xl leading-none text-blush-300 transition-colors duration-500 group-hover:text-blush-500">{{ point.n }}</p>
-        <h3 class="mt-5 font-display text-xl leading-tight">{{ point.title }}</h3>
-        <p class="mt-2.5 text-[0.9375rem] leading-relaxed text-mist-500">{{ point.text }}</p>
+  <section class="shell py-10 lg:py-16">
+    <ul class="grid gap-3 sm:grid-cols-3 sm:gap-4">
+      <li v-for="point in POINTS" :key="point.title" class="flex items-start gap-4 rounded-[1.25rem] border border-blush-100 p-5">
+        <span class="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-blush-100 text-blush-600">
+          <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <template v-if="point.icon === 'van'"><path d="M2 7h11v10H2zM13 10h4l3 3v4h-7z" /><circle cx="6" cy="18.5" r="1.6" /><circle cx="17" cy="18.5" r="1.6" /></template>
+            <template v-else-if="point.icon === 'cash'"><rect x="2.5" y="6" width="19" height="12" rx="2.5" /><circle cx="12" cy="12" r="2.6" /></template>
+            <template v-else><path d="M20 4c0 8-5 12-11 12H5c0-8 5-12 11-12z" /><path d="M5 20c1.5-4 4-6.5 8-8" /></template>
+          </svg>
+        </span>
+        <span>
+          <span class="block text-[0.9375rem] font-bold text-ink">{{ point.title }}</span>
+          <span class="mt-1 block text-[0.875rem] leading-relaxed text-mist-500">{{ point.text }}</span>
+        </span>
       </li>
     </ul>
   </section>

@@ -6,7 +6,7 @@
       <p class="mt-5 text-base font-light text-mist-600">
         Link je možda zastareo ili je proizvod uklonjen iz ponude.
       </p>
-      <RouterLink :to="{ name: 'home' }" class="eyebrow mt-9 inline-block bg-ink px-9 py-4 text-paper transition-colors hover:bg-clay-500">
+      <RouterLink :to="{ name: 'home' }" class="eyebrow mt-9 inline-block bg-blush-500 px-9 py-4 text-paper transition-colors hover:bg-blush-600">
         Nazad na početnu
       </RouterLink>
     </div>

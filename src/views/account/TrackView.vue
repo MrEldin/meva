@@ -52,7 +52,7 @@ onMounted(() => setMeta({
     <form class="mt-8 grid gap-4 sm:grid-cols-[1fr_1.4fr_auto]" @submit.prevent="submit">
       <input v-model="form.reference" required placeholder="Broj (npr. 00000012)" class="rounded-full border border-forest/15 bg-sand px-5 py-3.5 text-sm outline-none placeholder:text-forest/40 focus:border-forest/40" />
       <input v-model="form.email" required type="email" placeholder="E-mail" class="rounded-full border border-forest/15 bg-sand px-5 py-3.5 text-sm outline-none placeholder:text-forest/40 focus:border-forest/40" />
-      <button type="submit" class="pill bg-forest text-cream hover:bg-forest-soft disabled:opacity-50" :disabled="loading">
+      <button type="submit" class="pill bg-blush-500 text-paper hover:bg-blush-500 disabled:opacity-50" :disabled="loading">
         {{ loading ? 'Tražim…' : 'Pronađi' }}
       </button>
     </form>
@@ -68,7 +68,7 @@ onMounted(() => setMeta({
       <ol v-if="order.status !== 'cancelled' && order.status !== 'returned'" class="mt-6 space-y-4">
         <li v-for="step in STEPS" :key="step.status" class="flex gap-4">
           <span class="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[0.625rem]"
-            :class="reached(step.status) ? 'bg-forest text-cream' : 'bg-cream text-forest/40'">
+            :class="reached(step.status) ? 'bg-blush-500 text-paper' : 'bg-cream text-forest/40'">
             {{ reached(step.status) ? '✓' : '·' }}
           </span>
           <div>

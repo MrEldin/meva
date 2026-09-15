@@ -28,8 +28,8 @@
   --color-ink-soft: #2a2a2a;
   --color-paper: #ffffff;
   /* A white with a little warmth, for the bands between white sections. */
-  --color-shell: #faf8f8;
-  --color-shell-deep: #f4f0f1;
+  --color-shell: #fdf7f8;
+  --color-shell-deep: #fbeff2;
 
   /* Powder pink: the brand's own colour, and the only accent. */
   --color-blush-50: #fdf6f8;
@@ -51,8 +51,8 @@
   --color-mist-600: #4a4a4a;
 
   /* Kept so the admin desk, which is not part of this redesign, still builds. */
-  --color-cream: #faf8f8;
-  --color-sand: #f4f0f1;
+  --color-cream: #fdf7f8;
+  --color-sand: #fbeff2;
   --color-forest: #121212;
   --color-forest-soft: #2a2a2a;
   --color-sage: #f4d2dc;
@@ -84,9 +84,9 @@
   | to read and does not make anyone work; a single humanist sans does that
   | better than pairing a display serif with it, and it loads faster.
   */
-  --font-display: "Bodoni Moda", "Didot", "Times New Roman", serif;
-  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "DM Mono", ui-monospace, monospace;
+  --font-display: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "DM Sans", ui-monospace, monospace;
 
   --radius-card: 1rem;
 
@@ -130,8 +130,9 @@
 
   h1, h2, h3, h4 {
     font-family: var(--font-display);
-    font-weight: 500;
-    letter-spacing: -0.015em;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.12;
   }
 
   ::selection {

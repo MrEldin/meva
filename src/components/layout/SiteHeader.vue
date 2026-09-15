@@ -62,11 +62,11 @@ function openSearch() {
 <template>
   <header class="sticky top-0 z-40 bg-paper">
     <!-- The two things that decide a purchase, said before anything else. -->
-    <p class="bg-ink px-4 py-2.5 text-center text-[0.8125rem] font-medium text-paper">
+    <p class="bg-blush-100 px-4 py-2.5 text-center text-[0.8125rem] font-semibold text-blush-700">
       Besplatna dostava u celoj Srbiji · Plaćanje pouzećem
     </p>
 
-    <div class="border-b border-mist-200">
+    <div class="border-b border-blush-100">
       <div class="shell flex items-center justify-between gap-4 py-3.5 md:py-4">
         <!-- Menu and search, on the left, where the reference site puts them -->
         <div class="flex items-center gap-1">
@@ -98,7 +98,7 @@ function openSearch() {
             v-for="link in links"
             :key="link.label"
             :to="link.to"
-            class="rounded-full px-3.5 py-2 text-sm font-medium text-mist-600 transition-colors hover:bg-mist-100 hover:text-ink"
+            class="rounded-full px-3.5 py-2 text-sm font-medium text-mist-600 transition-colors hover:bg-blush-50 hover:text-blush-700"
             active-class="text-ink"
           >
             {{ link.label }}
@@ -138,9 +138,9 @@ function openSearch() {
               type="search"
               autofocus
               placeholder="Šta tražite? Na primer: šampon, seboreja, krema…"
-              class="w-full rounded-full border border-mist-300 bg-paper py-3.5 pl-5 pr-28 text-[0.9375rem] outline-none transition-colors placeholder:text-mist-400 focus:border-ink"
+              class="w-full rounded-full border border-mist-300 bg-paper py-3.5 pl-5 pr-28 text-[0.9375rem] outline-none transition-colors placeholder:text-mist-400 focus:border-blush-400"
             />
-            <button type="submit" class="absolute right-1.5 top-1.5 rounded-full bg-ink px-5 py-2 text-sm font-semibold text-paper transition-colors hover:bg-ink-soft">
+            <button type="submit" class="absolute right-1.5 top-1.5 rounded-full bg-blush-500 px-5 py-2 text-sm font-semibold text-paper transition-colors hover:bg-blush-600">
               Traži
             </button>
           </form>

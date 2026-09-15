@@ -69,7 +69,7 @@ setMeta({
           type="button"
           class="eyebrow shrink-0 border px-4 py-2.5 transition-colors duration-300"
           :class="!activeCategory && !onlySets
-            ? 'border-ink bg-ink text-paper'
+            ? 'border-ink bg-blush-500 text-paper'
             : 'border-mist-200 text-mist-500 hover:border-ink hover:text-ink'"
           @click="filterBy({})"
         >
@@ -82,7 +82,7 @@ setMeta({
           type="button"
           class="eyebrow shrink-0 border px-4 py-2.5 transition-colors duration-300"
           :class="activeCategory === category.slug
-            ? 'border-ink bg-ink text-paper'
+            ? 'border-ink bg-blush-500 text-paper'
             : 'border-mist-200 text-mist-500 hover:border-ink hover:text-ink'"
           @click="filterBy({ kategorija: category.slug })"
         >
@@ -93,7 +93,7 @@ setMeta({
           type="button"
           class="eyebrow shrink-0 border px-4 py-2.5 transition-colors duration-300"
           :class="onlySets
-            ? 'border-ink bg-ink text-paper'
+            ? 'border-ink bg-blush-500 text-paper'
             : 'border-mist-200 text-mist-500 hover:border-ink hover:text-ink'"
           @click="filterBy({ tip: 'set' })"
         >

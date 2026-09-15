@@ -11,7 +11,7 @@ const cart = useCartStore()
 
     <div v-if="!cart.lines.length" class="py-20 text-center md:py-28">
       <p class="font-display text-2xl text-mist-400">Korpa je prazna</p>
-      <RouterLink :to="{ name: 'catalog' }" class="eyebrow mt-8 inline-block bg-ink px-9 py-4 text-paper transition-colors hover:bg-clay-500">
+      <RouterLink :to="{ name: 'catalog' }" class="eyebrow mt-8 inline-block bg-blush-500 px-9 py-4 text-paper transition-colors hover:bg-blush-600">
         Pogledaj proizvode
       </RouterLink>
     </div>
@@ -71,7 +71,7 @@ const cart = useCartStore()
             <span class="font-display text-2xl tabular-nums text-ink">{{ money(cart.subtotal) }}</span>
           </div>
 
-          <RouterLink :to="{ name: 'checkout' }" class="eyebrow mt-7 block bg-ink py-4.5 text-center text-paper transition-colors duration-400 hover:bg-clay-500">
+          <RouterLink :to="{ name: 'checkout' }" class="eyebrow mt-7 block bg-blush-500 py-4.5 text-center text-paper transition-colors duration-400 hover:bg-blush-600">
             Nastavi ka poručivanju
           </RouterLink>
 
