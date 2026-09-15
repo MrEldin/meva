@@ -28,7 +28,11 @@ const TONE = {
   delivered: 'bg-sage text-sage-deep',
   returned: 'bg-clay-100 text-clay-700',
   cancelled: 'bg-forest/10 text-forest/60',
+  processing: 'bg-sage text-sage-deep',
+  completed: 'bg-sage text-sage-deep',
 }
+
+const origin = ref('')
 
 async function load() {
   loading.value = true
@@ -36,6 +40,7 @@ async function load() {
   const params = { page: page.value, per_page: 25 }
   if (term.value) params.q = term.value
   if (status.value) params.status = status.value
+  if (origin.value) params.origin = origin.value
   if (from.value) params.od = from.value
   if (to.value) params.do = to.value
 
@@ -64,6 +69,7 @@ async function exportCsv() {
   const params = new URLSearchParams()
   if (term.value) params.set('q', term.value)
   if (status.value) params.set('status', status.value)
+  if (origin.value) params.set('origin', origin.value)
   if (from.value) params.set('od', from.value)
   if (to.value) params.set('do', to.value)
 
@@ -81,7 +87,7 @@ watch(term, () => {
   clearTimeout(debounce)
   debounce = setTimeout(() => { page.value = 1; load() }, 350)
 })
-watch([status, from, to, page], load)
+watch([status, origin, from, to, page], load)
 
 onMounted(() => {
   setMeta({ title: 'Porudžbine' })
@@ -96,6 +102,7 @@ onMounted(() => {
       <div>
         <p class="eyebrow text-clay-500">Porudžbine</p>
         <h1 class="mt-2 font-display text-3xl tracking-tight sm:text-4xl">Ko je šta poručio</h1>
+        <p v-if="meta" class="mt-2 text-sm text-forest/55">{{ new Intl.NumberFormat('sr-RS').format(meta.total) }} porudžbina</p>
       </div>
       <button v-if="auth.can('orders.view')" type="button" class="pill border border-forest/20 hover:bg-forest hover:text-cream" @click="exportCsv">
         Preuzmi CSV
@@ -116,7 +123,16 @@ onMounted(() => {
       </button>
     </div>
 
-    <div class="mt-5 grid gap-3 sm:grid-cols-[1fr_auto_auto]">
+    <div class="mt-5 flex flex-wrap gap-1 rounded-full border border-forest/15 bg-sand p-1 sm:inline-flex">
+      <button v-for="option in [{ v: '', l: 'Sve' }, { v: 'live', l: 'Nove' }, { v: 'archive', l: 'Arhiva' }]" :key="option.v"
+        type="button" class="eyebrow rounded-full px-4 py-2 text-[0.5625rem] transition-colors"
+        :class="origin === option.v ? 'bg-forest text-cream' : 'hover:bg-sage'"
+        @click="origin = option.v; page = 1">
+        {{ option.l }}
+      </button>
+    </div>
+
+    <div class="mt-3 grid gap-3 sm:grid-cols-[1fr_auto_auto]">
       <label class="relative">
         <span class="sr-only">Pretraga</span>
         <input
@@ -139,6 +155,7 @@ onMounted(() => {
           <tr class="text-left">
             <th class="eyebrow px-4 pb-1 text-[0.5rem] font-medium text-forest/45">Broj</th>
             <th class="eyebrow px-4 pb-1 text-[0.5rem] font-medium text-forest/45">Datum</th>
+            <th class="eyebrow px-4 pb-1 text-[0.5rem] font-medium text-forest/45">Kupac</th>
             <th class="eyebrow px-4 pb-1 text-[0.5rem] font-medium text-forest/45">Status</th>
             <th class="eyebrow px-4 pb-1 text-[0.5rem] font-medium text-forest/45">Artikli</th>
             <th class="eyebrow px-4 pb-1 text-right text-[0.5rem] font-medium text-forest/45">Iznos</th>
@@ -151,8 +168,15 @@ onMounted(() => {
             class="cursor-pointer bg-sand transition-colors hover:bg-sage/60"
             @click="router.push({ name: 'admin.order', params: { id: order.id } })"
           >
-            <td class="rounded-l-2xl px-4 py-3 font-mono text-xs">{{ order.reference }}</td>
+            <td class="rounded-l-2xl px-4 py-3">
+              <span class="font-mono text-xs">{{ order.reference }}</span>
+              <span v-if="order.origin === 'archive'" class="eyebrow ml-2 text-[0.4375rem] text-forest/35">arhiva</span>
+            </td>
             <td class="px-4 py-3 text-forest/70">{{ when(order.placed_at) }}</td>
+            <td class="px-4 py-3">
+              <span class="block max-w-44 truncate">{{ order.customer_name ?? '—' }}</span>
+              <span v-if="order.city" class="block text-xs text-forest/45">{{ order.city }}</span>
+            </td>
             <td class="px-4 py-3">
               <span class="eyebrow rounded-full px-2.5 py-1 text-[0.5rem]" :class="TONE[order.status] ?? 'bg-forest/10'">{{ order.status_label }}</span>
             </td>

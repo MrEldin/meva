@@ -2,7 +2,7 @@
 import client from '@/api/client'
 import { setMeta } from '@/lib/meta'
 import { useAuthStore } from '@/stores/auth'
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
@@ -12,6 +12,10 @@ const order = ref(null)
 const loading = ref(true)
 const saving = ref(false)
 const saved = ref(false)
+
+// Archived orders are history: their lines are shown, their status is not
+// offered for change.
+const archived = computed(() => order.value?.origin === 'archive')
 
 const STATUSES = [
   { value: 'awaiting-dispatch', label: 'Za slanje' },
@@ -105,9 +109,22 @@ onMounted(async () => {
             <p v-if="order.notes" class="mt-4 rounded-xl bg-cream p-3 text-sm text-forest/75">„{{ order.notes }}"</p>
           </section>
 
+          <section v-if="order.source" class="rounded-[1.5rem] bg-sand p-5 sm:p-6">
+            <h2 class="eyebrow text-[0.5625rem] text-forest/50">Odakle je došla</h2>
+            <dl class="mt-3 space-y-1.5 text-sm text-forest/75">
+              <div class="flex justify-between gap-4"><dt class="text-forest/55">Izvor</dt><dd>{{ order.source.utm_source || 'direktno' }}</dd></div>
+              <div class="flex justify-between gap-4"><dt class="text-forest/55">Vrsta</dt><dd>{{ order.source.type || '—' }}</dd></div>
+              <div class="flex justify-between gap-4"><dt class="text-forest/55">Uređaj</dt><dd>{{ order.source.device || '—' }}</dd></div>
+              <div class="flex justify-between gap-4"><dt class="text-forest/55">Plaćanje</dt><dd>{{ order.source.payment || '—' }}</dd></div>
+            </dl>
+          </section>
+
           <section class="rounded-[1.5rem] bg-sand p-5 sm:p-6">
             <h2 class="eyebrow text-[0.5625rem] text-forest/50">Status</h2>
-            <div class="mt-4 flex flex-wrap gap-2">
+            <p v-if="archived" class="mt-3 text-sm text-forest/70">
+              {{ order.status_label }} — arhivirane porudžbine se ne menjaju.
+            </p>
+            <div v-else class="mt-4 flex flex-wrap gap-2">
               <button
                 v-for="option in STATUSES"
                 :key="option.value"
@@ -121,7 +138,7 @@ onMounted(async () => {
               </button>
             </div>
             <p v-if="saved" class="mt-3 text-xs text-sage-deep">Sačuvano.</p>
-            <p v-else-if="!auth.can('orders.manage')" class="mt-3 text-xs text-forest/50">Nemate dozvolu za izmenu porudžbina.</p>
+            <p v-else-if="!archived && !auth.can('orders.manage')" class="mt-3 text-xs text-forest/50">Nemate dozvolu za izmenu porudžbina.</p>
           </section>
         </div>
       </div>
