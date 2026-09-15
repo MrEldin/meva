@@ -1,29 +1,26 @@
 <script setup>
-import { useCatalogStore } from '@/stores/catalog'
-import { computed } from 'vue'
+import heroPhone from '@/assets/hero-phone.webp'
+import heroWide from '@/assets/hero-wide.webp'
 
 /**
- * The opening, for a phone.
+ * The opening, for a phone first.
  *
- * White and pink, and the type is the only dark thing. One photograph, one
- * sentence, one pink button, and the three facts that decide a purchase.
+ * The products are cut out of their background, so they float on the pink
+ * field instead of sitting inside a grey studio photograph. Two pictures: a
+ * tall arrangement for a phone, where the image stacks above the words, and a
+ * wide one for a desktop, where it sits beside them. The browser fetches only
+ * the one it needs.
+ *
+ * White and pink; the type is the only dark thing; one button.
  */
-const catalog = useCatalogStore()
-
-const hero = computed(() =>
-  catalog.products.find((p) => p.slug?.startsWith('set-za-seboreju-za-kosu-i-lice'))
-  ?? catalog.products.find((p) => p.image)
-  ?? null,
-)
-
 const PROMISES = ['Besplatna dostava', 'Plaćanje pouzećem', 'Bez registracije']
 </script>
 
 <template>
   <section class="bg-paper">
-    <div class="shell pb-6 pt-4 lg:pb-14 lg:pt-10">
-      <div class="overflow-hidden rounded-[1.75rem] bg-blush-50 lg:grid lg:grid-cols-2 lg:items-center">
-        <div class="p-6 pb-2 sm:p-8 lg:order-1 lg:p-14">
+    <div class="shell pb-6 pt-3 lg:pb-14 lg:pt-8">
+      <div class="overflow-hidden rounded-[1.75rem] bg-blush-50 lg:grid lg:grid-cols-[1fr_1.15fr] lg:items-center">
+        <div class="px-6 pt-7 sm:px-8 lg:order-1 lg:px-14 lg:py-16">
           <p class="text-[0.8125rem] font-bold uppercase tracking-wider text-blush-500">Prirodna kozmetika · Novi Pazar</p>
 
           <h1 class="mt-3 text-[2.125rem] leading-[1.1] sm:text-[2.75rem] lg:text-[3.25rem]">
@@ -52,16 +49,18 @@ const PROMISES = ['Besplatna dostava', 'Plaćanje pouzećem', 'Bez registracije'
           </ul>
         </div>
 
-        <div class="p-4 pt-2 sm:p-6 lg:order-2 lg:p-8">
-          <div class="overflow-hidden rounded-[1.25rem]">
+        <!-- The cutout, on the pink, with a soft pool of light behind it -->
+        <div class="relative px-3 pb-4 pt-6 sm:px-6 lg:order-2 lg:px-6 lg:py-8">
+          <div class="absolute inset-x-8 bottom-6 top-1/3 rounded-[50%] bg-blush-200/70 blur-3xl" />
+          <picture>
+            <source media="(min-width: 1024px)" :srcset="heroWide" />
             <img
-              v-if="hero?.image"
-              :src="hero.image"
-              :alt="hero.name"
-              class="aspect-[4/3] w-full object-cover lg:aspect-square"
+              :src="heroPhone"
+              alt="Meva preparati: šampon, losion, ulje i kreme"
+              class="relative mx-auto w-full max-w-md drop-shadow-[0_24px_40px_rgba(120,56,78,0.18)] lg:max-w-none"
+              fetchpriority="high"
             />
-            <div v-else class="aspect-[4/3] w-full bg-blush-100 lg:aspect-square" />
-          </div>
+          </picture>
         </div>
       </div>
     </div>
