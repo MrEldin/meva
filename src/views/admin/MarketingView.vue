@@ -96,9 +96,14 @@ onMounted(async () => {
 
 <template>
   <div>
-    <header class="border-b border-forest/10 pb-5">
-      <p class="eyebrow text-clay-500">Marketing</p>
-      <h1 class="mt-2 font-display text-3xl tracking-tight sm:text-4xl">Koga danas kontaktirati</h1>
+    <header class="flex flex-wrap items-end justify-between gap-4 border-b border-forest/10 pb-5">
+      <div>
+        <p class="eyebrow text-clay-500">Marketing</p>
+        <h1 class="mt-2 font-display text-3xl tracking-tight sm:text-4xl">Koga danas kontaktirati</h1>
+      </div>
+      <RouterLink :to="{ name: 'admin.email' }" class="pill bg-forest text-cream transition-colors hover:bg-forest-soft">
+        Email kampanje
+      </RouterLink>
     </header>
 
     <p v-if="loading" class="py-16 text-center text-sm text-forest/50">Učitavanje…</p>

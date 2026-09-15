@@ -33,6 +33,8 @@ const routes = [
       { path: 'proizvodi', name: 'admin.products', component: () => import('@/views/admin/ProductsView.vue'), meta: { permission: 'products.view' } },
       { path: 'proizvodi/:id', name: 'admin.product', component: () => import('@/views/admin/ProductEditView.vue'), meta: { permission: 'products.manage' } },
       { path: 'marketing', name: 'admin.marketing', component: () => import('@/views/admin/MarketingView.vue'), meta: { permission: 'marketing.manage' } },
+      { path: 'marketing/email', name: 'admin.email', component: () => import('@/views/admin/EmailCampaignsView.vue'), meta: { permission: 'marketing.manage' } },
+      { path: 'marketing/email/:id', name: 'admin.email.edit', component: () => import('@/views/admin/EmailEditorView.vue'), meta: { permission: 'marketing.manage' } },
       { path: 'tim', name: 'admin.team', component: () => import('@/views/admin/TeamView.vue'), meta: { permission: 'users.manage' } },
       { path: 'nalog', name: 'admin.profile', component: () => import('@/views/admin/ProfileView.vue') },
     ],

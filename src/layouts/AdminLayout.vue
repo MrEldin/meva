@@ -14,6 +14,7 @@ const links = computed(() =>
     { to: { name: 'admin.orders' }, label: 'Porudžbine', permission: 'orders.view', icon: 'box' },
     { to: { name: 'admin.products' }, label: 'Proizvodi', permission: 'products.view', icon: 'bottle' },
     { to: { name: 'admin.marketing' }, label: 'Marketing', permission: 'marketing.manage', icon: 'megaphone' },
+    { to: { name: 'admin.email' }, label: 'Email kampanje', permission: 'marketing.manage', icon: 'envelope' },
     { to: { name: 'admin.team' }, label: 'Tim', permission: 'users.manage', icon: 'people' },
     { to: { name: 'admin.profile' }, label: 'Moj nalog', permission: null, icon: 'user' },
   ].filter((link) => !link.permission || auth.can(link.permission)),
@@ -55,6 +56,7 @@ function signOut() {
             <template v-else-if="link.icon === 'box'"><path d="M3 8l9-5 9 5v8l-9 5-9-5Z" /><path d="M3 8l9 5 9-5M12 13v8" /></template>
             <template v-else-if="link.icon === 'bottle'"><path d="M10 2h4v4l2 3v11a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V9l2-3Z" /><path d="M8 13h8" /></template>
             <template v-else-if="link.icon === 'megaphone'"><path d="M3 11v2a1 1 0 0 0 1 1h3l6 4V6L7 10H4a1 1 0 0 0-1 1Z" /><path d="M17 9a4 4 0 0 1 0 6" /></template>
+            <template v-else-if="link.icon === 'envelope'"><rect x="3" y="5.5" width="18" height="13" rx="2.5" /><path d="M3.8 7.2 12 13l8.2-5.8" /></template>
             <template v-else-if="link.icon === 'people'"><circle cx="9" cy="8" r="3.2" /><path d="M2.5 20c0-3.3 2.9-5.5 6.5-5.5s6.5 2.2 6.5 5.5" /><path d="M17 7.5a3 3 0 0 1 0 5.6M18 20c0-2.2-.8-3.9-2.2-5" /></template>
             <template v-else><circle cx="12" cy="8" r="3.6" /><path d="M4.5 20c0-3.6 3.4-6 7.5-6s7.5 2.4 7.5 6" /></template>
           </svg>
