@@ -84,7 +84,7 @@
   | to read and does not make anyone work; a single humanist sans does that
   | better than pairing a display serif with it, and it loads faster.
   */
-  --font-display: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Bodoni Moda", "Didot", "Times New Roman", serif;
   --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "DM Mono", ui-monospace, monospace;
 
@@ -130,8 +130,8 @@
 
   h1, h2, h3, h4 {
     font-family: var(--font-display);
-    font-weight: 700;
-    letter-spacing: -0.025em;
+    font-weight: 500;
+    letter-spacing: -0.015em;
   }
 
   ::selection {
@@ -605,4 +605,81 @@
   .desk-table tbody tr:last-child td { border-bottom: 0; }
   .desk-table tbody tr { transition: background-color 0.15s; }
   .desk-table tbody tr:hover { background: color-mix(in oklab, var(--color-forest) 4%, transparent); }
+}
+
+/*
+|--------------------------------------------------------------------------
+| The shop's own furniture
+|--------------------------------------------------------------------------
+|
+| A shop can be clear and still have a voice. These are the pieces that give
+| it one: a tracked label, a rule that draws itself, a strip of type that
+| never stops moving, and a pink wash that turns a plain white section into a
+| room. None of them make anything harder to find.
+|
+*/
+
+@layer utilities {
+  /* Small tracked caps. Used for section numbers and the labels above them. */
+  .kicker {
+    font-family: var(--font-sans);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+  }
+
+  /* An editorial section head: a number, a hairline, then the title. */
+  .rule-draw {
+    position: relative;
+    overflow: hidden;
+  }
+  .rule-draw::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 1px;
+    width: 100%;
+    background: currentColor;
+    opacity: 0.18;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.9s var(--ease-silk);
+  }
+  .rule-draw.is-in::after { transform: scaleX(1); }
+
+  /* Type that never stops moving. Two copies, translated half the width. */
+  .ticker {
+    display: flex;
+    width: max-content;
+    animation: ticker var(--ticker-duration, 42s) linear infinite;
+  }
+  @keyframes ticker { to { transform: translateX(-50%); } }
+  @media (prefers-reduced-motion: reduce) { .ticker { animation: none; } }
+
+  /* A soft pink cloud behind a photograph, so the product floats rather than
+     sits in a box. */
+  .bloom-pink {
+    background:
+      radial-gradient(60% 55% at 30% 35%, rgba(230, 173, 191, 0.55), transparent 70%),
+      radial-gradient(50% 50% at 75% 70%, rgba(244, 210, 220, 0.75), transparent 72%);
+  }
+
+  /* Paper grain, barely there, so large flat areas are not dead. */
+  .grain::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.4;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.045 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 160px 160px;
+  }
+
+  /* The outlined display type used once, in the black band. */
+  .outline-type {
+    -webkit-text-stroke: 1px currentColor;
+    color: transparent;
+  }
 }

@@ -22,10 +22,13 @@ async function join() {
 </script>
 
 <template>
-  <section class="bg-ink text-paper">
-    <div class="shell py-12 text-center lg:py-16">
-      <h2 class="text-2xl text-paper sm:text-3xl">Saveti za negu, bez spama</h2>
-      <p class="mx-auto mt-2.5 max-w-md text-[0.9375rem] leading-relaxed text-paper/65">
+  <section class="grain relative overflow-hidden bg-ink text-paper">
+    <div class="shell relative py-16 text-center lg:py-24">
+      <p class="kicker text-blush-300">07 — Pismo iz Meve</p>
+      <h2 class="mx-auto mt-5 max-w-2xl text-[2.25rem] leading-[0.98] text-paper sm:text-[3.25rem]">
+        Saveti za negu, <span class="italic text-blush-300">bez spama.</span>
+      </h2>
+      <p class="mx-auto mt-5 max-w-md text-[0.9375rem] leading-relaxed text-paper/55">
         Jedan do dva puta mesečno: šta pomaže kod seboreje, psorijaze i osetljive kože, i kad stigne nešto novo.
       </p>
 

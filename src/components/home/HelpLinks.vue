@@ -1,30 +1,30 @@
 <script setup>
-/**
- * The questions people ask before they order, each one a page away.
- *
- * Put here rather than only in the footer because someone deciding whether to
- * buy is on this page, not at the bottom of it.
- */
+import SectionHead from '@/components/home/SectionHead.vue'
+
+/** The questions people ask before they order, each one a page away. */
 const LINKS = [
-  { to: 'faq', title: 'Česta pitanja', text: 'Koliko traje pakovanje, može li uz terapiju, kako se čuva.' },
-  { to: 'delivery', title: 'Dostava', text: 'Besplatno u celoj Srbiji, jedan do tri radna dana, plaćate kuriru.' },
-  { to: 'returns', title: 'Povrat i reklamacije', text: 'Četrnaest dana za odustajanje, i šta da radite ako nešto nije u redu.' },
+  { to: 'faq', n: '01', title: 'Česta pitanja', text: 'Koliko traje pakovanje, kada se vide rezultati, može li uz terapiju.' },
+  { to: 'delivery', n: '02', title: 'Dostava', text: 'Besplatno u celoj Srbiji, jedan do tri radna dana, plaćate kuriru.' },
+  { to: 'returns', n: '03', title: 'Povrat i reklamacije', text: 'Četrnaest dana za odustajanje, i šta ako nešto nije u redu.' },
 ]
 </script>
 
 <template>
-  <section class="shell py-12 lg:py-16">
-    <h2 class="text-2xl sm:text-3xl">Pre nego što poručite</h2>
+  <section class="shell py-14 lg:py-20">
+    <SectionHead number="06" kicker="Pre nego što poručite" title="Sve što se obično pita" />
 
-    <ul class="mt-6 grid gap-3 md:grid-cols-3">
+    <ul class="mt-9 divide-y divide-ink/10 border-b border-ink/10">
       <li v-for="link in LINKS" :key="link.to">
         <RouterLink
           :to="{ name: link.to }"
-          class="group flex h-full flex-col rounded-2xl border border-mist-200 p-6 transition-colors hover:border-ink"
+          class="group flex flex-wrap items-baseline gap-x-6 gap-y-2 py-6 transition-colors hover:bg-blush-50/60 sm:flex-nowrap sm:px-2"
         >
-          <h3 class="text-lg font-bold">{{ link.title }}</h3>
-          <p class="mt-2 flex-1 text-[0.9375rem] leading-relaxed text-mist-600">{{ link.text }}</p>
-          <span class="mt-4 text-sm font-semibold text-blush-500">Pročitaj →</span>
+          <span class="font-display text-sm text-blush-400">{{ link.n }}</span>
+          <span class="min-w-0 flex-1">
+            <span class="block font-display text-2xl leading-tight transition-transform duration-500 ease-[var(--ease-silk)] group-hover:translate-x-1.5 sm:text-3xl">{{ link.title }}</span>
+            <span class="mt-1.5 block text-[0.9375rem] text-mist-500">{{ link.text }}</span>
+          </span>
+          <span class="shrink-0 text-xl text-ink transition-transform duration-500 ease-[var(--ease-silk)] group-hover:translate-x-2">→</span>
         </RouterLink>
       </li>
     </ul>

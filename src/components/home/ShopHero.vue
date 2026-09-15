@@ -3,12 +3,13 @@ import { useCatalogStore } from '@/stores/catalog'
 import { computed } from 'vue'
 
 /**
- * One screen, one sentence, one button.
+ * The opening.
  *
- * The old opening was seven screens of a scrolling 3D scene. It was the best
- * thing on the site and the worst possible front door: a visitor who wants a
- * shampoo had to scroll past a film to find one. The scene still exists, one
- * click away under "Naša priča"; this is what someone arriving at a shop sees.
+ * Clear does not have to mean plain. The headline is set large in the display
+ * face and allowed to overlap the photograph; the product floats on a pink
+ * cloud rather than sitting in a grey box; a vertical label runs up the left
+ * edge the way it would on a magazine spread. The button is still the single
+ * blackest thing on the screen, which is the only rule that matters here.
  */
 const catalog = useCatalogStore()
 
@@ -17,55 +18,88 @@ const hero = computed(() =>
   ?? catalog.products.find((p) => p.image)
   ?? null,
 )
+
+const CLAIMS = ['Ručno rađeno', 'Bez sulfata', 'Bez parabena', 'Ispitano u laboratoriji', 'Od 2010.', 'Novi Pazar']
 </script>
 
 <template>
-  <section class="border-b border-mist-200">
-    <div class="shell grid items-center gap-10 py-12 lg:grid-cols-2 lg:gap-16 lg:py-20">
-      <div class="order-2 lg:order-1">
-        <p class="text-sm font-semibold uppercase tracking-[0.14em] text-blush-500">Novi Pazar · od 2010.</p>
+  <section class="relative overflow-hidden bg-paper">
+    <div class="shell relative">
+      <!-- The spine: a label read bottom to top, as on a book -->
+      <span class="kicker absolute left-0 top-40 hidden text-mist-400 writing-vertical lg:block">
+        Meva Cosmetics — Est. 2010
+      </span>
 
-        <h1 class="mt-4 text-[2.25rem] leading-[1.06] sm:text-5xl lg:text-[3.5rem]">
-          Prirodna nega<br />kože i <span class="text-blush-500">kose</span>.
-        </h1>
+      <div class="grid items-center gap-8 pb-10 pt-8 lg:grid-cols-12 lg:gap-6 lg:pb-16 lg:pt-14">
+        <!-- Type, over the picture -->
+        <div class="relative z-10 order-2 lg:order-1 lg:col-span-6 lg:pr-4">
+          <p class="kicker text-blush-500">01 — Prirodna nega</p>
 
-        <p class="mt-5 max-w-md text-base leading-relaxed text-mist-600 sm:text-lg">
-          Ručno rađeni preparati u malim serijama, sa sastavom koji možete pročitati i razumeti.
-          Ispitani u Institutu za javno zdravlje Vojvodine.
-        </p>
+          <h1 class="mt-5 text-[3.25rem] font-normal leading-[0.92] tracking-[-0.03em] sm:text-[4.5rem] lg:text-[5.75rem]">
+            Koža koja
+            <span class="block">se konačno</span>
+            <span class="relative inline-block italic text-blush-500">
+              smirila.
+              <svg class="absolute -bottom-2 left-0 w-full" height="10" viewBox="0 0 200 10" fill="none" preserveAspectRatio="none">
+                <path d="M2 7c40-5 90-6 196-2" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              </svg>
+            </span>
+          </h1>
 
-        <div class="mt-8 flex flex-wrap items-center gap-3">
-          <RouterLink
-            :to="{ name: 'catalog' }"
-            class="rounded-full bg-ink px-8 py-4 text-[0.9375rem] font-semibold text-paper transition-colors hover:bg-blush-500"
-          >
-            Pogledaj proizvode
-          </RouterLink>
-          <RouterLink
-            :to="{ name: 'story' }"
-            class="rounded-full border border-mist-300 px-8 py-4 text-[0.9375rem] font-semibold text-ink transition-colors hover:border-ink"
-          >
-            Naša priča
-          </RouterLink>
+          <p class="mt-8 max-w-sm text-[0.9375rem] leading-relaxed text-mist-600 sm:text-base">
+            Ručno rađeni preparati u malim serijama, sa sastavom koji možete pročitati i razumeti.
+            Ispitani u Institutu za javno zdravlje Vojvodine.
+          </p>
+
+          <div class="mt-9 flex flex-wrap items-center gap-3">
+            <RouterLink
+              :to="{ name: 'catalog' }"
+              class="group relative overflow-hidden rounded-full bg-ink px-9 py-4 text-[0.9375rem] font-semibold text-paper"
+            >
+              <span class="absolute inset-0 origin-left scale-x-0 bg-blush-500 transition-transform duration-500 ease-[var(--ease-silk)] group-hover:scale-x-100" />
+              <span class="relative">Pogledaj proizvode</span>
+            </RouterLink>
+            <RouterLink
+              :to="{ name: 'story' }"
+              class="group inline-flex items-center gap-2 px-2 py-4 text-[0.9375rem] font-semibold text-ink"
+            >
+              Naša priča
+              <span class="transition-transform duration-300 group-hover:translate-x-1">→</span>
+            </RouterLink>
+          </div>
         </div>
 
-        <ul class="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-mist-500">
-          <li class="flex items-center gap-2"><span class="h-1.5 w-1.5 rounded-full bg-blush-400" /> Besplatna dostava</li>
-          <li class="flex items-center gap-2"><span class="h-1.5 w-1.5 rounded-full bg-blush-400" /> Plaćanje pouzećem</li>
-          <li class="flex items-center gap-2"><span class="h-1.5 w-1.5 rounded-full bg-blush-400" /> Bez registracije</li>
-        </ul>
+        <!-- The photograph, floating -->
+        <div class="relative order-1 lg:order-2 lg:col-span-6">
+          <div class="bloom-pink absolute -inset-8 rounded-[50%] blur-3xl sm:-inset-14" />
+          <div class="relative overflow-hidden rounded-[2rem] shadow-[0_40px_80px_-40px_rgba(18,18,18,0.35)]">
+            <img
+              v-if="hero?.image"
+              :src="hero.image"
+              :alt="hero.name"
+              class="aspect-[4/5] w-full object-cover sm:aspect-square lg:aspect-[5/6]"
+            />
+            <div v-else class="aspect-[5/6] w-full bg-blush-50" />
+          </div>
+
+          <!-- One figure, hand-placed, the way a magazine tags a photo -->
+          <div class="absolute bottom-2 right-0 hidden rounded-full bg-ink px-5 py-3 text-paper sm:block lg:bottom-6">
+            <p class="font-display text-xl leading-none">5.479</p>
+            <p class="kicker mt-1 text-[0.5625rem] text-paper/55">porudžbina</p>
+          </div>
+        </div>
       </div>
+    </div>
 
-      <div class="order-1 lg:order-2">
-        <div class="relative overflow-hidden rounded-3xl bg-shell">
-          <img
-            v-if="hero?.image"
-            :src="hero.image"
-            :alt="hero.name"
-            class="aspect-[4/3] w-full object-cover lg:aspect-[5/4]"
-          />
-          <div v-else class="aspect-[4/3] w-full lg:aspect-[5/4]" />
-        </div>
+    <!-- A strip that never stops moving, carrying what the shop stands for -->
+    <div class="border-y border-ink/10 bg-blush-50 py-3.5">
+      <div class="ticker" style="--ticker-duration: 46s">
+        <ul v-for="copy in 2" :key="copy" class="flex shrink-0 items-center" aria-hidden="copy === 2">
+          <li v-for="claim in CLAIMS" :key="claim + copy" class="flex items-center">
+            <span class="kicker px-6 text-ink/70">{{ claim }}</span>
+            <span class="h-1 w-1 rounded-full bg-blush-400" />
+          </li>
+        </ul>
       </div>
     </div>
   </section>

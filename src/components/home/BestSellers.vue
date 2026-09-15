@@ -1,5 +1,6 @@
 <script setup>
 import ProductCard from '@/components/shop/ProductCard.vue'
+import SectionHead from '@/components/home/SectionHead.vue'
 import { useCatalogStore } from '@/stores/catalog'
 import { computed } from 'vue'
 
@@ -36,30 +37,30 @@ const items = computed(() => {
 </script>
 
 <template>
-  <section class="shell py-12 lg:py-16">
-    <div class="flex flex-wrap items-end justify-between gap-4">
-      <div>
-        <h2 class="text-2xl sm:text-3xl">Najtraženije</h2>
-        <p class="mt-1.5 text-sm text-mist-500">Preparati koje kupci najčešće poručuju.</p>
-      </div>
-      <RouterLink :to="{ name: 'catalog' }" class="text-sm font-semibold text-blush-500 underline-offset-4 hover:underline">
-        Svi proizvodi →
-      </RouterLink>
-    </div>
+  <section class="shell py-14 lg:py-20">
+    <SectionHead
+      number="03"
+      kicker="Po redosledu porudžbina"
+      title="Najtraženije"
+      note="Osam preparata koji čine većinu svega što je kuća ikad prodala."
+      :to="{ name: 'catalog' }"
+      link="Svih 68"
+    />
 
-    <div v-if="!items.length" class="grid grid-cols-2 gap-x-4 gap-y-8 pt-8 lg:grid-cols-4">
+    <div v-if="!items.length" class="grid grid-cols-2 gap-x-3 gap-y-9 pt-9 lg:grid-cols-4 lg:gap-x-4">
       <div v-for="n in 4" :key="n" class="animate-pulse">
-        <div class="aspect-square rounded-2xl bg-mist-100" />
-        <div class="mt-3.5 h-4 w-3/4 rounded bg-mist-100" />
-        <div class="mt-2 h-4 w-1/3 rounded bg-mist-100" />
+        <div class="aspect-[4/5] rounded-[1.25rem] bg-blush-50" />
+        <div class="mt-3.5 h-4 w-3/4 rounded bg-blush-50" />
+        <div class="mt-2 h-4 w-1/3 rounded bg-blush-50" />
       </div>
     </div>
 
-    <div v-else class="grid grid-cols-2 gap-x-4 gap-y-8 pt-8 sm:gap-x-6 lg:grid-cols-4">
+    <div v-else class="grid grid-cols-2 gap-x-3 gap-y-9 pt-9 lg:grid-cols-4 lg:gap-x-4">
       <ProductCard
         v-for="(product, i) in items"
         :key="product.slug"
         :product="product"
+        :index="i"
         :badge="i === 0 ? 'Najprodavanije' : null"
       />
     </div>
