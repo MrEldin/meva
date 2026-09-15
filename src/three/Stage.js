@@ -189,7 +189,7 @@ export class Stage {
     this.mirror.position.set(0, this.floorY - 0.003, sheetZ)
     this.scene.add(this.mirror)
 
-    if (import.meta.env.DEV && new URLSearchParams(location.search).has('nomirror')) this.mirror.visible = false
+    if (import.meta.env.DEV && location.search.includes('nomirror')) this.mirror.visible = false
 
     const fade = new THREE.MeshBasicMaterial({ map: createFloorFadeTexture(512, centreV), transparent: true, depthWrite: false })
     fade.toneMapped = false

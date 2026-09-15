@@ -133,24 +133,24 @@ onMounted(() => {
     })
 
     const rise = (sel, at, stagger = 0.08) =>
-      tl.fromTo(q(sel), { yPercent: 100, opacity: 0 }, { yPercent: 0, opacity: 1, stagger, duration: 0.5 }, at)
+      tl.fromTo(q(sel), { yPercent: 100, opacity: 0 }, { yPercent: 0, opacity: 1, stagger, duration: 0.5, immediateRender: false }, at)
     // A chapter is invisible until its turn, so its mobile scrim never covers another's copy.
     const enter = (sel, at) => tl.fromTo(q(sel), { opacity: 0, y: 0 }, { opacity: 1, y: 0, duration: 0.2, immediateRender: false }, at)
     const leave = (sel, at) => tl.to(q(sel), { opacity: 0, y: -40, duration: 0.5 }, at)
 
     // 0 → 1: word-mark recedes, chapter one leaves, the bottle centres and the camera moves in.
-    tl.fromTo(q('.wordmark'), { scale: 1, opacity: 1 }, { scale: 1.6, opacity: 0, duration: 1 }, 0)
-      .fromTo(q('.ch-0'), { opacity: 1, y: 0 }, { opacity: 0, y: -60, duration: 0.6 }, 0.1)
-      .fromTo(q('.hint'), { opacity: 1 }, { opacity: 0, duration: 0.3 }, 0)
+    tl.fromTo(q('.wordmark'), { scale: 1, opacity: 1 }, { scale: 1.6, opacity: 0, duration: 1, immediateRender: false }, 0)
+      .fromTo(q('.ch-0'), { opacity: 1, y: 0 }, { opacity: 0, y: -60, duration: 0.6, immediateRender: false }, 0.1)
+      .fromTo(q('.hint'), { opacity: 1 }, { opacity: 0, duration: 0.3, immediateRender: false }, 0)
       .fromTo(s, rest, { rotation: 0.2, offsetX: 0, cameraZ: 6.2, cameraY: 0.1, lookY: 0.05, duration: 1.2, immediateRender: false }, 0.2)
-      .fromTo(s, { sweep: -1 }, { sweep: 1, duration: 1.0, ease: 'power1.inOut' }, 0.3)
+      .fromTo(s, { sweep: -1 }, { sweep: 1, duration: 1.0, ease: 'power1.inOut', immediateRender: false }, 0.3)
       .to(s, { sweep: 0, duration: 0.4 }, 1.3)
 
     // 1 → 2.3: ingredients — the scan ring reads the label, leaders point at it.
     enter('.ch-1', 0.9)
     rise('.ch-1 .rise', 1.0)
     tl.to(s, { scanAlpha: 1, duration: 0.15 }, 1.0)
-      .fromTo(s, { scan: 0 }, { scan: 1, duration: 0.9, ease: 'power1.inOut' }, 1.05)
+      .fromTo(s, { scan: 0 }, { scan: 1, duration: 0.9, ease: 'power1.inOut', immediateRender: false }, 1.05)
       .to(s, { leaders: 1, duration: 0.4 }, 1.3)
       .to(q('.callout'), { opacity: 1, stagger: 0.1, duration: 0.3 }, 1.35)
       .to(s, { rotation: -0.15, duration: 1.0 }, 1.2)
@@ -165,7 +165,7 @@ onMounted(() => {
     tl.to(s, { skinLift: 1, duration: 0.6, ease: 'power2.out' }, 2.4)
       .to(s, { cameraZ: desktop ? 7.2 : 6.8, cameraY: 0.55, lookY: -0.35, lookX: desktop ? 0.9 : 1.35, offsetX: 0, sway: 0, duration: 0.8, ease: 'power1.inOut' }, 2.4)
       .to(s, { rotation: 0.35, tilt: -2.0, pour: 1, duration: 0.8, ease: 'power2.inOut' }, 2.9)
-      .fromTo(s, { drop: 0 }, { drop: 1, duration: 0.3, ease: 'none' }, 3.55)
+      .fromTo(s, { drop: 0 }, { drop: 1, duration: 0.3, ease: 'none', immediateRender: false }, 3.55)
       .to(s, { film: 1, duration: 0.7, ease: 'power1.out' }, 3.85)
       .to(s, { flakes: 0, duration: 0.7, ease: 'power1.inOut' }, 3.95)
       .to(s, { redness: 0, duration: 0.8, ease: 'power1.inOut' }, 4.15)
@@ -180,7 +180,7 @@ onMounted(() => {
     tl.to(s, { pour: 0, tilt: -0.12, lookX: 0, duration: 0.7, ease: 'power2.inOut' }, 4.95)
       .to(s, { skinLift: 0, duration: 0.5, ease: 'power2.in' }, 5.45)
       .to(s, { flakes: 1, redness: 1, film: 0, drop: 0, duration: 0.01 }, 6.3)
-      .fromTo(s, { sweep: 1 }, { sweep: -1, duration: 1.0, ease: 'power1.inOut' }, 5.1)
+      .fromTo(s, { sweep: 1 }, { sweep: -1, duration: 1.0, ease: 'power1.inOut', immediateRender: false }, 5.1)
       .to(s, { sweep: 0, duration: 0.4 }, 6.1)
       .to(s, { rotation: BACK_ROTATION, offsetX: desktop ? -1.1 : 0, cameraZ: 5.2, cameraY: 0.05, lookY: 0.05, glow: 1.1, duration: 1.2 }, 5.0)
     enter('.ch-3', 5.4)
@@ -188,7 +188,7 @@ onMounted(() => {
     leave('.ch-3', 6.35)
 
     // 6.4 → 7.7: the set arrives around the hero, framed from further back.
-    tl.fromTo(s, { sweep: -1 }, { sweep: 1, duration: 1.2, ease: 'power1.inOut' }, 6.55)
+    tl.fromTo(s, { sweep: -1 }, { sweep: 1, duration: 1.2, ease: 'power1.inOut', immediateRender: false }, 6.55)
       .to(s, { rotation: 0, tilt: 0, offsetX: desktop ? -0.65 : 0, cameraZ: 10.4, cameraY: 0.45, lookY: 0.1, spread: 1, glow: 0.8, duration: 1.2 }, 6.4)
     enter('.ch-4', 6.75)
     rise('.ch-4 .rise', 6.85)
