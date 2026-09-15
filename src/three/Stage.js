@@ -86,7 +86,7 @@ export class Stage {
     this.renderer.outputColorSpace = THREE.SRGBColorSpace
     this.renderer.setClearColor(0x121c17, 1)
     this.renderer.shadowMap.enabled = true
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap
+    this.renderer.shadowMap.type = THREE.PCFShadowMap
 
     this.scene = new THREE.Scene()
     this.camera = new THREE.PerspectiveCamera(26, 1, 0.1, 80)
