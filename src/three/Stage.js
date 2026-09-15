@@ -14,7 +14,8 @@ import { createFloorFadeTexture, createSpriteTexture } from './label'
 import { createBackdrop, createPetals } from './backdrop'
 import { createSkinPatch } from './skin'
 import { createStudioScene } from './studio'
-import { qualitySettings } from './quality'
+import { detectTier, isForced, nextLevelDown, settingsFor } from './quality'
+import { setDetail } from './detail'
 
 export { defaultState } from './constants'
 
@@ -58,7 +59,10 @@ export class Stage {
 
   constructor(canvas) {
     this.canvas = canvas
-    this.quality = qualitySettings()
+    this.quality = settingsFor(detectTier())
+
+    // Geometry is built from this, so it has to be set before anything is.
+    setDetail(this.quality.detail)
 
     this.renderer = new THREE.WebGLRenderer({
       canvas,
@@ -73,7 +77,7 @@ export class Stage {
     this.renderer.toneMappingExposure = 1.0
     this.renderer.outputColorSpace = THREE.SRGBColorSpace
     this.renderer.setClearColor(0x121c17, 1)
-    this.renderer.shadowMap.enabled = true
+    this.renderer.shadowMap.enabled = this.quality.shadows
     this.renderer.shadowMap.type = THREE.PCFShadowMap
     // A phone renders thirty frames a second by choice rather than by
     // struggling to hold sixty; a steady thirty reads as smooth, a swinging
@@ -172,6 +176,21 @@ export class Stage {
     const sheetZ = 5 // spans z −3 … 13; the products stand at z 0
     const centreV = 0.5 + sheetZ / sheet[1]
 
+    // Unlit on purpose. A lit plane facing straight up catches the key, the
+    // top light and the whole environment, and comes out pale grey -- where
+    // the mirror it replaces shows a dark room. This is the tone that
+    // reflection reads as; the shadow sheet above still takes the bottle's.
+    const plateMaterial = new THREE.MeshBasicMaterial({ color: 0x151f1a })
+    plateMaterial.toneMapped = false
+
+    this.plate = new THREE.Mesh(new THREE.PlaneGeometry(...sheet), plateMaterial)
+    this.plate.rotation.x = -Math.PI / 2
+    this.plate.position.set(0, this.floorY - 0.003, sheetZ)
+    this.scene.add(this.plate)
+
+    // The mirror draws the whole room a second time, so it is the first thing
+    // given up. It is built whenever the level allows it and hidden if the
+    // scene later decides this machine cannot afford it.
     if (this.quality.mirror) {
       this.mirror = new Reflector(new THREE.PlaneGeometry(...sheet), {
         clipBias: 0.003,
@@ -180,27 +199,11 @@ export class Stage {
         color: 0x8a8a8a,
       })
       this.mirror.rotation.x = -Math.PI / 2
-      this.mirror.position.set(0, this.floorY - 0.003, sheetZ)
+      this.mirror.position.set(0, this.floorY - 0.002, sheetZ)
       this.scene.add(this.mirror)
-      this.floorSheet = this.mirror
-    } else {
-      // Without the mirror the products would stand on nothing, so the floor
-      // keeps a dark sheet with the same fade over it. The reflection is gone;
-      // the room is not.
-      // Unlit on purpose. A lit plane facing straight up catches the key, the
-      // top light and the whole environment, and comes out pale grey -- where
-      // the mirror it replaces shows a dark room. This is set to the tone that
-      // reflection reads as, and the shadow sheet above still takes the
-      // bottle's shadow.
-      const material = new THREE.MeshBasicMaterial({ color: 0x151f1a })
-      material.toneMapped = false
-
-      const plate = new THREE.Mesh(new THREE.PlaneGeometry(...sheet), material)
-      plate.rotation.x = -Math.PI / 2
-      plate.position.set(0, this.floorY - 0.003, sheetZ)
-      this.scene.add(plate)
-      this.floorSheet = plate
     }
+
+    this.plate.visible = !this.mirror
 
     if (import.meta.env.DEV && location.search.includes('nomirror') && this.mirror) this.mirror.visible = false
 
@@ -219,6 +222,9 @@ export class Stage {
     this.shadowCatcher.rotation.x = -Math.PI / 2
     this.shadowCatcher.position.set(0, this.floorY + 0.0005, sheetZ)
     this.shadowCatcher.receiveShadow = true
+    // Nothing to catch when the shadow pass is off; the painted contact
+    // shadows under each bottle still ground them.
+    this.shadowCatcher.visible = this.quality.shadows
     this.scene.add(this.shadowCatcher)
   }
 
@@ -402,6 +408,94 @@ export class Stage {
   }
 
   /**
+   * Watch how long frames are taking, and give something up if they are long.
+   *
+   * This is the part that works on hardware nobody tested. A card can be named
+   * anything; what it cannot hide is taking forty milliseconds to draw a
+   * frame. Measured over a window rather than a frame, because one slow frame
+   * means a garbage collection, not a slow machine.
+   *
+   * It only ever steps down. Stepping back up would mean rebuilding what was
+   * just thrown away, at exactly the moment the machine is struggling, and the
+   * scene would oscillate between two levels for the rest of the visit.
+   */
+  watchFrames(deltaMs) {
+    if (this.settled || isForced()) return
+
+    // Give it a moment: the first seconds include shader compilation, texture
+    // uploads and the page still loading, none of which say anything about how
+    // the scene will run.
+    if (performance.now() - this.started < 2500) return
+
+    this.samples ??= []
+    this.samples.push(deltaMs)
+
+    if (this.samples.length < 45) return
+
+    const sorted = [...this.samples].sort((a, b) => a - b)
+    const median = sorted[sorted.length >> 1]
+    this.samples = []
+
+    // The budget: the frame we asked for, with room for the browser's own
+    // work. Uncapped means we want 60, so 16.7ms.
+    const target = this.frameInterval || 1000 / 60
+
+    if (median > target * 1.45) {
+      if (!this.downgrade()) this.settled = true
+
+      return
+    }
+
+    // Two comfortable windows in a row and we stop watching, so a scene that
+    // is fine pays nothing for this.
+    this.comfortable = (this.comfortable ?? 0) + 1
+    if (this.comfortable >= 2) this.settled = true
+  }
+
+  /**
+   * Drop to the level below, live. Returns false at the bottom.
+   */
+  downgrade() {
+    const next = nextLevelDown(this.quality.tier)
+
+    if (!next) return false
+
+    const was = this.quality.tier
+    this.quality = settingsFor(next)
+    this.comfortable = 0
+
+    // The glow: a dozen full-screen passes, and the least missed.
+    if (!this.quality.bloom && this.bloom) {
+      this.composer.removePass(this.bloom)
+      this.bloom.dispose()
+      this.bloom = null
+    }
+
+    // The mirror: a second drawing of the whole room.
+    if (!this.quality.mirror && this.mirror) {
+      this.mirror.visible = false
+      this.plate.visible = true
+    }
+
+    // Real shadows: a second drawing of every object.
+    this.renderer.shadowMap.enabled = this.quality.shadows
+    this.shadowCatcher.visible = this.quality.shadows
+    if (this.quality.shadows) {
+      this.key.shadow.mapSize.set(this.quality.shadowMap, this.quality.shadowMap)
+      this.key.shadow.radius = this.quality.shadowRadius
+      this.key.shadow.map?.dispose()
+      this.key.shadow.map = null
+    }
+
+    this.frameInterval = this.quality.fps ? 1000 / this.quality.fps : 0
+    this.resize()
+
+    if (import.meta.env.DEV) console.info(`Meva: scene stepped down from ${was} to ${next}`)
+
+    return true
+  }
+
+  /**
    * Resolves once the first frame is actually on screen, so the page can take
    * its loading state away at the moment there is something to look at rather
    * than at the moment the code arrived.
@@ -424,6 +518,9 @@ export class Stage {
       deltaMs = Math.min(now - this.lastFrame, 100)
       this.lastFrame = now
     }
+
+    this.watchFrames(this.lastTick ? now - this.lastTick : 16)
+    this.lastTick = now
 
     const t = (now - this.started) / 1000
 
@@ -488,7 +585,9 @@ export class Stage {
       line.visible = dot.visible = tip.visible = alpha > 0.01
     })
 
-    this.floorFade.position.x = this.floorSheet.position.x = this.shadowCatcher.position.x = this.products.position.x + (this.compact ? 0 : s.spread * 0.65)
+    const floorX = this.products.position.x + (this.compact ? 0 : s.spread * 0.65)
+    this.floorFade.position.x = this.plate.position.x = this.shadowCatcher.position.x = floorX
+    if (this.mirror) this.mirror.position.x = floorX
 
     // Scan ring, sweeping the hero from base to cap.
     const { ring } = this.scan.userData

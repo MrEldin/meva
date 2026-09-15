@@ -1,5 +1,7 @@
 import * as THREE from 'three'
 
+import { segments } from './detail'
+
 const UP = new THREE.Vector3(0, 1, 0)
 const FWD = new THREE.Vector3(0, 0, 1)
 const clamp01 = (v) => Math.max(0, Math.min(1, v))
@@ -38,18 +40,18 @@ export function createSkinPatch() {
     envMapIntensity: 0.28,
   })
 
-  const dome = new THREE.Mesh(new THREE.SphereGeometry(SPHERE, 128, 48, 0, Math.PI * 2, 0, THETA), skinMaterial)
+  const dome = new THREE.Mesh(new THREE.SphereGeometry(SPHERE, segments(128, 32), segments(48, 14), 0, Math.PI * 2, 0, THETA), skinMaterial)
   dome.position.y = CENTRE_Y
   dome.castShadow = true
   dome.receiveShadow = true
   group.add(dome)
 
-  const wall = new THREE.Mesh(new THREE.CylinderGeometry(RIM, RIM * 0.985, WALL, 128, 1, true), skinMaterial)
+  const wall = new THREE.Mesh(new THREE.CylinderGeometry(RIM, RIM * 0.985, WALL, segments(128, 32), 1, true), skinMaterial)
   wall.position.y = WALL / 2
   wall.castShadow = true
   group.add(wall)
 
-  const rim = new THREE.Mesh(new THREE.TorusGeometry(RIM - 0.008, 0.018, 12, 128), skinMaterial)
+  const rim = new THREE.Mesh(new THREE.TorusGeometry(RIM - 0.008, 0.018, segments(12, 6), segments(128, 32)), skinMaterial)
   rim.rotation.x = Math.PI / 2
   rim.position.y = WALL
   group.add(rim)
@@ -61,7 +63,7 @@ export function createSkinPatch() {
 
   // Redness: a mottled overlay following the dome, a hair above the skin.
   const redness = new THREE.Mesh(
-    new THREE.SphereGeometry(SPHERE + 0.0025, 96, 32, 0, Math.PI * 2, 0, THETA * 0.96),
+    new THREE.SphereGeometry(SPHERE + 0.0025, segments(96, 28), segments(32, 12), 0, Math.PI * 2, 0, THETA * 0.96),
     new THREE.MeshBasicMaterial({ map: createRednessTexture(), transparent: true, opacity: 0, depthWrite: false }),
   )
   redness.position.y = CENTRE_Y

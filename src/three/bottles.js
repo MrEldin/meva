@@ -1,5 +1,7 @@
 import * as THREE from 'three'
 
+import { segments } from './detail'
+
 import { BACK_CENTRE, createLabelTexture, createShadowTexture, FRONT_CENTRE } from './label'
 import { createRoughnessTexture } from './studio'
 
@@ -85,7 +87,7 @@ function bodyGeometry(r, h, neck = 0.3) {
   push(r * neck * 0.8, h + 0.04)
   push(0, h + 0.04)
 
-  return new THREE.LatheGeometry(pts, 128)
+  return new THREE.LatheGeometry(pts, segments(128, 28))
 }
 
 /** Flip-top cap: a bevelled cylinder with a hinge lip at the back. */
@@ -101,10 +103,10 @@ function flipCap(r, h) {
     pts.push(new THREE.Vector2(r - 0.06 + Math.cos(a) * 0.06, h - 0.06 + Math.sin(a) * 0.06))
   }
   pts.push(new THREE.Vector2(0, h))
-  group.add(new THREE.Mesh(new THREE.LatheGeometry(pts, 96), frosted))
+  group.add(new THREE.Mesh(new THREE.LatheGeometry(pts, segments(96, 24)), frosted))
 
   // Dark seam at the foot of the cap
-  const ring = new THREE.Mesh(new THREE.TorusGeometry(r * 0.98, 0.008, 8, 64), seam)
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(r * 0.98, 0.008, segments(8, 5), segments(64, 20)), seam)
   ring.rotation.x = Math.PI / 2
   group.add(ring)
 
@@ -118,7 +120,7 @@ function flipCap(r, h) {
 
 /** A screw cap with vertical ribs, as on the oil. */
 function ribbedCap(r, h, ribs = 36) {
-  const geometry = new THREE.CylinderGeometry(r, r, h, ribs * 2, 1, false)
+  const geometry = new THREE.CylinderGeometry(r, r, h, segments(ribs * 2, 16), 1, false)
   const pos = geometry.attributes.position
   for (let i = 0; i < pos.count; i++) {
     const x = pos.getX(i)
@@ -137,7 +139,7 @@ function ribbedCap(r, h, ribs = 36) {
 function labelMesh(r, y, h, spec, wrap = WRAP) {
   const length = TAU * wrap
   // The front of the design faces the camera at rotation 0.
-  const geometry = new THREE.CylinderGeometry(r, r, h, 192, 1, true, -FRONT_CENTRE * length, length)
+  const geometry = new THREE.CylinderGeometry(r, r, h, segments(192, 40), 1, true, -FRONT_CENTRE * length, length)
   const material = new THREE.MeshStandardMaterial({
     map: createLabelTexture(spec),
     roughness: 0.55,
@@ -258,12 +260,12 @@ export function oilBottle(spec = {}) {
   cap.position.y = h + 0.17
   group.add(cap)
 
-  const capSeam = new THREE.Mesh(new THREE.TorusGeometry(r * 0.64, 0.007, 8, 64), seam)
+  const capSeam = new THREE.Mesh(new THREE.TorusGeometry(r * 0.64, 0.007, segments(8, 5), segments(64, 20)), seam)
   capSeam.rotation.x = Math.PI / 2
   capSeam.position.y = h + 0.02
   group.add(capSeam)
 
-  const tip = new THREE.Mesh(new THREE.CylinderGeometry(0.035, r * 0.45, 0.26, 48), plastic)
+  const tip = new THREE.Mesh(new THREE.CylinderGeometry(0.035, r * 0.45, 0.26, segments(48, 16)), plastic)
   tip.position.y = h + 0.45
   group.add(tip)
 
@@ -292,7 +294,7 @@ export function creamJar(spec = {}) {
   const h = 0.58
   const group = new THREE.Group()
 
-  const body = new THREE.Mesh(new THREE.CylinderGeometry(r, r * 0.97, h, 96), plastic)
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(r, r * 0.97, h, segments(96, 24)), plastic)
   body.position.y = h / 2
   group.add(body)
 
@@ -302,11 +304,11 @@ export function creamJar(spec = {}) {
     lidPts.push(new THREE.Vector2(r * 1.015 - 0.06 + Math.cos(a) * 0.06, 0.24 + Math.sin(a) * 0.06))
   }
   lidPts.push(new THREE.Vector2(0, 0.3))
-  const lid = new THREE.Mesh(new THREE.LatheGeometry(lidPts, 96), frosted)
+  const lid = new THREE.Mesh(new THREE.LatheGeometry(lidPts, segments(96, 24)), frosted)
   lid.position.y = h + 0.01
   group.add(lid)
 
-  const gap = new THREE.Mesh(new THREE.TorusGeometry(r * 0.99, 0.009, 8, 96), seam)
+  const gap = new THREE.Mesh(new THREE.TorusGeometry(r * 0.99, 0.009, segments(8, 5), segments(96, 24)), seam)
   gap.rotation.x = Math.PI / 2
   gap.position.y = h
   group.add(gap)
@@ -340,11 +342,11 @@ export function serumBottle(spec = {}) {
 
   group.add(new THREE.Mesh(bodyGeometry(r, h, 0.5), amber))
 
-  const collar = new THREE.Mesh(new THREE.CylinderGeometry(r * 0.56, r * 0.56, 0.3, 48), black)
+  const collar = new THREE.Mesh(new THREE.CylinderGeometry(r * 0.56, r * 0.56, 0.3, segments(48, 16)), black)
   collar.position.y = h + 0.17
   group.add(collar)
 
-  const bulb = new THREE.Mesh(new THREE.CapsuleGeometry(r * 0.3, 0.3, 8, 24), black)
+  const bulb = new THREE.Mesh(new THREE.CapsuleGeometry(r * 0.3, 0.3, segments(8, 4), segments(24, 10)), black)
   bulb.position.y = h + 0.55
   group.add(bulb)
 
