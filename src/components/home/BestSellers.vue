@@ -1,6 +1,7 @@
 <script setup>
 import ProductCard from '@/components/shop/ProductCard.vue'
 import SectionHead from '@/components/home/SectionHead.vue'
+import { BESTSELLERS } from '@/data/bestsellers'
 import { useCatalogStore } from '@/stores/catalog'
 import { computed } from 'vue'
 
@@ -12,20 +13,9 @@ import { computed } from 'vue'
  */
 const catalog = useCatalogStore()
 
-// The ten the fifteen-year order history puts at the top.
-const ORDER = [
-  'sampon-za-kosu-200ml',
-  'losion-za-seboreicni-dermatitis',
-  'set-za-seboreju-za-kosu-i-lice',
-  'set-za-psorijazu-za-kozu-glave-i-tela',
-  'keratin-regenerator',
-  'krema-protiv-gljivica-dan-50ml',
-  'ulje-za-kosu-i-obrve-50ml',
-  'mleko-za-telo',
-]
 
 const items = computed(() => {
-  const picked = ORDER
+  const picked = BESTSELLERS
     .map((slug) => catalog.products.find((p) => p.slug?.startsWith(slug)))
     .filter(Boolean)
 

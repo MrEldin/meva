@@ -1,6 +1,7 @@
 <script setup>
 import { setMeta } from '@/lib/meta'
-import ProductCard from '@/components/product/ProductCard.vue'
+import ProductCard from '@/components/shop/ProductCard.vue'
+import { byPopularity } from '@/data/bestsellers'
 import { useCatalogStore } from '@/stores/catalog'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -29,7 +30,7 @@ const visible = computed(() => {
     if (term && !product.name.toLowerCase().includes(term)) return false
 
     return true
-  })
+  }).sort(byPopularity)
 })
 
 const heading = computed(() => {
@@ -55,7 +56,7 @@ setMeta({
 <template>
   <div class="shell py-14 md:py-20">
     <header class="max-w-2xl">
-      <p class="eyebrow text-clay-500">Prodavnica</p>
+      <p class="text-[0.8125rem] font-bold uppercase tracking-wider text-blush-500">Prodavnica</p>
       <h1 class="mt-4 font-display text-4xl leading-tight text-ink md:text-6xl">{{ heading }}</h1>
       <p class="mt-4 text-sm font-light text-mist-500">
         {{ visible.length }} {{ visible.length === 1 ? 'proizvod' : 'proizvoda' }}
@@ -63,14 +64,14 @@ setMeta({
     </header>
 
     <!-- Filters -->
-    <div class="mt-10 flex flex-col gap-5 border-y border-mist-200 py-5 lg:flex-row lg:items-center lg:justify-between">
+    <div class="mt-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
       <div class="-mx-5 flex gap-2 overflow-x-auto px-5 lg:mx-0 lg:flex-wrap lg:px-0">
         <button
           type="button"
-          class="eyebrow shrink-0 border px-4 py-2.5 transition-colors duration-300"
+          class="shrink-0 rounded-full border px-4 py-2 text-[0.875rem] font-semibold transition-colors"
           :class="!activeCategory && !onlySets
-            ? 'border-ink bg-blush-500 text-paper'
-            : 'border-mist-200 text-mist-500 hover:border-ink hover:text-ink'"
+            ? 'border-blush-500 bg-blush-500 text-paper'
+            : 'border-blush-100 bg-paper text-mist-600 hover:border-blush-300'"
           @click="filterBy({})"
         >
           Sve
@@ -80,10 +81,10 @@ setMeta({
           v-for="category in catalog.collections"
           :key="category.slug"
           type="button"
-          class="eyebrow shrink-0 border px-4 py-2.5 transition-colors duration-300"
+          class="shrink-0 rounded-full border px-4 py-2 text-[0.875rem] font-semibold transition-colors"
           :class="activeCategory === category.slug
-            ? 'border-ink bg-blush-500 text-paper'
-            : 'border-mist-200 text-mist-500 hover:border-ink hover:text-ink'"
+            ? 'border-blush-500 bg-blush-500 text-paper'
+            : 'border-blush-100 bg-paper text-mist-600 hover:border-blush-300'"
           @click="filterBy({ kategorija: category.slug })"
         >
           {{ category.name }}
@@ -91,10 +92,10 @@ setMeta({
 
         <button
           type="button"
-          class="eyebrow shrink-0 border px-4 py-2.5 transition-colors duration-300"
+          class="shrink-0 rounded-full border px-4 py-2 text-[0.875rem] font-semibold transition-colors"
           :class="onlySets
-            ? 'border-ink bg-blush-500 text-paper'
-            : 'border-mist-200 text-mist-500 hover:border-ink hover:text-ink'"
+            ? 'border-blush-500 bg-blush-500 text-paper'
+            : 'border-blush-100 bg-paper text-mist-600 hover:border-blush-300'"
           @click="filterBy({ tip: 'set' })"
         >
           Setovi
@@ -130,7 +131,7 @@ setMeta({
 
     <div v-else class="py-24 text-center">
       <p class="font-display text-2xl text-ink">Nema proizvoda po tom filteru</p>
-      <button type="button" class="eyebrow mt-6 border-b border-ink pb-1 text-ink" @click="filterBy({}); search = ''">
+      <button type="button" class="mt-6 rounded-full bg-blush-500 px-6 py-3 text-[0.875rem] font-bold text-paper" @click="filterBy({}); search = ''">
         Prikaži sve
       </button>
     </div>

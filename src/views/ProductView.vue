@@ -1,5 +1,5 @@
 <script setup>
-import ProductCard from '@/components/product/ProductCard.vue'
+import ProductCard from '@/components/shop/ProductCard.vue'
 import ShareRow from '@/components/ui/ShareRow.vue'
 import { setMeta } from '@/lib/meta'
 import { track } from '@/lib/tracking'
@@ -258,7 +258,7 @@ const shareText = computed(() =>
       <!-- Related -->
       <section v-if="related.length" class="mt-20 md:mt-28">
         <h2 class="font-display text-2xl text-ink md:text-3xl">Moglo bi vam se svideti</h2>
-        <div class="mt-8 grid grid-cols-2 gap-x-4 gap-y-12 lg:grid-cols-4 lg:gap-8">
+        <div class="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
           <ProductCard v-for="item in related" :key="item.id" :product="item" />
         </div>
       </section>
