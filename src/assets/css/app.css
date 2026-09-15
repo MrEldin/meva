@@ -163,6 +163,42 @@
   }
 }
 
+/* A rail that runs to the edge of the screen but starts where the page does.
+ *
+ * Its first card has to line up with the heading and the rule above it, which
+ * live inside `shell` -- so the inset is the shell's padding *plus* whatever
+ * gutter the shell picks up once the page is wider than its maximum. Written
+ * out rather than copied as Tailwind classes, because the two were drifting:
+ * the rail changed padding at 640 and 1024 where the shell changes at 768 and
+ * 1280, so between those widths they disagreed by twenty and twenty four
+ * pixels, and past 1440 by eighty.
+ *
+ * `scroll-padding-inline` matters as much as the padding. A scroll container
+ * with snap points aligns the first card to the scroll port, which sits inside
+ * the padding -- so the browser scrolls the padding away and the card ends up
+ * flush against the edge of the screen. Telling it where the snap line really
+ * is keeps the inset.
+ */
+@utility shell-rail {
+  --rail-inset: 1.25rem;
+  padding-inline: var(--rail-inset);
+  scroll-padding-inline: var(--rail-inset);
+
+  @media (min-width: 768px) {
+    --rail-inset: 2.5rem;
+  }
+
+  @media (min-width: 1280px) {
+    --rail-inset: 4rem;
+  }
+
+  /* Past the shell's 90rem maximum the page centres itself; the rail has to
+     pick up the same gutter or it drifts left of everything above it. */
+  @media (min-width: 90rem) {
+    --rail-inset: calc((100% - 90rem) / 2 + 4rem);
+  }
+}
+
 /* Reveals content as it scrolls into view; see v-reveal. */
 @utility reveal {
   opacity: 0;

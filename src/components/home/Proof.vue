@@ -105,7 +105,7 @@ onBeforeUnmount(() => ctx?.revert())
       </div>
       <div
         ref="rail"
-        class="review-rail mt-8 flex cursor-grab gap-5 overflow-x-auto px-5 pb-20 scrollbar-none select-none sm:px-10 lg:px-16"
+        class="review-rail shell-rail mt-8 flex cursor-grab gap-5 overflow-x-auto pb-20 scrollbar-none select-none"
         data-cursor="drag"
       >
         <TiltCard v-for="(r, i) in reviews" :key="i" :max="5" class="review w-[80vw] shrink-0 sm:w-[24rem]">

@@ -116,7 +116,7 @@ onBeforeUnmount(() => ctx?.revert())
 
       <div
         ref="track"
-        class="mt-10 flex gap-5 overflow-x-auto px-5 pb-20 scrollbar-none snap-x snap-mandatory sm:px-10 lg:overflow-visible lg:px-16 lg:pb-0"
+        class="shell-rail mt-10 flex gap-5 overflow-x-auto pb-20 scrollbar-none snap-x snap-mandatory lg:overflow-visible lg:pb-0"
       >
         <article
           v-for="(product, i) in items"
