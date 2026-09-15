@@ -120,7 +120,7 @@ onMounted(async () => {
               class="eyebrow rounded-full px-4 py-2 text-[0.5625rem] transition-colors"
               :class="tab === list.key ? 'bg-forest text-cream' : 'hover:bg-sage'"
               @click="tab = list.key">
-              {{ list.label }} ({{ insights[list.key].length }})
+              {{ list.label }} ({{ number(insights[`${list.key}_total`] ?? insights[list.key].length) }})
             </button>
           </div>
           <button type="button" class="pill border border-forest/20 hover:bg-forest hover:text-cream"
@@ -144,7 +144,7 @@ onMounted(async () => {
               </tr>
             </thead>
             <tbody>
-              <tr v-for="person in rows.slice(0, 60)" :key="person.email" class="bg-cream">
+              <tr v-for="person in rows" :key="person.email" class="bg-cream">
                 <td class="rounded-l-2xl px-4 py-3">
                   <span class="block max-w-48 truncate font-medium">{{ person.name ?? person.email }}</span>
                   <span class="block max-w-48 truncate text-xs text-forest/45">{{ person.city ?? person.email }}</span>
@@ -165,7 +165,9 @@ onMounted(async () => {
               </tr>
             </tbody>
           </table>
-          <p v-if="rows.length > 60" class="mt-3 text-xs text-forest/45">Prikazano 60 od {{ rows.length }} — ceo spisak je u CSV-u.</p>
+          <p v-if="(insights?.[`${tab}_total`] ?? 0) > rows.length" class="mt-3 text-xs text-forest/45">
+            Prikazano {{ rows.length }} od {{ number(insights[`${tab}_total`]) }} — ceo spisak je u CSV-u.
+          </p>
           <p v-if="!rows.length" class="py-8 text-center text-sm text-forest/50">Ova lista je trenutno prazna.</p>
         </div>
       </section>
