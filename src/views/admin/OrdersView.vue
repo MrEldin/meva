@@ -290,7 +290,12 @@ onBeforeUnmount(() => observer?.disconnect())
             <td class="px-4 py-3">
               <span class="eyebrow rounded-full px-2.5 py-1 text-[0.5rem]" :class="TONE[order.status] ?? 'bg-forest/10'">{{ order.status_label }}</span>
             </td>
-            <td class="px-4 py-3 text-forest/70 tabular-nums">{{ order.items }}</td>
+            <td class="px-4 py-3">
+              <span class="tabular-nums text-forest/70">{{ order.items }}</span>
+              <span v-if="order.articles?.length" class="mt-0.5 block max-w-64 truncate text-xs text-forest/45">
+                {{ order.articles.map((a) => `${a.name}${a.quantity > 1 ? ` ×${a.quantity}` : ''}`).join(', ') }}
+              </span>
+            </td>
             <td class="rounded-r-2xl px-4 py-3 text-right tabular-nums">{{ money(order.total) }}</td>
           </tr>
         </tbody>
