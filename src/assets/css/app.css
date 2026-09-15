@@ -477,6 +477,23 @@
   .btn-accent { background: var(--color-clay-500); color: #fff; }
   .btn-accent:hover:not(:disabled) { background: var(--color-clay-600); }
 
+  /* The rail down the side of the panel.
+     A flat dark rectangle is what every admin template looks like. This one
+     is a room: a gradient from the forest towards its own shadow, with the
+     same fine grain the opening scene uses, so it reads as paper rather than
+     as chrome. */
+  .desk-rail {
+    background-color: var(--color-forest);
+    background-image:
+      radial-gradient(110% 55% at 100% 38%, rgba(217, 228, 198, 0.07), transparent 65%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent 30%, rgba(0, 0, 0, 0.22)),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.035 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: auto, auto, 140px 140px;
+  }
+
+  /* A hairline rule with the brand's own weight to it. */
+  .rule-soft { background: linear-gradient(90deg, rgba(242, 239, 232, 0.22), rgba(242, 239, 232, 0.04)); }
+
   /* A figure on the desk wears its colour as a wash rather than a stripe: a
      bar across the top of a rounded, bordered card never sits flush with the
      corner, and the seam shows. */
