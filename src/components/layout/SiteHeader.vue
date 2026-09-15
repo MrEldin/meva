@@ -1,4 +1,5 @@
 <script setup>
+import { useAuthStore } from '@/stores/auth'
 import { useCartStore } from '@/stores/cart'
 import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
