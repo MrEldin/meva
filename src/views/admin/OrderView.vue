@@ -62,14 +62,14 @@ onMounted(async () => {
 
 <template>
   <div>
-    <RouterLink :to="{ name: 'admin.orders' }" class="eyebrow text-forest/50 transition-colors hover:text-forest">← Sve porudžbine</RouterLink>
+    <RouterLink :to="{ name: 'admin.orders' }" class="label text-forest/65 transition-colors hover:text-forest">← Sve porudžbine</RouterLink>
 
-    <p v-if="loading" class="py-16 text-center text-sm text-forest/50">Učitavanje…</p>
+    <p v-if="loading" class="py-16 text-center text-sm text-forest/65">Učitavanje…</p>
 
     <div v-else-if="order" class="mt-4">
       <header class="flex flex-wrap items-end justify-between gap-4 border-b border-forest/10 pb-5">
         <div>
-          <p class="eyebrow text-clay-500">Porudžbina</p>
+          <p class="label text-clay-500">Porudžbina</p>
           <h1 class="mt-2 font-display text-3xl tracking-tight sm:text-4xl">{{ order.reference }}</h1>
           <p class="mt-2 text-sm text-forest/60">{{ when(order.placed_at) }}</p>
         </div>
@@ -78,12 +78,12 @@ onMounted(async () => {
 
       <div class="grid gap-5 pt-6 lg:grid-cols-[1.4fr_1fr]">
         <section class="rounded-[1.5rem] bg-sand p-5 sm:p-6">
-          <h2 class="eyebrow text-[0.5625rem] text-forest/50">Artikli</h2>
+          <h2 class="label text-forest/65">Artikli</h2>
           <ul class="mt-4 divide-y divide-forest/10">
             <li v-for="line in order.lines" :key="line.identifier" class="flex items-start justify-between gap-4 py-3">
               <div class="min-w-0">
                 <p class="text-sm font-semibold">{{ line.description }}</p>
-                <p class="mt-0.5 font-mono text-xs text-forest/50">{{ line.identifier }} · {{ line.quantity }} × {{ money(line.unit_price) }}</p>
+                <p class="mt-0.5 font-mono text-xs text-forest/65">{{ line.identifier }} · {{ line.quantity }} × {{ money(line.unit_price) }}</p>
               </div>
               <span class="shrink-0 tabular-nums">{{ line.total_formatted }}</span>
             </li>
@@ -98,7 +98,7 @@ onMounted(async () => {
 
         <div class="space-y-5">
           <section class="rounded-[1.5rem] bg-sand p-5 sm:p-6">
-            <h2 class="eyebrow text-[0.5625rem] text-forest/50">Kupac</h2>
+            <h2 class="label text-forest/65">Kupac</h2>
             <p class="mt-3 text-base font-semibold">{{ order.customer?.name }}</p>
             <dl class="mt-3 space-y-1.5 text-sm text-forest/75">
               <dd><a :href="`tel:${order.customer?.phone}`" class="hover:text-clay-600">{{ order.customer?.phone }}</a></dd>
@@ -110,17 +110,17 @@ onMounted(async () => {
           </section>
 
           <section v-if="order.source" class="rounded-[1.5rem] bg-sand p-5 sm:p-6">
-            <h2 class="eyebrow text-[0.5625rem] text-forest/50">Odakle je došla</h2>
+            <h2 class="label text-forest/65">Odakle je došla</h2>
             <dl class="mt-3 space-y-1.5 text-sm text-forest/75">
-              <div class="flex justify-between gap-4"><dt class="text-forest/55">Izvor</dt><dd>{{ order.source.utm_source || 'direktno' }}</dd></div>
-              <div class="flex justify-between gap-4"><dt class="text-forest/55">Vrsta</dt><dd>{{ order.source.type || '—' }}</dd></div>
-              <div class="flex justify-between gap-4"><dt class="text-forest/55">Uređaj</dt><dd>{{ order.source.device || '—' }}</dd></div>
-              <div class="flex justify-between gap-4"><dt class="text-forest/55">Plaćanje</dt><dd>{{ order.source.payment || '—' }}</dd></div>
+              <div class="flex justify-between gap-4"><dt class="text-forest/65">Izvor</dt><dd>{{ order.source.utm_source || 'direktno' }}</dd></div>
+              <div class="flex justify-between gap-4"><dt class="text-forest/65">Vrsta</dt><dd>{{ order.source.type || '—' }}</dd></div>
+              <div class="flex justify-between gap-4"><dt class="text-forest/65">Uređaj</dt><dd>{{ order.source.device || '—' }}</dd></div>
+              <div class="flex justify-between gap-4"><dt class="text-forest/65">Plaćanje</dt><dd>{{ order.source.payment || '—' }}</dd></div>
             </dl>
           </section>
 
           <section class="rounded-[1.5rem] bg-sand p-5 sm:p-6">
-            <h2 class="eyebrow text-[0.5625rem] text-forest/50">Status</h2>
+            <h2 class="label text-forest/65">Status</h2>
             <p v-if="archived" class="mt-3 text-sm text-forest/70">
               {{ order.status_label }} — arhivirane porudžbine se ne menjaju.
             </p>
@@ -129,7 +129,7 @@ onMounted(async () => {
                 v-for="option in STATUSES"
                 :key="option.value"
                 type="button"
-                class="eyebrow rounded-full px-4 py-2.5 text-[0.5625rem] transition-colors disabled:opacity-40"
+                class="label rounded-full px-4 py-2.5 transition-colors disabled:opacity-40"
                 :class="order.status === option.value ? 'bg-forest text-cream' : 'bg-cream hover:bg-sage'"
                 :disabled="!auth.can('orders.manage') || saving"
                 @click="setStatus(option.value)"
@@ -138,7 +138,7 @@ onMounted(async () => {
               </button>
             </div>
             <p v-if="saved" class="mt-3 text-xs text-sage-deep">Sačuvano.</p>
-            <p v-else-if="!archived && !auth.can('orders.manage')" class="mt-3 text-xs text-forest/50">Nemate dozvolu za izmenu porudžbina.</p>
+            <p v-else-if="!archived && !auth.can('orders.manage')" class="mt-3 text-xs text-forest/65">Nemate dozvolu za izmenu porudžbina.</p>
           </section>
         </div>
       </div>

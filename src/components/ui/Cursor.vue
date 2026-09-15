@@ -22,16 +22,18 @@ onMounted(async () => {
   await nextTick() // the dot and ring render only once enabled
   document.documentElement.classList.add('has-cursor')
 
-  const dotX = gsap.quickTo(dot.value, 'x', { duration: 0.12, ease: 'power3' })
-  const dotY = gsap.quickTo(dot.value, 'y', { duration: 0.12, ease: 'power3' })
-  const ringX = gsap.quickTo(ring.value, 'x', { duration: 0.42, ease: 'power3' })
-  const ringY = gsap.quickTo(ring.value, 'y', { duration: 0.42, ease: 'power3' })
+  // The dot is written straight to the transform on every move: a tween, however
+  // short, puts the pointer behind the hand, and a pointer that trails feels
+  // broken rather than smooth. Only the ring is allowed to lag, and less than
+  // it used to.
+  const setDot = gsap.quickSetter(dot.value, 'css')
+  const ringX = gsap.quickTo(ring.value, 'x', { duration: 0.18, ease: 'power2' })
+  const ringY = gsap.quickTo(ring.value, 'y', { duration: 0.18, ease: 'power2' })
 
   const labels = { drag: 'Prevuci', view: 'Pogledaj', play: 'Pusti' }
 
   const move = (e) => {
-    dotX(e.clientX)
-    dotY(e.clientY)
+    setDot({ x: e.clientX, y: e.clientY })
     ringX(e.clientX)
     ringY(e.clientY)
 
@@ -75,7 +77,7 @@ onBeforeUnmount(() => cleanup())
 </script>
 
 <template>
-  <div v-if="enabled" class="pointer-events-none fixed inset-0 z-[200] mix-blend-difference" aria-hidden="true">
+  <div v-if="enabled" class="pointer-events-none fixed inset-0 z-[9999] mix-blend-difference" aria-hidden="true">
     <div ref="dot" class="cursor-dot" :class="mode" />
     <div ref="ring" class="cursor-ring" :class="mode">
       <span class="cursor-label">{{ label }}</span>

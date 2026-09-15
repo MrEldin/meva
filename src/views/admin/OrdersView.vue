@@ -1,4 +1,5 @@
 <script setup>
+import PageHeader from '@/components/admin/PageHeader.vue'
 import client from '@/api/client'
 import { setMeta } from '@/lib/meta'
 import { useAuthStore } from '@/stores/auth'
@@ -151,22 +152,20 @@ onBeforeUnmount(() => observer?.disconnect())
 
 <template>
   <div>
-    <header class="flex flex-wrap items-end justify-between gap-4 border-b border-forest/10 pb-5">
-      <div>
-        <p class="eyebrow text-clay-500">Porudžbine</p>
-        <h1 class="mt-2 font-display text-3xl tracking-tight sm:text-4xl">Ko je šta poručio</h1>
-        <p v-if="meta" class="mt-2 text-sm text-forest/55">
-          {{ number(meta.total) }} {{ meta.total === 1 ? 'porudžbina' : 'porudžbina' }}
-          <span v-if="active.length" class="text-forest/40">· filtrirano</span>
-        </p>
-      </div>
-      <div class="flex flex-wrap gap-2">
-        <button type="button" class="pill border border-forest/20 hover:bg-forest hover:text-cream" @click="showFilters = !showFilters">
+    <PageHeader
+      tone="orders"
+      eyebrow="Porudžbine"
+      title="Ko je šta poručio"
+      :note="meta ? `${number(meta.total)} porudžbina${active.length ? ' — filtrirano' : ''}` : null"
+    >
+      <template #actions>
+        <button type="button" class="btn btn-ghost" @click="showFilters = !showFilters">
           {{ showFilters ? 'Sakrij filtere' : 'Filteri' }}
+          <span v-if="active.length" class="chip bg-desk-orders px-2 py-0.5 text-[0.6875rem] text-white">{{ active.length }}</span>
         </button>
-        <button type="button" class="pill border border-forest/20 hover:bg-forest hover:text-cream" @click="exportCsv">Preuzmi CSV</button>
-      </div>
-    </header>
+        <button type="button" class="btn btn-ghost" @click="exportCsv">Preuzmi CSV</button>
+      </template>
+    </PageHeader>
 
     <!-- Status counts -->
     <div class="flex flex-wrap gap-2 pt-5">
@@ -174,12 +173,12 @@ onBeforeUnmount(() => observer?.disconnect())
         v-for="row in summary"
         :key="row.status"
         type="button"
-        class="rounded-2xl px-4 py-3 text-left transition-all"
-        :class="[TONE[row.status] ?? 'bg-sand', filters.status === row.status ? 'ring-2 ring-forest' : '']"
+        class="rounded-2xl px-4 py-3 text-left transition-all hover:shadow-[0_10px_26px_-18px_rgba(36,52,44,0.5)]"
+        :class="[TONE[row.status] ?? 'bg-sand text-forest', filters.status === row.status ? 'ring-2 ring-forest ring-offset-2 ring-offset-cream' : '']"
         @click="filterStatus(row.status)"
       >
-        <span class="block font-display text-xl tabular-nums">{{ number(row.orders) }}</span>
-        <span class="eyebrow mt-0.5 block text-[0.5rem]">{{ row.label }}</span>
+        <span class="block font-display text-2xl leading-none tabular-nums">{{ number(row.orders) }}</span>
+        <span class="mt-1.5 block text-xs font-semibold opacity-75">{{ row.label }}</span>
       </button>
     </div>
 
@@ -189,12 +188,12 @@ onBeforeUnmount(() => observer?.disconnect())
         v-model="filters.q"
         type="search"
         placeholder="Broj porudžbine, ime, e-mail, telefon, grad…"
-        class="w-full rounded-full border border-forest/15 bg-sand px-5 py-3 text-sm outline-none placeholder:text-forest/40 focus:border-forest/40"
+        class="field field-pill w-full"
       />
-      <div class="flex flex-wrap gap-1 rounded-full border border-forest/15 bg-sand p-1">
+      <div class="segment">
         <button v-for="option in [{ v: '', l: 'Sve' }, { v: 'live', l: 'Nove' }, { v: 'archive', l: 'Arhiva' }]" :key="option.v"
-          type="button" class="eyebrow rounded-full px-4 py-2 text-[0.5625rem] transition-colors"
-          :class="filters.origin === option.v ? 'bg-forest text-cream' : 'hover:bg-sage'"
+          type="button"
+          :class="filters.origin === option.v ? 'is-on' : ''"
           @click="filters.origin = option.v">
           {{ option.l }}
         </button>
@@ -204,42 +203,42 @@ onBeforeUnmount(() => observer?.disconnect())
     <!-- The rest of the filters -->
     <div v-if="showFilters" class="mt-3 grid gap-3 rounded-[1.5rem] bg-sand p-4 sm:grid-cols-2 lg:grid-cols-4">
       <label class="block">
-        <span class="text-xs text-forest/55">Od datuma</span>
-        <input v-model="filters.od" type="date" class="mt-1 w-full rounded-full border border-forest/15 bg-cream px-4 py-2.5 text-sm outline-none focus:border-forest/40" />
+        <span class="text-xs text-forest/65">Od datuma</span>
+        <input v-model="filters.od" type="date" class="field field-pill mt-1 w-full" />
       </label>
       <label class="block">
-        <span class="text-xs text-forest/55">Do datuma</span>
-        <input v-model="filters.do" type="date" class="mt-1 w-full rounded-full border border-forest/15 bg-cream px-4 py-2.5 text-sm outline-none focus:border-forest/40" />
+        <span class="text-xs text-forest/65">Do datuma</span>
+        <input v-model="filters.do" type="date" class="field field-pill mt-1 w-full" />
       </label>
       <label class="block">
-        <span class="text-xs text-forest/55">Grad</span>
-        <input v-model="filters.grad" list="order-cities" placeholder="npr. Beograd" class="mt-1 w-full rounded-full border border-forest/15 bg-cream px-4 py-2.5 text-sm outline-none focus:border-forest/40" />
+        <span class="text-xs text-forest/65">Grad</span>
+        <input v-model="filters.grad" list="order-cities" placeholder="npr. Beograd" class="field field-pill mt-1 w-full" />
         <datalist id="order-cities"><option v-for="city in choices.cities" :key="city.value" :value="city.value">{{ city.orders }}</option></datalist>
       </label>
       <label class="block">
-        <span class="text-xs text-forest/55">Izvor</span>
-        <select v-model="filters.izvor" class="mt-1 w-full rounded-full border border-forest/15 bg-cream px-4 py-2.5 text-sm outline-none focus:border-forest/40">
+        <span class="text-xs text-forest/65">Izvor</span>
+        <select v-model="filters.izvor" class="field field-select field-pill mt-1 w-full">
           <option value="">svi</option>
           <option v-for="source in choices.sources" :key="source.value" :value="source.value">{{ source.value }} ({{ number(source.orders) }})</option>
         </select>
       </label>
       <label class="block">
-        <span class="text-xs text-forest/55">Uređaj</span>
-        <select v-model="filters.uredjaj" class="mt-1 w-full rounded-full border border-forest/15 bg-cream px-4 py-2.5 text-sm outline-none focus:border-forest/40">
+        <span class="text-xs text-forest/65">Uređaj</span>
+        <select v-model="filters.uredjaj" class="field field-select field-pill mt-1 w-full">
           <option value="">svi</option>
           <option v-for="device in choices.devices" :key="device.value" :value="device.value">{{ device.value }} ({{ number(device.orders) }})</option>
         </select>
       </label>
       <label class="block">
-        <span class="text-xs text-forest/55">Iznos od (RSD)</span>
-        <input v-model="filters.min" type="number" min="0" step="100" class="mt-1 w-full rounded-full border border-forest/15 bg-cream px-4 py-2.5 text-sm tabular-nums outline-none focus:border-forest/40" />
+        <span class="text-xs text-forest/65">Iznos od (RSD)</span>
+        <input v-model="filters.min" type="number" min="0" step="100" class="field field-pill mt-1 w-full tabular-nums" />
       </label>
       <label class="block">
-        <span class="text-xs text-forest/55">Iznos do (RSD)</span>
-        <input v-model="filters.max" type="number" min="0" step="100" class="mt-1 w-full rounded-full border border-forest/15 bg-cream px-4 py-2.5 text-sm tabular-nums outline-none focus:border-forest/40" />
+        <span class="text-xs text-forest/65">Iznos do (RSD)</span>
+        <input v-model="filters.max" type="number" min="0" step="100" class="field field-pill mt-1 w-full tabular-nums" />
       </label>
       <div class="flex items-end">
-        <button type="button" class="pill w-full justify-center border border-forest/20 hover:bg-forest hover:text-cream" @click="clearAll">Poništi sve</button>
+        <button type="button" class="btn btn-ghost w-full" @click="clearAll">Poništi sve</button>
       </div>
     </div>
 
@@ -256,56 +255,59 @@ onBeforeUnmount(() => observer?.disconnect())
       </button>
     </div>
 
-    <p v-if="loading" class="py-16 text-center text-sm text-forest/50">Učitavanje…</p>
-    <p v-else-if="!orders.length" class="py-16 text-center text-sm text-forest/50">Nema porudžbina za ove uslove.</p>
+    <p v-if="loading" class="py-16 text-center text-sm text-forest/65">Učitavanje…</p>
+    <p v-else-if="!orders.length" class="py-16 text-center text-sm text-forest/65">Nema porudžbina za ove uslove.</p>
 
-    <div v-else class="mt-5 overflow-x-auto">
-      <table class="w-full min-w-[52rem] border-separate border-spacing-y-2 text-sm">
+    <div v-else class="mt-5 panel overflow-x-auto p-2 sm:p-3">
+      <table class="desk-table min-w-[52rem]">
         <thead>
           <tr class="text-left">
-            <th class="eyebrow px-4 pb-1 text-[0.5rem] font-medium text-forest/45">Broj</th>
-            <th class="eyebrow px-4 pb-1 text-[0.5rem] font-medium text-forest/45">Datum</th>
-            <th class="eyebrow px-4 pb-1 text-[0.5rem] font-medium text-forest/45">Kupac</th>
-            <th class="eyebrow px-4 pb-1 text-[0.5rem] font-medium text-forest/45">Status</th>
-            <th class="eyebrow px-4 pb-1 text-[0.5rem] font-medium text-forest/45">Artikli</th>
-            <th class="eyebrow px-4 pb-1 text-right text-[0.5rem] font-medium text-forest/45">Iznos</th>
+            <th class="th">Broj</th>
+            <th class="th">Datum</th>
+            <th class="th">Kupac</th>
+            <th class="th">Status</th>
+            <th class="th">Artikli</th>
+            <th class="th text-right">Iznos</th>
           </tr>
         </thead>
         <tbody>
           <tr
             v-for="order in orders"
             :key="order.id"
-            class="cursor-pointer bg-sand transition-colors hover:bg-sage/60"
+            class="cursor-pointer"
             @click="router.push({ name: 'admin.order', params: { id: order.id } })"
           >
-            <td class="rounded-l-2xl px-4 py-3">
+            <td>
               <span class="font-mono text-xs">{{ order.reference }}</span>
-              <span v-if="order.origin === 'archive'" class="eyebrow ml-2 text-[0.4375rem] text-forest/35">arhiva</span>
+              <span v-if="order.origin === 'archive'" class="label ml-2 text-forest/52">arhiva</span>
             </td>
-            <td class="px-4 py-3 text-forest/70">{{ when(order.placed_at) }}</td>
-            <td class="px-4 py-3">
+            <td class="text-forest/70">{{ when(order.placed_at) }}</td>
+            <td>
               <span class="block max-w-44 truncate">{{ order.customer_name ?? '—' }}</span>
-              <span v-if="order.city" class="block text-xs text-forest/45">{{ order.city }}</span>
+              <span v-if="order.city" class="block text-xs text-forest/60">{{ order.city }}</span>
             </td>
-            <td class="px-4 py-3">
-              <span class="eyebrow rounded-full px-2.5 py-1 text-[0.5rem]" :class="TONE[order.status] ?? 'bg-forest/10'">{{ order.status_label }}</span>
+            <td>
+              <span class="chip" :class="TONE[order.status] ?? 'bg-forest/10 text-forest/70'">
+                <span class="h-1.5 w-1.5 rounded-full bg-current opacity-70" />
+                {{ order.status_label }}
+              </span>
             </td>
-            <td class="px-4 py-3">
+            <td>
               <span class="tabular-nums text-forest/70">{{ order.items }}</span>
-              <span v-if="order.articles?.length" class="mt-0.5 block max-w-64 truncate text-xs text-forest/45">
+              <span v-if="order.articles?.length" class="mt-0.5 block max-w-64 truncate text-xs text-forest/60">
                 {{ order.articles.map((a) => `${a.name}${a.quantity > 1 ? ` ×${a.quantity}` : ''}`).join(', ') }}
               </span>
             </td>
-            <td class="rounded-r-2xl px-4 py-3 text-right tabular-nums">{{ money(order.total) }}</td>
+            <td class="text-right tabular-nums">{{ money(order.total) }}</td>
           </tr>
         </tbody>
       </table>
 
       <!-- The next page loads when this comes into view. -->
-      <div ref="sentinel" class="py-8 text-center text-sm text-forest/45">
+      <div ref="sentinel" class="py-8 text-center text-sm text-forest/60">
         <span v-if="loadingMore">Učitavam još…</span>
         <span v-else-if="done">{{ number(orders.length) }} od {{ number(meta?.total ?? 0) }} — to je sve.</span>
-        <button v-else type="button" class="eyebrow text-forest/60 hover:text-forest" @click="loadMore">Učitaj još</button>
+        <button v-else type="button" class="label text-forest/60 hover:text-forest" @click="loadMore">Učitaj još</button>
       </div>
     </div>
   </div>

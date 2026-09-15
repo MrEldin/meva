@@ -103,7 +103,7 @@ onMounted(async () => {
   <div>
     <header class="flex flex-wrap items-end justify-between gap-4 border-b border-forest/10 pb-5">
       <div>
-        <p class="eyebrow text-clay-500">Marketing</p>
+        <p class="label text-clay-500">Marketing</p>
         <h1 class="mt-2 font-display text-3xl tracking-tight sm:text-4xl">Email kampanje</h1>
         <p class="mt-2 max-w-xl text-sm leading-relaxed text-forest/60">
           Napišite poruku u blokovima, vidite je tačno onako kako će stići, i pošaljite je grupi kojoj znači.
@@ -111,27 +111,27 @@ onMounted(async () => {
       </div>
 
       <div class="flex flex-wrap gap-2">
-        <button type="button" class="pill border border-forest/20 hover:bg-forest hover:text-cream" @click="knowledgeOpen = true">
+        <button type="button" class="btn btn-ghost" @click="knowledgeOpen = true">
           <span aria-hidden="true">✦</span> Baza znanja
         </button>
-        <button type="button" class="pill bg-forest text-cream hover:bg-forest-soft" @click="openPicker">
+        <button type="button" class="btn btn-primary" @click="openPicker">
           Nova kampanja
         </button>
       </div>
     </header>
 
-    <p v-if="loading" class="py-16 text-center text-sm text-forest/50">Učitavanje…</p>
+    <p v-if="loading" class="py-16 text-center text-sm text-forest/65">Učitavanje…</p>
 
     <template v-else>
       <!-- Nothing written yet -->
       <div v-if="!campaigns.length" class="mt-8 rounded-[1.5rem] border border-dashed border-forest/20 px-6 py-16 text-center">
         <p class="font-display text-2xl tracking-tight">Još nema nijedne kampanje</p>
-        <p class="mx-auto mt-2 max-w-md text-sm leading-relaxed text-forest/55">
+        <p class="mx-auto mt-2 max-w-md text-sm leading-relaxed text-forest/65">
           Počnite od dobrodošlice: to je mejl koji ljudi najviše otvaraju. Ako niste sigurni kako, baza znanja objašnjava sve redom.
         </p>
         <div class="mt-6 flex flex-wrap justify-center gap-2">
-          <button type="button" class="pill bg-forest text-cream hover:bg-forest-soft" @click="openPicker">Napravi prvu kampanju</button>
-          <button type="button" class="pill border border-forest/20 hover:bg-forest hover:text-cream" @click="knowledgeOpen = true">Otvori bazu znanja</button>
+          <button type="button" class="btn btn-primary" @click="openPicker">Napravi prvu kampanju</button>
+          <button type="button" class="btn btn-ghost" @click="knowledgeOpen = true">Otvori bazu znanja</button>
         </div>
       </div>
 
@@ -145,29 +145,29 @@ onMounted(async () => {
 
             <span class="min-w-0 flex-1">
               <span class="block truncate font-medium">{{ campaign.name }}</span>
-              <span class="mt-0.5 block truncate text-[0.8125rem] text-forest/50">
+              <span class="mt-0.5 block truncate text-sm text-forest/65">
                 {{ campaign.subject || 'Bez naslova' }}
               </span>
             </span>
 
-            <span class="hidden text-right text-[0.8125rem] text-forest/55 sm:block">
+            <span class="hidden text-right text-sm text-forest/65 sm:block">
               <span class="block">{{ campaign.template_name }}</span>
-              <span class="block text-forest/40">{{ segmentName(campaign.audience) }}</span>
+              <span class="block text-forest/58">{{ segmentName(campaign.audience) }}</span>
             </span>
 
-            <span class="hidden text-right text-[0.8125rem] tabular-nums text-forest/55 md:block">
+            <span class="hidden text-right text-sm tabular-nums text-forest/65 md:block">
               <span class="block">{{ date(campaign.sent_at ?? campaign.created_at) }}</span>
-              <span class="block text-forest/40">{{ campaign.recipients ? `${campaign.recipients} primalaca` : `${campaign.blocks} blokova` }}</span>
+              <span class="block text-forest/58">{{ campaign.recipients ? `${campaign.recipients} primalaca` : `${campaign.blocks} blokova` }}</span>
             </span>
 
-            <span class="eyebrow shrink-0 rounded-full px-3 py-1.5 text-[0.5rem]" :class="STATUS[campaign.status]?.class">
+            <span class="label shrink-0 rounded-full px-3 py-1.5" :class="STATUS[campaign.status]?.class">
               {{ STATUS[campaign.status]?.label ?? campaign.status }}
             </span>
 
             <button
               v-if="campaign.status !== 'sent'"
               type="button"
-              class="shrink-0 rounded-full p-2 text-forest/30 transition-colors hover:bg-clay-100 hover:text-clay-600"
+              class="shrink-0 rounded-full p-2 text-forest/65 transition-colors hover:bg-clay-100 hover:text-clay-600"
               aria-label="Obriši"
               @click.prevent="remove(campaign)"
             >
@@ -191,9 +191,9 @@ onMounted(async () => {
     >
       <header class="flex items-start justify-between gap-4 border-b border-forest/10 px-6 py-5 sm:px-8">
         <div>
-          <p class="eyebrow text-clay-500">Nova kampanja</p>
+          <p class="label text-clay-500">Nova kampanja</p>
           <h2 class="mt-1.5 font-display text-2xl tracking-tight sm:text-3xl">Šta želite da pošaljete?</h2>
-          <p class="mt-1 text-sm text-forest/55">Šabloni su poređani redom kojim ih kupac sreće.</p>
+          <p class="mt-1 text-sm text-forest/65">Šabloni su poređani redom kojim ih kupac sreće.</p>
         </div>
         <button type="button" class="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-forest/15 text-forest/60 transition-colors hover:bg-forest hover:text-cream"
           aria-label="Zatvori" @click="pickerOpen = false">
@@ -201,9 +201,9 @@ onMounted(async () => {
         </button>
       </header>
 
-      <div class="min-h-0 flex-1 overflow-y-auto px-6 py-6 sm:px-8">
+      <div data-lenis-prevent class="min-h-0 flex-1 overflow-y-auto px-6 py-6 sm:px-8">
         <section v-for="group in stages" :key="group.stage" class="mb-7 last:mb-0">
-          <p class="eyebrow text-forest/40">{{ group.stage }}</p>
+          <p class="label text-forest/58">{{ group.stage }}</p>
 
           <div class="mt-3 grid gap-2.5 sm:grid-cols-2 xl:grid-cols-3">
             <button
@@ -212,7 +212,7 @@ onMounted(async () => {
               type="button"
               class="rounded-[1.25rem] border p-4 text-left transition-all duration-300"
               :class="chosen?.key === template.key
-                ? 'border-transparent bg-forest text-cream shadow-lg shadow-forest/15'
+ ? 'border-transparent bg-forest text-cream shadow-lg shadow-forest/15'
                 : 'border-forest/10 bg-sand hover:border-forest/25'"
               @click="choose(template)"
             >
@@ -220,16 +220,16 @@ onMounted(async () => {
                 <span class="h-2.5 w-2.5 shrink-0 rounded-full" :style="{ backgroundColor: template.accent }" />
                 <span class="font-display text-lg leading-tight tracking-tight">{{ template.name }}</span>
               </span>
-              <span class="mt-2 block text-[0.8125rem] leading-relaxed" :class="chosen?.key === template.key ? 'text-cream/70' : 'text-forest/60'">
+              <span class="mt-2 block text-sm leading-relaxed" :class="chosen?.key === template.key ? 'text-cream/70' : 'text-forest/60'">
                 {{ template.summary }}
               </span>
-              <span class="mt-2.5 flex items-start gap-1.5 text-[0.75rem] leading-relaxed"
-                :class="chosen?.key === template.key ? 'text-cream/55' : 'text-forest/40'">
+              <span class="mt-2.5 flex items-start gap-1.5 text-[0.8125rem] leading-relaxed"
+                :class="chosen?.key === template.key ? 'text-cream/55' : 'text-forest/58'">
                 <span aria-hidden="true">✦</span>
                 <span>{{ template.advice }}</span>
               </span>
-              <span class="mt-2.5 block text-[0.6875rem]"
-                :class="chosen?.key === template.key ? 'text-cream/45' : 'text-forest/35'">
+              <span class="mt-2.5 block text-xs"
+                :class="chosen?.key === template.key ? 'text-cream/45' : 'text-forest/52'">
                 Šalje se: {{ segmentName(template.audience) }} ({{ sizes[template.audience] ?? 0 }})
               </span>
             </button>
@@ -241,27 +241,27 @@ onMounted(async () => {
       <footer class="border-t border-forest/10 bg-sand px-6 py-4 sm:px-8">
         <div class="flex flex-wrap items-end gap-3">
           <label class="min-w-0 flex-1">
-            <span class="eyebrow text-forest/40">Ime kampanje</span>
+            <span class="label text-forest/58">Ime kampanje</span>
             <input
               v-model="name"
               type="text"
               :disabled="!chosen"
               :placeholder="chosen ? 'Kako ćete je prepoznati za mesec dana' : 'Prvo izaberite šablon'"
-              class="mt-1.5 w-full rounded-full border border-forest/15 bg-cream px-5 py-3 text-sm outline-none transition-colors placeholder:text-forest/30 focus:border-forest/40 disabled:opacity-50"
+              class="field field-pill mt-1.5 w-full disabled:opacity-50"
               @keydown.enter="create"
             />
           </label>
           <button
             type="button"
-            class="pill bg-forest px-7 py-3.5 text-cream transition-opacity hover:bg-forest-soft disabled:opacity-40"
+            class="btn btn-primary px-7"
             :disabled="!chosen || !name.trim() || creating"
             @click="create"
           >
             {{ creating ? 'Pravim…' : 'Napravi i otvori' }}
           </button>
         </div>
-        <p v-if="error" class="mt-2 text-[0.8125rem] text-clay-600">{{ error }}</p>
-        <p v-else class="mt-2 text-[0.75rem] text-forest/40">Ime vidite samo vi. Naslov mejla se piše u sledećem koraku.</p>
+        <p v-if="error" class="mt-2 text-sm text-clay-600">{{ error }}</p>
+        <p v-else class="mt-2 text-[0.8125rem] text-forest/58">Ime vidite samo vi. Naslov mejla se piše u sledećem koraku.</p>
       </footer>
     </VueFinalModal>
 

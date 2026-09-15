@@ -18,7 +18,7 @@ const props = defineProps({
 const emit = defineEmits(['change'])
 
 const LABELS = {
-  eyebrow: 'Nadnaslov',
+  label: 'Nadnaslov',
   heading: 'Naslov',
   text: 'Tekst',
   button_label: 'Natpis na dugmetu',
@@ -86,10 +86,10 @@ const gallery = computed(() => props.products.filter((p) => p.image))
     <div v-for="field in fields" :key="field">
       <!-- One product -->
       <template v-if="field === 'product_slug'">
-        <label class="eyebrow block text-forest/40">{{ LABELS[field] }}</label>
+        <label class="label block text-forest/58">{{ LABELS[field] }}</label>
         <select
           :value="block.product_slug ?? ''"
-          class="mt-1.5 w-full rounded-2xl border border-forest/15 bg-cream px-4 py-2.5 text-sm outline-none transition-colors focus:border-forest/40"
+          class="field field-select mt-1.5 w-full"
           @change="set('product_slug', $event.target.value || null)"
         >
           <option value="">— izaberite proizvod —</option>
@@ -101,30 +101,30 @@ const gallery = computed(() => props.products.filter((p) => p.image))
 
       <!-- Several products -->
       <template v-else-if="field === 'product_slugs'">
-        <label class="eyebrow block text-forest/40">
+        <label class="label block text-forest/58">
           {{ LABELS[field] }}
-          <span class="ml-1 normal-case tracking-normal text-forest/30">izabrano {{ (block.product_slugs ?? []).length }}</span>
+          <span class="ml-1 normal-case tracking-normal text-forest/65">izabrano {{ (block.product_slugs ?? []).length }}</span>
         </label>
         <div class="mt-1.5 flex flex-wrap gap-1.5">
           <button
             v-for="product in products"
             :key="product.slug"
             type="button"
-            class="rounded-full border px-3 py-1.5 text-[0.75rem] transition-colors"
+            class="rounded-full border px-3 py-1.5 text-[0.8125rem] transition-colors"
             :class="(block.product_slugs ?? []).includes(product.slug)
-              ? 'border-transparent bg-forest text-cream'
+ ? 'border-transparent bg-forest text-cream'
               : 'border-forest/15 hover:border-forest/35'"
             @click="toggleProduct(product.slug)"
           >
             {{ product.name }}
           </button>
         </div>
-        <p class="mt-1.5 text-[0.75rem] text-forest/40">Najviše šest. Preko toga niko ne bira.</p>
+        <p class="mt-1.5 text-[0.8125rem] text-forest/58">Najviše šest. Preko toga niko ne bira.</p>
       </template>
 
       <!-- Repeatable rows -->
       <template v-else-if="field === 'items'">
-        <label class="eyebrow block text-forest/40">{{ LABELS[field] }}</label>
+        <label class="label block text-forest/58">{{ LABELS[field] }}</label>
         <div class="mt-1.5 space-y-2">
           <div v-for="(item, index) in block.items ?? []" :key="index" class="rounded-2xl bg-cream p-3">
             <div class="flex items-center gap-1.5">
@@ -132,16 +132,16 @@ const gallery = computed(() => props.products.filter((p) => p.image))
                 :value="item.title"
                 type="text"
                 placeholder="Naslov stavke"
-                class="min-w-0 flex-1 rounded-full border border-forest/15 bg-sand px-3.5 py-2 text-[0.8125rem] outline-none focus:border-forest/40"
+                class="min-w-0 flex-1 field field-pill"
                 @input="setItem(index, 'title', $event.target.value)"
               />
-              <button type="button" class="rounded-full p-1.5 text-forest/30 hover:bg-sand hover:text-forest" aria-label="Gore" @click="moveItem(index, -1)">
+              <button type="button" class="rounded-full p-1.5 text-forest/65 hover:bg-sand hover:text-forest" aria-label="Gore" @click="moveItem(index, -1)">
                 <svg viewBox="0 0 16 16" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 12V4M4.5 7.5L8 4l3.5 3.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
               </button>
-              <button type="button" class="rounded-full p-1.5 text-forest/30 hover:bg-sand hover:text-forest" aria-label="Dole" @click="moveItem(index, 1)">
+              <button type="button" class="rounded-full p-1.5 text-forest/65 hover:bg-sand hover:text-forest" aria-label="Dole" @click="moveItem(index, 1)">
                 <svg viewBox="0 0 16 16" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 4v8M4.5 8.5L8 12l3.5-3.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
               </button>
-              <button type="button" class="rounded-full p-1.5 text-forest/30 hover:bg-clay-100 hover:text-clay-600" aria-label="Obriši" @click="removeItem(index)">
+              <button type="button" class="rounded-full p-1.5 text-forest/65 hover:bg-clay-100 hover:text-clay-600" aria-label="Obriši" @click="removeItem(index)">
                 <svg viewBox="0 0 16 16" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3l10 10M13 3L3 13" stroke-linecap="round" /></svg>
               </button>
             </div>
@@ -149,40 +149,40 @@ const gallery = computed(() => props.products.filter((p) => p.image))
               :value="item.text"
               rows="2"
               placeholder="Objašnjenje u jednoj rečenici"
-              class="mt-1.5 w-full resize-none rounded-2xl border border-forest/15 bg-sand px-3.5 py-2 text-[0.8125rem] leading-relaxed outline-none focus:border-forest/40"
+              class="mt-1.5 w-full resize-none field"
               @input="setItem(index, 'text', $event.target.value)"
             />
           </div>
         </div>
-        <button type="button" class="mt-2 text-[0.8125rem] text-clay-600 underline underline-offset-4 hover:text-clay-700" @click="addItem">
+        <button type="button" class="mt-2 text-sm text-clay-600 underline underline-offset-4 hover:text-clay-700" @click="addItem">
           Dodaj stavku
         </button>
       </template>
 
       <!-- A number -->
       <template v-else-if="field === 'size'">
-        <label class="eyebrow block text-forest/40">{{ LABELS[field] }}</label>
+        <label class="label block text-forest/58">{{ LABELS[field] }}</label>
         <input
           :value="block.size ?? 24"
           type="range" min="8" max="96" step="4"
           class="mt-2 w-full accent-[#C56D59]"
           @input="set('size', Number($event.target.value))"
         />
-        <p class="mt-0.5 text-right font-mono text-[0.75rem] tabular-nums text-forest/40">{{ block.size ?? 24 }} px</p>
+        <p class="mt-0.5 text-right font-mono text-[0.8125rem] tabular-nums text-forest/58">{{ block.size ?? 24 }} px</p>
       </template>
 
       <!-- A picture: pasted address, or one already in the shop -->
       <template v-else-if="field === 'image'">
-        <label class="eyebrow block text-forest/40">{{ LABELS[field] }}</label>
+        <label class="label block text-forest/58">{{ LABELS[field] }}</label>
         <input
           :value="block.image ?? ''"
           type="url"
           placeholder="https://…"
-          class="mt-1.5 w-full rounded-full border border-forest/15 bg-cream px-4 py-2.5 text-sm outline-none transition-colors focus:border-forest/40"
+          class="field field-pill mt-1.5 w-full"
           @input="set('image', $event.target.value || null)"
         />
         <div v-if="gallery.length" class="mt-2">
-          <p class="text-[0.75rem] text-forest/40">Ili uzmite sliku proizvoda:</p>
+          <p class="text-[0.8125rem] text-forest/58">Ili uzmite sliku proizvoda:</p>
           <div class="mt-1.5 flex flex-wrap gap-1.5">
             <button
               v-for="product in gallery"
@@ -201,34 +201,34 @@ const gallery = computed(() => props.products.filter((p) => p.image))
 
       <!-- Long text -->
       <template v-else-if="LONG.includes(field)">
-        <label class="eyebrow block text-forest/40">{{ LABELS[field] ?? field }}</label>
+        <label class="label block text-forest/58">{{ LABELS[field] ?? field }}</label>
         <textarea
           :value="block[field] ?? ''"
           rows="5"
-          class="mt-1.5 w-full resize-y rounded-2xl border border-forest/15 bg-cream px-4 py-3 text-sm leading-relaxed outline-none transition-colors focus:border-forest/40"
+          class="mt-1.5 w-full resize-y field"
           @input="set(field, $event.target.value)"
         />
       </template>
 
       <!-- Everything else -->
       <template v-else>
-        <label class="eyebrow block text-forest/40">{{ LABELS[field] ?? field }}</label>
+        <label class="label block text-forest/58">{{ LABELS[field] ?? field }}</label>
         <input
           :value="block[field] ?? ''"
           :type="field.endsWith('_url') ? 'url' : 'text'"
-          class="mt-1.5 w-full rounded-full border border-forest/15 bg-cream px-4 py-2.5 text-sm outline-none transition-colors focus:border-forest/40"
+          class="field field-pill mt-1.5 w-full"
           @input="set(field, $event.target.value)"
         />
       </template>
     </div>
 
-    <p v-if="!fields.length" class="text-[0.8125rem] text-forest/45">Ovaj blok nema šta da se podesi.</p>
+    <p v-if="!fields.length" class="text-sm text-forest/60">Ovaj blok nema šta da se podesi.</p>
 
     <!-- What can be dropped into any text field -->
     <div v-if="fields.length" class="rounded-2xl bg-cream px-3.5 py-3">
-      <p class="eyebrow text-[0.5rem] text-forest/35">Zamene u tekstu</p>
+      <p class="label text-forest/52">Zamene u tekstu</p>
       <div class="mt-1.5 flex flex-wrap gap-1.5">
-        <span v-for="token in tokens" :key="token.token" class="font-mono text-[0.6875rem] text-forest/55" :title="token.note">
+        <span v-for="token in tokens" :key="token.token" class="font-mono text-xs text-forest/65" :title="token.note">
           {{ token.token }}
         </span>
       </div>

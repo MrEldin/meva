@@ -260,13 +260,13 @@ onBeforeUnmount(() => {
 
 <template>
   <div>
-    <p v-if="loading" class="py-16 text-center text-sm text-forest/50">Učitavanje…</p>
+    <p v-if="loading" class="py-16 text-center text-sm text-forest/65">Učitavanje…</p>
 
     <template v-else-if="campaign">
       <!-- Header: what it is called, and what happens to it -->
       <header class="flex flex-wrap items-start justify-between gap-4 border-b border-forest/10 pb-5">
         <div class="min-w-0 flex-1">
-          <RouterLink :to="{ name: 'admin.email' }" class="eyebrow flex w-fit items-center gap-1.5 text-forest/40 transition-colors hover:text-clay-600">
+          <RouterLink :to="{ name: 'admin.email' }" class="label flex w-fit items-center gap-1.5 text-forest/58 transition-colors hover:text-clay-600">
             <span aria-hidden="true">←</span> Kampanje
           </RouterLink>
           <input
@@ -276,21 +276,21 @@ onBeforeUnmount(() => {
             class="mt-1.5 block w-full max-w-xl bg-transparent font-display text-3xl tracking-tight outline-none disabled:opacity-70"
             @input="scheduleSave"
           />
-          <p class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.8125rem] text-forest/45">
+          <p class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-forest/60">
             <span>{{ campaign.template_name }}</span>
             <span v-if="savedLabel">· {{ savedLabel }}</span>
-            <span v-if="frozen" class="eyebrow rounded-full bg-sage px-2.5 py-1 text-[0.5rem] text-forest">Poslata — ne menja se</span>
+            <span v-if="frozen" class="label rounded-full bg-sage px-2.5 py-1 text-forest">Poslata — ne menja se</span>
           </p>
         </div>
 
         <div class="flex flex-wrap gap-2">
-          <button type="button" class="pill border border-forest/20 hover:bg-forest hover:text-cream" @click="knowledgeOpen = true">
+          <button type="button" class="btn btn-ghost" @click="knowledgeOpen = true">
             <span aria-hidden="true">✦</span> Baza znanja
           </button>
-          <button type="button" class="pill border border-forest/20 hover:bg-forest hover:text-cream" :disabled="frozen" @click="test">
+          <button type="button" class="btn btn-ghost" :disabled="frozen" @click="test">
             Pošalji probu
           </button>
-          <button type="button" class="pill bg-forest text-cream hover:bg-forest-soft disabled:opacity-40" :disabled="frozen" @click="sendOpen = true">
+          <button type="button" class="btn btn-primary" :disabled="frozen" @click="sendOpen = true">
             Pošalji kampanju
           </button>
         </div>
@@ -303,44 +303,44 @@ onBeforeUnmount(() => {
       <section class="mt-5 rounded-[1.5rem] bg-sand p-5">
         <div class="grid gap-4 lg:grid-cols-2">
           <label class="block">
-            <span class="eyebrow text-forest/40">Naslov mejla</span>
+            <span class="label text-forest/58">Naslov mejla</span>
             <input
               v-model="campaign.subject"
               type="text"
               :disabled="frozen"
               maxlength="200"
               placeholder="Trideset do pedeset znakova"
-              class="mt-1.5 w-full rounded-full border border-forest/15 bg-cream px-5 py-3 text-sm outline-none transition-colors focus:border-forest/40"
+              class="field field-pill mt-1.5 w-full"
               @input="touched"
             />
-            <span class="mt-1 block text-[0.75rem]" :class="(campaign.subject?.length ?? 0) > 52 ? 'text-clay-600' : 'text-forest/40'">
+            <span class="mt-1 block text-[0.8125rem]" :class="(campaign.subject?.length ?? 0) > 52 ? 'text-clay-600' : 'text-forest/58'">
               {{ campaign.subject?.length ?? 0 }} znakova ·
               {{ (campaign.subject?.length ?? 0) > 52 ? 'seći će se na telefonu' : 'staje na telefon' }}
             </span>
           </label>
 
           <label class="block">
-            <span class="eyebrow text-forest/40">Preheader</span>
+            <span class="label text-forest/58">Preheader</span>
             <input
               v-model="campaign.preheader"
               type="text"
               :disabled="frozen"
               maxlength="200"
               placeholder="Sivi red pored naslova u sandučetu"
-              class="mt-1.5 w-full rounded-full border border-forest/15 bg-cream px-5 py-3 text-sm outline-none transition-colors focus:border-forest/40"
+              class="field field-pill mt-1.5 w-full"
               @input="touched"
             />
-            <span class="mt-1 block text-[0.75rem] text-forest/40">Drugi razlog za otvaranje, ne nastavak naslova.</span>
+            <span class="mt-1 block text-[0.8125rem] text-forest/58">Drugi razlog za otvaranje, ne nastavak naslova.</span>
           </label>
         </div>
 
         <!-- How it looks in the inbox -->
         <div class="mt-4 rounded-2xl bg-cream px-4 py-3">
-          <p class="eyebrow text-[0.5rem] text-forest/35">U sandučetu će izgledati ovako</p>
+          <p class="label text-forest/52">U sandučetu će izgledati ovako</p>
           <div class="mt-2 flex items-baseline gap-2 overflow-hidden">
             <span class="shrink-0 text-sm font-semibold">Meva Kozmetika</span>
             <span class="truncate text-sm">{{ campaign.subject || 'Bez naslova' }}</span>
-            <span class="truncate text-sm text-forest/40">— {{ campaign.preheader || 'bez preheadera' }}</span>
+            <span class="truncate text-sm text-forest/58">— {{ campaign.preheader || 'bez preheadera' }}</span>
           </div>
         </div>
       </section>
@@ -351,8 +351,8 @@ onBeforeUnmount(() => {
         <div class="space-y-4">
           <section class="rounded-[1.5rem] bg-sand p-4">
             <div class="flex items-center justify-between gap-3">
-              <p class="eyebrow text-forest/40">Blokovi · {{ campaign.blocks.length }}</p>
-              <button type="button" class="eyebrow rounded-full bg-forest px-4 py-2 text-[0.5rem] text-cream transition-colors hover:bg-forest-soft disabled:opacity-40"
+              <p class="label text-forest/58">Blokovi · {{ campaign.blocks.length }}</p>
+              <button type="button" class="btn btn-primary px-4 py-2 text-[0.8125rem]"
                 :disabled="frozen" @click="paletteOpen = true">
                 + Dodaj blok
               </button>
@@ -365,7 +365,7 @@ onBeforeUnmount(() => {
                 :draggable="!frozen"
                 class="group rounded-2xl border transition-all"
                 :class="[
-                  selected === block.id ? 'border-transparent bg-forest text-cream' : 'border-forest/10 bg-cream hover:border-forest/25',
+ selected === block.id ? 'border-transparent bg-forest text-cream' : 'border-forest/10 bg-cream hover:border-forest/25',
                   dragOver === block.id ? 'ring-2 ring-clay-500' : '',
                   dragging === block.id ? 'opacity-40' : '',
                 ]"
@@ -375,11 +375,11 @@ onBeforeUnmount(() => {
                 @drop.prevent="onDrop(block.id)"
               >
                 <div class="flex items-center gap-2 px-3 py-2.5">
-                  <span class="cursor-grab text-forest/25 group-hover:text-forest/45" :class="selected === block.id ? 'text-cream/40' : ''" aria-hidden="true">⠿</span>
+                  <span class="cursor-grab text-forest/60 group-hover:text-forest/60" :class="selected === block.id ? 'text-cream/40' : ''" aria-hidden="true">⠿</span>
 
                   <button type="button" class="min-w-0 flex-1 text-left" @click="selected = selected === block.id ? null : block.id">
                     <span class="block truncate text-sm font-medium">{{ blockLabel(block.type) }}</span>
-                    <span class="block truncate text-[0.75rem]" :class="selected === block.id ? 'text-cream/55' : 'text-forest/40'">
+                    <span class="block truncate text-[0.8125rem]" :class="selected === block.id ? 'text-cream/55' : 'text-forest/58'">
                       {{ block.heading || block.text || block.quote || block.product_slug || definitionFor(block.type)?.group }}
                     </span>
                   </button>
@@ -403,7 +403,7 @@ onBeforeUnmount(() => {
 
                 <!-- The open block's settings, in place -->
                 <div v-if="selected === block.id" class="rounded-b-2xl bg-sand px-3.5 pt-3.5 pb-4 text-forest">
-                  <p v-if="definitionFor(block.type)?.why" class="mb-3 flex items-start gap-1.5 rounded-2xl bg-wheat/40 px-3 py-2.5 text-[0.75rem] leading-relaxed text-forest/70">
+                  <p v-if="definitionFor(block.type)?.why" class="mb-3 flex items-start gap-1.5 rounded-2xl bg-wheat/40 px-3 py-2.5 text-[0.8125rem] leading-relaxed text-forest/70">
                     <span aria-hidden="true">✦</span>
                     <span>{{ definitionFor(block.type).why }}</span>
                   </p>
@@ -418,28 +418,28 @@ onBeforeUnmount(() => {
               </li>
             </ul>
 
-            <p v-if="!campaign.blocks.length" class="py-8 text-center text-sm text-forest/45">
+            <p v-if="!campaign.blocks.length" class="py-8 text-center text-sm text-forest/60">
               Nema nijednog bloka. Počnite naslovnom slikom.
             </p>
           </section>
 
           <!-- Who gets it -->
           <section class="rounded-[1.5rem] bg-sand p-4">
-            <p class="eyebrow text-forest/40">Kome se šalje</p>
+            <p class="label text-forest/58">Kome se šalje</p>
             <select
               v-model="campaign.audience"
               :disabled="frozen"
-              class="mt-2 w-full rounded-2xl border border-forest/15 bg-cream px-4 py-2.5 text-sm outline-none focus:border-forest/40"
+              class="field field-select mt-2 w-full"
               @change="scheduleSave"
             >
               <option v-for="segment in book.segments" :key="segment.key" :value="segment.key">
                 {{ segment.name }} ({{ book.sizes[segment.key] ?? 0 }})
               </option>
             </select>
-            <p class="mt-2 text-[0.8125rem] leading-relaxed text-forest/55">
+            <p class="mt-2 text-sm leading-relaxed text-forest/65">
               {{ book.segments.find((s) => s.key === campaign.audience)?.why }}
             </p>
-            <p class="mt-2 font-mono text-[0.8125rem] tabular-nums text-forest/45">
+            <p class="mt-2 font-mono text-sm tabular-nums text-forest/60">
               Trenutno {{ audience.count }} primalaca
             </p>
           </section>
@@ -448,14 +448,13 @@ onBeforeUnmount(() => {
         <!-- The message -->
         <section class="rounded-[1.5rem] bg-sand p-4">
           <div class="flex flex-wrap items-center justify-between gap-3 pb-3">
-            <p class="eyebrow text-forest/40">
+            <p class="label text-forest/58">
               Kako će stići
               <span v-if="rendering" class="ml-1.5 normal-case tracking-normal text-clay-500">osvežavam…</span>
             </p>
-            <div class="flex gap-1 rounded-full border border-forest/15 bg-cream p-1">
+            <div class="segment">
               <button v-for="mode in ['desktop', 'mobile']" :key="mode" type="button"
-                class="eyebrow rounded-full px-4 py-1.5 text-[0.5rem] transition-colors"
-                :class="preview === mode ? 'bg-forest text-cream' : 'hover:bg-sage'"
+                :class="preview === mode ? 'is-on' : ''"
                 @click="preview = mode">
                 {{ mode === 'desktop' ? 'Računar' : 'Telefon' }}
               </button>
@@ -473,7 +472,7 @@ onBeforeUnmount(() => {
             </div>
           </div>
 
-          <p class="mt-2.5 text-[0.75rem] leading-relaxed text-forest/40">
+          <p class="mt-2.5 text-[0.8125rem] leading-relaxed text-forest/58">
             Ovo nije približan prikaz — ovo je isti HTML koji odlazi u sanduče.
           </p>
         </section>
@@ -491,7 +490,7 @@ onBeforeUnmount(() => {
     >
       <header class="flex items-start justify-between gap-4 border-b border-forest/10 px-6 py-5">
         <div>
-          <p class="eyebrow text-clay-500">Blokovi</p>
+          <p class="label text-clay-500">Blokovi</p>
           <h2 class="mt-1.5 font-display text-2xl tracking-tight">Šta dodajemo u mejl?</h2>
         </div>
         <button type="button" class="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-forest/15 text-forest/60 transition-colors hover:bg-forest hover:text-cream"
@@ -500,9 +499,9 @@ onBeforeUnmount(() => {
         </button>
       </header>
 
-      <div class="min-h-0 flex-1 overflow-y-auto px-6 py-5">
+      <div data-lenis-prevent class="min-h-0 flex-1 overflow-y-auto px-6 py-5">
         <section v-for="group in palette" :key="group.group" class="mb-6 last:mb-0">
-          <p class="eyebrow text-forest/40">{{ group.group }}</p>
+          <p class="label text-forest/58">{{ group.group }}</p>
           <div class="mt-2.5 grid gap-2 sm:grid-cols-2">
             <button
               v-for="definition in group.items"
@@ -512,7 +511,7 @@ onBeforeUnmount(() => {
               @click="addBlock(definition)"
             >
               <span class="block text-sm font-medium">{{ definition.label }}</span>
-              <span class="mt-1 block text-[0.75rem] leading-relaxed text-forest/55">{{ definition.why }}</span>
+              <span class="mt-1 block text-[0.8125rem] leading-relaxed text-forest/65">{{ definition.why }}</span>
             </button>
           </div>
         </section>
@@ -528,40 +527,40 @@ onBeforeUnmount(() => {
       content-transition="vfm-fade"
       overlay-transition="vfm-fade"
     >
-      <p class="eyebrow text-clay-500">Poslednji korak</p>
+      <p class="label text-clay-500">Poslednji korak</p>
       <h2 class="mt-2 font-display text-2xl tracking-tight">Poslati kampanju?</h2>
 
       <dl class="mt-5 space-y-2.5 rounded-2xl bg-sand px-4 py-4 text-sm">
         <div class="flex justify-between gap-4">
-          <dt class="text-forest/50">Naslov</dt>
+          <dt class="text-forest/65">Naslov</dt>
           <dd class="min-w-0 truncate text-right font-medium">{{ campaign?.subject || '— nema naslova —' }}</dd>
         </div>
         <div class="flex justify-between gap-4">
-          <dt class="text-forest/50">Publika</dt>
+          <dt class="text-forest/65">Publika</dt>
           <dd class="text-right font-medium">{{ segmentName(campaign?.audience) }}</dd>
         </div>
         <div class="flex justify-between gap-4">
-          <dt class="text-forest/50">Primalaca</dt>
+          <dt class="text-forest/65">Primalaca</dt>
           <dd class="text-right font-medium tabular-nums">{{ audience.count }}</dd>
         </div>
       </dl>
 
       <label class="mt-4 block">
-        <span class="eyebrow text-forest/40">Prvo probajte na svojoj adresi</span>
+        <span class="label text-forest/58">Prvo probajte na svojoj adresi</span>
         <div class="mt-1.5 flex gap-2">
           <input v-model="testEmail" type="email" placeholder="ostavite prazno za svoju adresu"
-            class="min-w-0 flex-1 rounded-full border border-forest/15 bg-sand px-4 py-2.5 text-sm outline-none focus:border-forest/40" />
-          <button type="button" class="pill border border-forest/20 px-5 py-2.5 hover:bg-forest hover:text-cream" @click="test">Pošalji probu</button>
+            class="min-w-0 flex-1 field field-pill" />
+          <button type="button" class="btn btn-ghost" @click="test">Pošalji probu</button>
         </div>
       </label>
 
-      <p class="mt-4 text-[0.8125rem] leading-relaxed text-forest/55">
+      <p class="mt-4 text-sm leading-relaxed text-forest/65">
         Posle slanja kampanja se više ne menja — ostaje zapis o tome šta je tačno otišlo.
       </p>
 
       <div class="mt-5 flex flex-wrap justify-end gap-2">
-        <button type="button" class="pill border border-forest/20 hover:bg-forest hover:text-cream" @click="sendOpen = false">Odustani</button>
-        <button type="button" class="pill bg-clay-500 text-cream transition-colors hover:bg-clay-600 disabled:opacity-40"
+        <button type="button" class="btn btn-ghost" @click="sendOpen = false">Odustani</button>
+        <button type="button" class="btn btn-accent"
           :disabled="sending || !audience.count" @click="send">
           {{ sending ? 'Šaljem…' : `Pošalji na ${audience.count} adresa` }}
         </button>

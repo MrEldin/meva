@@ -161,9 +161,9 @@ const accent = computed(() => ACCENTS[current.value.accent] ?? ACCENTS.forest)
 
     <header class="flex items-start justify-between gap-4 border-b border-forest/10 px-6 py-5 sm:px-8">
       <div class="min-w-0">
-        <p class="eyebrow text-clay-500">Baza znanja</p>
+        <p class="label text-clay-500">Baza znanja</p>
         <h2 class="mt-1.5 font-display text-2xl leading-tight tracking-tight sm:text-3xl">Email marketing, od A do Ž</h2>
-        <p class="mt-1 text-sm text-forest/55">{{ total }} tehnika koje možete primeniti danas.</p>
+        <p class="mt-1 text-sm text-forest/65">{{ total }} tehnika koje možete primeniti danas.</p>
       </div>
 
       <div class="flex shrink-0 items-center gap-4">
@@ -180,7 +180,7 @@ const accent = computed(() => ACCENTS[current.value.accent] ?? ACCENTS.forest)
           </svg>
           <div class="leading-tight">
             <div class="font-mono text-sm font-medium tabular-nums">{{ percent }}%</div>
-            <div class="text-[0.6875rem] text-forest/50">{{ learnedCount }} / {{ total }}</div>
+            <div class="text-xs text-forest/65">{{ learnedCount }} / {{ total }}</div>
           </div>
         </div>
 
@@ -199,7 +199,7 @@ const accent = computed(() => ACCENTS[current.value.accent] ?? ACCENTS.forest)
 
     <div class="flex min-h-0 flex-1 flex-col lg:flex-row">
       <!-- Chapter rail -->
-      <nav class="shrink-0 overflow-x-auto border-b border-forest/10 px-4 py-3 lg:w-72 lg:overflow-y-auto lg:border-r lg:border-b-0 lg:px-4 lg:py-5">
+      <nav data-lenis-prevent class="shrink-0 overflow-x-auto border-b border-forest/10 px-4 py-3 lg:w-72 lg:overflow-y-auto lg:border-r lg:border-b-0 lg:px-4 lg:py-5">
         <ul class="flex gap-2 lg:flex-col lg:gap-1">
           <li v-for="item in CHAPTERS" :key="item.key" class="shrink-0">
             <button
@@ -220,8 +220,13 @@ const accent = computed(() => ACCENTS[current.value.accent] ?? ACCENTS.forest)
 
               <span class="min-w-0 flex-1">
                 <span class="block truncate text-sm font-medium">{{ item.title }}</span>
-                <span class="mt-1 block h-0.5 w-full overflow-hidden rounded-full"
-                  :class="chapter === item.key ? 'bg-cream/20' : 'bg-forest/10'">
+                <span
+                  class="mt-1 block h-0.5 w-full overflow-hidden rounded-full transition-opacity"
+                  :class="[
+                    chapter === item.key ? 'bg-cream/20' : 'bg-forest/10',
+                    chapterProgress(item.key) > 0 || chapter === item.key ? 'opacity-100' : 'opacity-0',
+                  ]"
+                >
                   <span class="block h-full rounded-full transition-[width] duration-500 ease-out"
                     :class="chapter === item.key ? 'bg-cream' : 'bg-clay-500'"
                     :style="{ width: `${chapterProgress(item.key) * 100}%` }" />
@@ -232,17 +237,17 @@ const accent = computed(() => ACCENTS[current.value.accent] ?? ACCENTS.forest)
         </ul>
 
         <div class="mt-4 hidden px-3 lg:block">
-          <button type="button" class="text-[0.6875rem] text-forest/40 underline underline-offset-4 transition-colors hover:text-clay-600" @click="reset">
+          <button type="button" class="text-xs text-forest/58 underline underline-offset-4 transition-colors hover:text-clay-600" @click="reset">
             Poništi napredak
           </button>
         </div>
       </nav>
 
       <!-- Chapter body -->
-      <div ref="scroller" class="min-h-0 flex-1 overflow-y-auto px-5 py-7 sm:px-10 sm:py-9" @scroll.passive="onScroll">
+      <div ref="scroller" data-lenis-prevent class="min-h-0 flex-1 overflow-y-auto px-5 py-7 sm:px-10 sm:py-9" @scroll.passive="onScroll">
         <Transition name="chapter" mode="out-in">
           <div :key="current.key" class="mx-auto max-w-2xl">
-            <p class="eyebrow" :class="accent.text">Poglavlje {{ chapterIndex + 1 }} / {{ CHAPTERS.length }}</p>
+            <p class="label" :class="accent.text">Poglavlje {{ chapterIndex + 1 }} / {{ CHAPTERS.length }}</p>
             <h3 class="mt-2 font-display text-3xl leading-tight tracking-tight sm:text-4xl">{{ current.title }}</h3>
             <p class="mt-2 text-base leading-relaxed text-forest/60">{{ current.tagline }}</p>
 
@@ -265,7 +270,7 @@ const accent = computed(() => ACCENTS[current.value.accent] ?? ACCENTS.forest)
                     type="button"
                     class="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full border transition-all duration-300"
                     :class="learned.has(lesson.id)
-                      ? `${accent.dot} border-transparent text-cream scale-100`
+ ? `${accent.dot} border-transparent text-cream scale-100`
                       : 'border-forest/20 text-transparent hover:border-forest/40'"
                     :aria-label="learned.has(lesson.id) ? 'Označi kao nepročitano' : 'Označi kao naučeno'"
                     @click="toggle(lesson.id)"
@@ -277,7 +282,7 @@ const accent = computed(() => ACCENTS[current.value.accent] ?? ACCENTS.forest)
 
                   <div class="min-w-0 flex-1">
                     <div class="flex items-baseline gap-2.5">
-                      <span class="font-mono text-[0.6875rem] tabular-nums text-forest/35">{{ String(index + 1).padStart(2, '0') }}</span>
+                      <span class="font-mono text-xs tabular-nums text-forest/52">{{ String(index + 1).padStart(2, '0') }}</span>
                       <h4 class="font-display text-lg leading-snug tracking-tight">{{ lesson.title }}</h4>
                     </div>
 
@@ -285,12 +290,12 @@ const accent = computed(() => ACCENTS[current.value.accent] ?? ACCENTS.forest)
 
                     <div class="mt-4 grid gap-2.5 sm:grid-cols-2">
                       <div class="rounded-2xl bg-cream/70 p-3.5" :class="learned.has(lesson.id) ? 'bg-cream' : 'bg-sand'">
-                        <p class="eyebrow text-[0.5rem] text-forest/40">Zašto radi</p>
-                        <p class="mt-1.5 text-[0.8125rem] leading-relaxed text-forest/65">{{ lesson.why }}</p>
+                        <p class="label text-forest/58">Zašto radi</p>
+                        <p class="mt-1.5 text-sm leading-relaxed text-forest/65">{{ lesson.why }}</p>
                       </div>
                       <div class="rounded-2xl p-3.5" :class="accent.soft">
-                        <p class="eyebrow text-[0.5rem]" :class="accent.text">Kako da primenite</p>
-                        <p class="mt-1.5 text-[0.8125rem] leading-relaxed text-forest/75">{{ lesson.do }}</p>
+                        <p class="label" :class="accent.text">Kako da primenite</p>
+                        <p class="mt-1.5 text-sm leading-relaxed text-forest/75">{{ lesson.do }}</p>
                       </div>
                     </div>
                   </div>
@@ -304,17 +309,17 @@ const accent = computed(() => ACCENTS[current.value.accent] ?? ACCENTS.forest)
                 <p class="text-sm font-medium">
                   {{ chapterDone(current.key) ? 'Poglavlje pročitano.' : `Pročitano ${current.lessons.filter((l) => learned.has(l.id)).length} od ${current.lessons.length}.` }}
                 </p>
-                <p class="mt-0.5 text-[0.8125rem] text-forest/50">
+                <p class="mt-0.5 text-sm text-forest/65">
                   {{ nextChapter ? `Sledi: ${nextChapter.title}` : 'To je kraj knjige — ostalo je da se primeni.' }}
                 </p>
               </div>
               <div class="flex gap-2">
                 <button v-if="!chapterDone(current.key)" type="button"
-                  class="pill border border-forest/20 px-5 py-3 hover:bg-forest hover:text-cream" @click="markChapter">
+                  class="btn btn-ghost" @click="markChapter">
                   Označi sve
                 </button>
                 <button v-if="nextChapter" type="button"
-                  class="pill bg-forest px-5 py-3 text-cream hover:bg-forest-soft" @click="goTo(nextChapter.key)">
+                  class="btn btn-primary" @click="goTo(nextChapter.key)">
                   Dalje
                 </button>
               </div>

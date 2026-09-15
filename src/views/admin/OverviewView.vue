@@ -1,4 +1,5 @@
 <script setup>
+import PageHeader from '@/components/admin/PageHeader.vue'
 import client from '@/api/client'
 import BarList from '@/components/admin/BarList.vue'
 import RevenueChart from '@/components/admin/RevenueChart.vue'
@@ -66,62 +67,59 @@ const ordersOf = (row) => `${count(row.orders)}`
 
 <template>
   <div>
-    <header class="flex flex-wrap items-end justify-between gap-4 border-b border-forest/10 pb-5">
-      <div>
-        <p class="eyebrow text-clay-500">Pregled</p>
-        <h1 class="mt-2 font-display text-3xl tracking-tight sm:text-4xl">Kako ide prodaja</h1>
-      </div>
+    <PageHeader tone="overview" eyebrow="Pregled" title="Kako ide prodaja" note="Promet, porudžbine i kupci za izabrani period.">
+      <template #actions>
 
-      <div class="flex flex-wrap gap-1 rounded-full border border-forest/15 bg-sand p-1">
+      <div class="segment">
         <button
           v-for="option in RANGES"
           :key="option.value"
           type="button"
-          class="eyebrow rounded-full px-4 py-2 text-[0.5625rem] transition-colors"
-          :class="range === option.value ? 'bg-forest text-cream' : 'hover:bg-sage'"
+          :class="range === option.value ? 'is-on' : ''"
           @click="range = option.value"
         >
           {{ option.label }}
         </button>
       </div>
-    </header>
+      </template>
+    </PageHeader>
 
-    <p v-if="loading" class="py-16 text-center text-sm text-forest/50">Učitavanje…</p>
+    <p v-if="loading" class="py-16 text-center text-sm text-forest/65">Učitavanje…</p>
     <p v-else-if="failed" class="py-16 text-center text-sm text-clay-600">Analitika trenutno nije dostupna.</p>
 
     <div v-else-if="totals" class="space-y-5 pt-6">
-      <p class="text-xs text-forest/50">
+      <p class="text-xs text-forest/65">
         {{ data.period.from }} — {{ data.period.to }} · poređenje sa {{ data.period.previous_from }} — {{ data.period.previous_to }}
       </p>
 
       <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatTile label="Promet" :value="money(totals.revenue)" :change="change.revenue" :hint="`${money(totals.revenue_per_day)} dnevno`" />
-        <StatTile label="Porudžbine" :value="count(totals.orders)" :change="change.orders" :hint="`${count(totals.orders_per_customer)} po kupcu`" />
-        <StatTile label="Prosečna korpa" :value="money(totals.average_order)" :change="change.average_order" />
-        <StatTile label="Kupci" :value="count(totals.customers)" :change="change.customers" :hint="`${count(totals.new_customers)} novih, ${count(totals.returning_customers)} vraćenih`" />
+        <StatTile label="Promet" tone="orders" :value="money(totals.revenue)" :change="change.revenue" :hint="`${money(totals.revenue_per_day)} dnevno`" />
+        <StatTile label="Porudžbine" tone="overview" :value="count(totals.orders)" :change="change.orders" :hint="`${count(totals.orders_per_customer)} po kupcu`" />
+        <StatTile label="Prosečna korpa" tone="products" :value="money(totals.average_order)" :change="change.average_order" />
+        <StatTile label="Kupci" tone="marketing" :value="count(totals.customers)" :change="change.customers" :hint="`${count(totals.new_customers)} novih, ${count(totals.returning_customers)} vraćenih`" />
       </div>
 
       <RevenueChart :points="data.series.points" :granularity="data.series.granularity" title="Promet kroz vreme" />
 
       <div class="grid gap-4 lg:grid-cols-2">
-        <BarList title="Najprodavaniji preparati" :rows="data.products" :format="revenueOf" />
-        <BarList title="Kategorije" :rows="data.categories" :format="revenueOf" empty="Kategorije se računaju iz istorije prodaje." />
+        <BarList title="Najprodavaniji preparati" tone="products" :rows="data.products" :format="revenueOf" />
+        <BarList title="Kategorije" tone="email" :rows="data.categories" :format="revenueOf" empty="Kategorije se računaju iz istorije prodaje." />
       </div>
 
       <div class="grid gap-4 lg:grid-cols-3">
-        <BarList title="Odakle dolaze" :rows="data.channels" :format="revenueOf" />
-        <BarList title="Uređaji" :rows="data.devices" :format="ordersOf" metric="orders" />
-        <BarList title="Gradovi" :rows="data.cities" :format="ordersOf" metric="orders" />
+        <BarList title="Odakle dolaze" tone="marketing" :rows="data.channels" :format="revenueOf" />
+        <BarList title="Uređaji" tone="team" :rows="data.devices" :format="ordersOf" metric="orders" />
+        <BarList title="Gradovi" tone="overview" :rows="data.cities" :format="ordersOf" metric="orders" />
       </div>
 
       <div class="grid gap-4 lg:grid-cols-3">
-        <BarList title="Kada poručuju (dan)" :rows="data.busiest.weekday" :format="ordersOf" metric="orders" />
-        <BarList title="Kada poručuju (sat)" :rows="data.busiest.hour" :format="ordersOf" metric="orders" />
-        <BarList title="Najbolji kupci" :rows="data.customers" :format="revenueOf" empty="Još nema ponovljenih kupovina." />
+        <BarList title="Kada poručuju (dan)" tone="orders" :rows="data.busiest.weekday" :format="ordersOf" metric="orders" />
+        <BarList title="Kada poručuju (sat)" tone="email" :rows="data.busiest.hour" :format="ordersOf" metric="orders" />
+        <BarList title="Najbolji kupci" tone="products" :rows="data.customers" :format="revenueOf" empty="Još nema ponovljenih kupovina." />
       </div>
 
       <section v-if="data.statuses.length" class="rounded-[1.5rem] bg-sand p-5 sm:p-6">
-        <h2 class="eyebrow text-[0.5625rem] text-forest/50">Porudžbine po statusu</h2>
+        <h2 class="label text-forest/65">Porudžbine po statusu</h2>
         <div class="mt-4 flex flex-wrap gap-3">
           <RouterLink
             v-for="row in data.statuses"
@@ -130,7 +128,7 @@ const ordersOf = (row) => `${count(row.orders)}`
             class="rounded-2xl bg-cream px-4 py-3 transition-colors hover:bg-sage"
           >
             <span class="block font-display text-2xl tabular-nums">{{ count(row.orders) }}</span>
-            <span class="eyebrow mt-1 block text-[0.5rem] text-forest/55">{{ row.label }}</span>
+            <span class="label mt-1 block text-forest/65">{{ row.label }}</span>
           </RouterLink>
         </div>
       </section>

@@ -341,3 +341,190 @@
 
   .review-rail.is-dragging * { pointer-events: none; }
 }
+
+/*
+|--------------------------------------------------------------------------
+| The admin desk
+|--------------------------------------------------------------------------
+|
+| The shop front can whisper; the desk has to be read quickly, often by
+| someone standing up. So the panel carries its own scale -- bigger labels,
+| darker secondary text -- and its own colour, because seven sections that
+| look identical are seven sections you have to read to tell apart.
+|
+*/
+
+@theme {
+  /* One colour per section of the panel, used on its icon, its heading rule
+     and its accents, so a glance at the screen says where you are. */
+  --color-desk-overview: #4b7f9b;
+  --color-desk-orders: #c56d59;
+  --color-desk-products: #5c8560;
+  --color-desk-marketing: #b3617e;
+  --color-desk-email: #b08a34;
+  --color-desk-team: #7a6a92;
+  --color-desk-account: #6e776f;
+}
+
+@layer utilities {
+  /* Small caps label. The old one was ten pixels of tracked-out mono; this is
+     bigger, tighter and dark enough to read at a glance. */
+  .label {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  :where(.label) { color: color-mix(in oklab, var(--color-forest) 62%, transparent); }
+
+  .label-strong { color: color-mix(in oklab, var(--color-forest) 85%, transparent); }
+
+  /* Column headings in a table: the same label, a touch quieter. */
+  .th {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  :where(.th) { color: color-mix(in oklab, var(--color-forest) 55%, transparent); }
+
+  /* A panel on the desk. */
+  .panel {
+    border-radius: 1.5rem;
+    background: var(--color-sand);
+    border: 1px solid color-mix(in oklab, var(--color-forest) 7%, transparent);
+  }
+
+  /* Text input, textarea and select share one shape. */
+  .field {
+    width: 100%;
+    border-radius: 0.875rem;
+    border: 1px solid color-mix(in oklab, var(--color-forest) 16%, transparent);
+    background: var(--color-cream);
+    padding: 0.625rem 0.9375rem;
+    font-size: 0.875rem;
+    line-height: 1.45;
+    color: var(--color-forest);
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .field::placeholder { color: color-mix(in oklab, var(--color-forest) 38%, transparent); }
+  .field:focus {
+    outline: none;
+    border-color: color-mix(in oklab, var(--color-forest) 45%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-forest) 8%, transparent);
+  }
+  .field:disabled { opacity: 0.55; }
+
+  .field-pill { border-radius: 9999px; padding-inline: 1.125rem; }
+
+  /* A select drawn by the browser puts its arrow hard against the edge, which
+     looks wrong inside a rounded control. This hides the native one and paints
+     a chevron with room around it. */
+  .field-select {
+    appearance: none;
+    -webkit-appearance: none;
+    padding-right: 2.5rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1.5 1.75 6 6.25l4.5-4.5' stroke='%2324342C' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 12px 8px;
+    cursor: pointer;
+  }
+  .field-select::-ms-expand { display: none; }
+
+  /* A small status or category pill. */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    border-radius: 9999px;
+    padding: 0.3125rem 0.6875rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
+  /* A button on the desk: plainer and smaller than the shop's pill. */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 9999px;
+    padding: 0.625rem 1.25rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.2;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s, opacity 0.2s;
+    cursor: pointer;
+  }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  .btn-primary { background: var(--color-forest); color: var(--color-cream); }
+  .btn-primary:hover:not(:disabled) { background: var(--color-forest-soft); }
+
+  .btn-ghost {
+    border: 1px solid color-mix(in oklab, var(--color-forest) 18%, transparent);
+    color: var(--color-forest);
+  }
+  .btn-ghost:hover:not(:disabled) { background: var(--color-forest); color: var(--color-cream); }
+
+  .btn-accent { background: var(--color-clay-500); color: #fff; }
+  .btn-accent:hover:not(:disabled) { background: var(--color-clay-600); }
+
+  /* A figure on the desk wears its colour as a wash rather than a stripe: a
+     bar across the top of a rounded, bordered card never sits flush with the
+     corner, and the seam shows. */
+  .tile-overview { background: color-mix(in oklab, var(--color-desk-overview) 10%, var(--color-sand)); }
+  .tile-orders { background: color-mix(in oklab, var(--color-desk-orders) 10%, var(--color-sand)); }
+  .tile-products { background: color-mix(in oklab, var(--color-desk-products) 10%, var(--color-sand)); }
+  .tile-marketing { background: color-mix(in oklab, var(--color-desk-marketing) 10%, var(--color-sand)); }
+  .tile-email { background: color-mix(in oklab, var(--color-desk-email) 12%, var(--color-sand)); }
+  .tile-team { background: color-mix(in oklab, var(--color-desk-team) 10%, var(--color-sand)); }
+  .tile-account { background: color-mix(in oklab, var(--color-desk-account) 10%, var(--color-sand)); }
+
+  /* A row of mutually exclusive choices: period, status, list. */
+  .segment {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    border-radius: 9999px;
+    border: 1px solid color-mix(in oklab, var(--color-forest) 12%, transparent);
+    background: var(--color-sand);
+    padding: 0.25rem;
+  }
+  .segment > * {
+    border-radius: 9999px;
+    padding: 0.5rem 1rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.2;
+    color: color-mix(in oklab, var(--color-forest) 70%, transparent);
+    transition: background-color 0.2s, color 0.2s;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .segment > *:hover { background: color-mix(in oklab, var(--color-forest) 6%, transparent); color: var(--color-forest); }
+  .segment > .is-on, .segment > .is-on:hover { background: var(--color-forest); color: var(--color-cream); }
+
+  /* Table rows on the desk: a tinted head, hairline rules, a hover that shows
+     which row the pointer is on. */
+  .desk-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+  .desk-table thead th {
+    text-align: left;
+    padding: 0.625rem 1rem;
+    background: color-mix(in oklab, var(--color-forest) 5%, transparent);
+    border-bottom: 1px solid color-mix(in oklab, var(--color-forest) 10%, transparent);
+  }
+  .desk-table thead th:first-child { border-top-left-radius: 0.875rem; border-bottom-left-radius: 0.875rem; }
+  .desk-table thead th:last-child { border-top-right-radius: 0.875rem; border-bottom-right-radius: 0.875rem; }
+  .desk-table tbody td { padding: 0.8125rem 1rem; border-bottom: 1px solid color-mix(in oklab, var(--color-forest) 7%, transparent); }
+  .desk-table tbody tr:last-child td { border-bottom: 0; }
+  .desk-table tbody tr { transition: background-color 0.15s; }
+  .desk-table tbody tr:hover { background: color-mix(in oklab, var(--color-forest) 4%, transparent); }
+}
