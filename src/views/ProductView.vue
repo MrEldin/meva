@@ -158,11 +158,8 @@ const shareText = computed(() =>
             {{ product.name }}
           </h1>
 
-          <p class="mt-5 font-display text-2xl text-ink md:text-3xl">
+          <p class="mt-5 text-3xl font-extrabold text-ink">
             {{ product.price ? product.price.formatted : 'Cena na upit' }}
-            <span v-if="product.price_eur" class="ml-2 text-base font-light text-mist-400">
-              / {{ product.price_eur.formatted }}
-            </span>
           </p>
 
           <p v-if="product.excerpt" class="mt-6 text-base font-light leading-relaxed text-mist-600">

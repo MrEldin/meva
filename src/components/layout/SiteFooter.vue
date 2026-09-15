@@ -1,93 +1,80 @@
 <script setup>
-import logoBlack from '@/assets/brand/logo-black.png'
-import client from '@/api/client'
-import { track } from '@/lib/tracking'
-import { ref } from 'vue'
+import logoWhite from '@/assets/brand/logo-white.png'
 
-const year = new Date().getFullYear()
-
-const email = ref('')
-const joined = ref(false)
-const joining = ref(false)
-
-/** Join the mailing list, tagged with whatever campaign brought them here. */
-async function join() {
-  if (joining.value) return
-
-  joining.value = true
-
-  const params = new URLSearchParams(window.location.search)
-
-  try {
-    await client.post('/newsletter', {
-      email: email.value,
-      source: 'footer',
-      utm_source: params.get('utm_source'),
-      utm_campaign: params.get('utm_campaign'),
-    })
-
-    joined.value = true
-    email.value = ''
-    track.subscribe('footer')
-  } finally {
-    joining.value = false
-  }
-}
-
-const links = [
-  { label: 'Prodavnica', to: { name: 'catalog' } },
+const SHOP = [
+  { label: 'Svi proizvodi', to: { name: 'catalog' } },
   { label: 'Nega kože', to: { name: 'catalog', query: { kategorija: 'preparati-za-lice' } } },
   { label: 'Kosa', to: { name: 'catalog', query: { kategorija: 'kosa' } } },
-  { label: 'Setovi', to: { name: 'catalog', query: { tip: 'set' } } },
-  { label: 'Prati porudžbinu', to: { name: 'track' } },
-  { label: 'Prijava', to: { name: 'login' } },
+  { label: 'Setovi', to: { name: 'catalog', query: { kategorija: 'setovi' } } },
 ]
+
+const HELP = [
+  { label: 'Česta pitanja', to: { name: 'faq' } },
+  { label: 'Dostava', to: { name: 'delivery' } },
+  { label: 'Povrat i reklamacije', to: { name: 'returns' } },
+  { label: 'Praćenje porudžbine', to: { name: 'track' } },
+]
+
+const ACCOUNT = [
+  { label: 'Moj nalog', to: { name: 'account' } },
+  { label: 'Naša priča', to: { name: 'story' } },
+]
+
+const year = new Date().getFullYear()
 </script>
 
 <template>
-  <footer class="bg-cream text-forest">
-    <div class="shell py-10">
-      <form class="mb-10 flex flex-col gap-4 rounded-[1.5rem] bg-sand p-6 sm:flex-row sm:items-center sm:justify-between" @submit.prevent="join">
+  <footer class="bg-ink text-paper">
+    <div class="shell py-12 lg:py-16">
+      <div class="grid gap-10 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
         <div>
-          <p class="font-display text-2xl">Pismo iz Meve</p>
-          <p class="mt-1 text-sm text-forest/60">Saveti za negu i novi preparati. Bez spama.</p>
+          <img :src="logoWhite" alt="Meva Cosmetics" class="h-9 w-auto" />
+          <p class="mt-4 max-w-xs text-[0.9375rem] leading-relaxed text-paper/60">
+            Ručno rađena prirodna kozmetika iz Novog Pazara, od 2010. Ispitano u Institutu za javno zdravlje Vojvodine.
+          </p>
+          <a
+            href="https://www.instagram.com/meva.cosmetics/"
+            target="_blank"
+            rel="noopener"
+            class="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-paper/80 transition-colors hover:text-paper"
+          >
+            <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.2" cy="6.8" r="1" fill="currentColor" stroke="none" /></svg>
+            @meva.cosmetics
+          </a>
         </div>
-        <div v-if="joined" class="text-sm text-sage-deep">Hvala — javljamo se uskoro.</div>
-        <div v-else class="flex w-full gap-2 sm:w-auto">
-          <input
-            v-model="email"
-            type="email"
-            required
-            placeholder="vasa@adresa.rs"
-            class="min-w-0 flex-1 rounded-full border border-forest/15 bg-cream px-5 py-3 text-sm outline-none placeholder:text-forest/40 focus:border-forest/40 sm:w-64"
-          />
-          <button type="submit" class="pill shrink-0 bg-forest text-cream hover:bg-forest-soft disabled:opacity-50" :disabled="joining">Prijavi se</button>
-        </div>
-      </form>
 
-      <div id="kontakt" class="grid gap-8 border-t border-forest/15 pt-8 md:grid-cols-3">
-        <div>
-          <img :src="logoBlack" alt="Meva Cosmetics" class="h-8 w-auto" />
-          <p class="mt-4 max-w-xs text-sm leading-relaxed text-forest/65">Prirodna kozmetika, ručno rađena u malim serijama od 2010.</p>
-        </div>
-        <div class="grid grid-cols-2 gap-6 text-sm">
-          <div>
-            <p class="eyebrow text-clay-500">Adresa</p>
-            <p class="mt-3 leading-relaxed text-forest/75">Miloša Obilića 20<br />36300 Novi Pazar</p>
-          </div>
-          <div>
-            <p class="eyebrow text-clay-500">Dostava</p>
-            <p class="mt-3 leading-relaxed text-forest/75">Besplatna u celoj Srbiji.<br />Plaćanje pouzećem.</p>
-          </div>
-        </div>
-        <div class="flex flex-col gap-4 md:items-end">
-          <nav class="flex flex-wrap gap-x-5 gap-y-2 md:justify-end">
-            <RouterLink v-for="link in links" :key="link.label" :to="link.to" class="eyebrow transition-colors hover:text-blush-500">{{ link.label }}</RouterLink>
-            <a href="https://www.instagram.com/meva.cosmetics/" target="_blank" rel="noopener" class="eyebrow transition-colors hover:text-blush-500">Instagram</a>
-          </nav>
-        </div>
+        <nav>
+          <h2 class="text-sm font-bold uppercase tracking-wider text-paper">Prodavnica</h2>
+          <ul class="mt-4 space-y-2.5">
+            <li v-for="link in SHOP" :key="link.label">
+              <RouterLink :to="link.to" class="text-[0.9375rem] text-paper/60 transition-colors hover:text-paper">{{ link.label }}</RouterLink>
+            </li>
+          </ul>
+        </nav>
+
+        <nav>
+          <h2 class="text-sm font-bold uppercase tracking-wider text-paper">Pomoć</h2>
+          <ul class="mt-4 space-y-2.5">
+            <li v-for="link in HELP" :key="link.label">
+              <RouterLink :to="link.to" class="text-[0.9375rem] text-paper/60 transition-colors hover:text-paper">{{ link.label }}</RouterLink>
+            </li>
+          </ul>
+        </nav>
+
+        <nav>
+          <h2 class="text-sm font-bold uppercase tracking-wider text-paper">Nalog</h2>
+          <ul class="mt-4 space-y-2.5">
+            <li v-for="link in ACCOUNT" :key="link.label">
+              <RouterLink :to="link.to" class="text-[0.9375rem] text-paper/60 transition-colors hover:text-paper">{{ link.label }}</RouterLink>
+            </li>
+          </ul>
+        </nav>
       </div>
-      <p class="mt-10 font-mono text-[0.5625rem] uppercase tracking-[0.12em] text-forest/50">© {{ year }} Meva Kozmetika · Novi Pazar</p>
+
+      <div class="mt-12 flex flex-col gap-3 border-t border-paper/12 pt-6 text-sm text-paper/45 sm:flex-row sm:items-center sm:justify-between">
+        <p>Meva Kozmetika · Miloša Obilića 20, 36300 Novi Pazar</p>
+        <p>© {{ year }} Meva Kozmetika</p>
+      </div>
     </div>
   </footer>
 </template>

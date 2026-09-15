@@ -1,14 +1,25 @@
 <script setup>
-import Closing from '@/components/home/Closing.vue'
-import Finder from '@/components/home/Finder.vue'
-import HeroStage from '@/components/home/HeroStage.vue'
-import Proof from '@/components/home/Proof.vue'
-import Rail from '@/components/home/Rail.vue'
-import TrustStrip from '@/components/home/TrustStrip.vue'
+import LabProof from '@/components/home/LabProof.vue'
+import HelpLinks from '@/components/home/HelpLinks.vue'
+import Newsletter from '@/components/home/Newsletter.vue'
+import Reviews from '@/components/home/Reviews.vue'
+import ShopHero from '@/components/home/ShopHero.vue'
+import ShopByConcern from '@/components/home/ShopByConcern.vue'
+import BestSellers from '@/components/home/BestSellers.vue'
+import Promise from '@/components/home/Promise.vue'
 import { setMeta } from '@/lib/meta'
 import { useCatalogStore } from '@/stores/catalog'
 import { onMounted } from 'vue'
 
+/**
+ * The front page is the shop.
+ *
+ * The client's brief was one sentence long and worth following exactly: a
+ * visitor should land on the shop, see plainly what is for sale, and never
+ * have to work out where to click to order. So the order here is products,
+ * then the reasons to trust them, then the answers to what people ask before
+ * they buy. Nothing above the products but one line and one button.
+ */
 const catalog = useCatalogStore()
 
 onMounted(() => {
@@ -35,12 +46,14 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="bg-cream">
-    <HeroStage />
-    <TrustStrip />
-    <Rail />
-    <Finder />
-    <Proof />
-    <Closing />
+  <div class="bg-paper">
+    <ShopHero />
+    <ShopByConcern />
+    <BestSellers />
+    <LabProof />
+    <Promise />
+    <Reviews />
+    <HelpLinks />
+    <Newsletter />
   </div>
 </template>

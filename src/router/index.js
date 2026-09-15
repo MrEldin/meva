@@ -5,6 +5,10 @@ import { createRouter, createWebHistory } from 'vue-router'
 const routes = [
   { path: '/', name: 'home', component: () => import('@/views/HomeView.vue') },
   { path: '/proizvodi', name: 'catalog', component: () => import('@/views/CatalogView.vue') },
+  { path: '/prica', name: 'story', component: () => import('@/views/StoryView.vue') },
+  { path: '/cesta-pitanja', name: 'faq', component: () => import('@/views/help/FaqView.vue') },
+  { path: '/dostava', name: 'delivery', component: () => import('@/views/help/DeliveryView.vue') },
+  { path: '/reklamacije', name: 'returns', component: () => import('@/views/help/ReturnsView.vue') },
   { path: '/proizvod/:slug', name: 'product', component: () => import('@/views/ProductView.vue') },
   { path: '/korpa', name: 'cart', component: () => import('@/views/CartView.vue') },
   { path: '/porucivanje', name: 'checkout', component: () => import('@/views/CheckoutView.vue') },
