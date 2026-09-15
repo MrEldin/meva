@@ -1,7 +1,12 @@
 <script setup>
+import ShareRow from '@/components/ui/ShareRow.vue'
+import { setMeta } from '@/lib/meta'
+import { onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
+
+onMounted(() => setMeta({ title: 'Hvala na porudžbini' }))
 </script>
 
 <template>
@@ -21,7 +26,15 @@ const route = useRoute()
         Zvaćemo vas radi potvrde pre nego što paket krene.
       </p>
 
-      <p class="mt-4 text-sm font-light text-mist-500">
+      <p class="mt-6 text-sm text-forest/60">
+        Dokle je stigla? Pratite je na
+        <RouterLink :to="{ name: 'track' }" class="text-clay-600 underline-offset-4 hover:underline">stranici za praćenje</RouterLink>
+        — treba vam ovaj broj i vaš e-mail.
+      </p>
+
+      <ShareRow class="mt-8 justify-center" title="Naručila sam iz Meve" text="Prirodna kozmetika iz Novog Pazara" :url="'https://meva.life/'" label="Preporuči" />
+
+      <p class="mt-6 text-sm font-light text-mist-500">
         Plaćate kuriru pri preuzimanju. Dostava je besplatna.
       </p>
 

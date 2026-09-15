@@ -7,6 +7,7 @@ import logoBlack from '@/assets/brand/logo-black.png'
 
 const route = useRoute()
 const cart = useCartStore()
+const auth = useAuthStore()
 const menuOpen = ref(false)
 
 // Any navigation closes the panel; leaving it open across routes is a classic
@@ -61,14 +62,15 @@ const links = [
         <!-- Account and cart -->
         <div class="flex items-center gap-2">
           <RouterLink
-            :to="{ name: 'login' }"
-            class="hidden h-11 w-11 items-center justify-center rounded-full border border-forest/15 bg-sand transition-colors duration-300 hover:bg-sage sm:flex"
-            aria-label="Nalog"
+            :to="auth.signedIn ? (auth.isStaff ? { name: 'admin' } : { name: 'account' }) : { name: 'login' }"
+            class="hidden h-11 items-center gap-2 rounded-full border border-forest/15 bg-sand px-3 transition-colors duration-300 hover:bg-sage sm:flex"
+            :aria-label="auth.signedIn ? 'Moj nalog' : 'Prijava'"
           >
             <svg viewBox="0 0 24 24" fill="none" class="h-4.5 w-4.5" stroke="currentColor" stroke-width="1.4">
               <circle cx="12" cy="8" r="3.6" />
               <path d="M4.5 20c0-3.6 3.4-6 7.5-6s7.5 2.4 7.5 6" stroke-linecap="round" />
             </svg>
+            <span v-if="auth.signedIn" class="eyebrow max-w-24 truncate text-[0.5625rem]">{{ auth.user?.first_name ?? 'Nalog' }}</span>
           </RouterLink>
 
           <RouterLink

@@ -1,4 +1,5 @@
 <script setup>
+import { setMeta } from '@/lib/meta'
 import ProductCard from '@/components/product/ProductCard.vue'
 import { useCatalogStore } from '@/stores/catalog'
 import { computed, onMounted, ref, watch } from 'vue'
@@ -44,6 +45,11 @@ function filterBy(query) {
 }
 
 watch(() => route.query, () => (search.value = ''))
+
+setMeta({
+  title: 'Svi preparati',
+  description: 'Prirodna kozmetika Meva: preparati za seboreju, psorijazu, ekcem, akne, negu lica i kose. Besplatna dostava, plaćanje pouzećem.',
+})
 </script>
 
 <template>

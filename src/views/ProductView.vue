@@ -1,5 +1,8 @@
 <script setup>
 import ProductCard from '@/components/product/ProductCard.vue'
+import ShareRow from '@/components/ui/ShareRow.vue'
+import { setMeta } from '@/lib/meta'
+import { track } from '@/lib/tracking'
 import { useCartStore } from '@/stores/cart'
 import { useCatalogStore } from '@/stores/catalog'
 import { computed, ref, watch } from 'vue'
@@ -24,6 +27,8 @@ async function load(slug) {
 
   try {
     product.value = await catalog.find(slug)
+    describe()
+    track.viewProduct(product.value)
   } catch {
     failed.value = true
   } finally {
@@ -50,9 +55,47 @@ const related = computed(() => {
 
 function addToCart() {
   cart.add(product.value, quantity.value)
+  track.addToCart(product.value, quantity.value)
   added.value = true
   setTimeout(() => (added.value = false), 1800)
 }
+
+/** What this page says about itself to browsers, share sheets and assistants. */
+function describe() {
+  const item = product.value
+  if (!item) return
+
+  const summary = (item.excerpt ?? '').trim()
+
+  setMeta({
+    title: item.name,
+    description: `${summary.slice(0, 180)}${item.price ? ` · ${item.price.formatted} · besplatna dostava` : ''}`,
+    image: item.image,
+    type: 'product',
+    schema: {
+      '@context': 'https://schema.org',
+      '@type': 'Product',
+      name: item.name,
+      description: summary,
+      image: item.image ? [item.image] : undefined,
+      sku: item.sku,
+      brand: { '@type': 'Brand', name: 'Meva Kozmetika' },
+      offers: item.price
+        ? {
+            '@type': 'Offer',
+            priceCurrency: 'RSD',
+            price: (item.price.minor / 100).toFixed(2),
+            availability: 'https://schema.org/InStock',
+            url: window.location.href,
+          }
+        : undefined,
+    },
+  })
+}
+
+const shareText = computed(() =>
+  product.value ? `${(product.value.excerpt ?? '').slice(0, 120)}${product.value.price ? ` — ${product.value.price.formatted}` : ''}` : '',
+)
 </script>
 
 <template>
@@ -155,11 +198,19 @@ function addToCart() {
             </button>
           </div>
 
-          <ul class="mt-8 space-y-2.5 border-t border-mist-200 pt-6 text-sm font-light text-mist-500">
+          <ul class="mt-8 space-y-2.5 border-t border-forest/15 pt-6 text-sm text-forest/60">
             <li>Besplatna dostava na teritoriji Srbije</li>
             <li>Plaćanje pouzećem, kuriru pri preuzimanju</li>
             <li>Isporuka 2–3 radna dana</li>
           </ul>
+
+          <ShareRow
+            class="mt-7"
+            :title="product.name"
+            :text="shareText"
+            :id="product.sku"
+            label="Pošalji nekome"
+          />
         </div>
       </div>
 

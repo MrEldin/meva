@@ -1,13 +1,45 @@
 <script setup>
 import logoBlack from '@/assets/brand/logo-black.png'
+import client from '@/api/client'
+import { track } from '@/lib/tracking'
+import { ref } from 'vue'
 
 const year = new Date().getFullYear()
+
+const email = ref('')
+const joined = ref(false)
+const joining = ref(false)
+
+/** Join the mailing list, tagged with whatever campaign brought them here. */
+async function join() {
+  if (joining.value) return
+
+  joining.value = true
+
+  const params = new URLSearchParams(window.location.search)
+
+  try {
+    await client.post('/newsletter', {
+      email: email.value,
+      source: 'footer',
+      utm_source: params.get('utm_source'),
+      utm_campaign: params.get('utm_campaign'),
+    })
+
+    joined.value = true
+    email.value = ''
+    track.subscribe('footer')
+  } finally {
+    joining.value = false
+  }
+}
 
 const links = [
   { label: 'Prodavnica', to: { name: 'catalog' } },
   { label: 'Nega kože', to: { name: 'catalog', query: { kategorija: 'preparati-za-lice' } } },
   { label: 'Kosa', to: { name: 'catalog', query: { kategorija: 'kosa' } } },
   { label: 'Setovi', to: { name: 'catalog', query: { tip: 'set' } } },
+  { label: 'Prati porudžbinu', to: { name: 'track' } },
   { label: 'Prijava', to: { name: 'login' } },
 ]
 </script>
@@ -15,6 +47,24 @@ const links = [
 <template>
   <footer class="bg-cream text-forest">
     <div class="shell py-10">
+      <form class="mb-10 flex flex-col gap-4 rounded-[1.5rem] bg-sand p-6 sm:flex-row sm:items-center sm:justify-between" @submit.prevent="join">
+        <div>
+          <p class="font-display text-2xl">Pismo iz Meve</p>
+          <p class="mt-1 text-sm text-forest/60">Saveti za negu i novi preparati. Bez spama.</p>
+        </div>
+        <div v-if="joined" class="text-sm text-sage-deep">Hvala — javljamo se uskoro.</div>
+        <div v-else class="flex w-full gap-2 sm:w-auto">
+          <input
+            v-model="email"
+            type="email"
+            required
+            placeholder="vasa@adresa.rs"
+            class="min-w-0 flex-1 rounded-full border border-forest/15 bg-cream px-5 py-3 text-sm outline-none placeholder:text-forest/40 focus:border-forest/40 sm:w-64"
+          />
+          <button type="submit" class="pill shrink-0 bg-forest text-cream hover:bg-forest-soft disabled:opacity-50" :disabled="joining">Prijavi se</button>
+        </div>
+      </form>
+
       <div id="kontakt" class="grid gap-8 border-t border-forest/15 pt-8 md:grid-cols-3">
         <div>
           <img :src="logoBlack" alt="Meva Cosmetics" class="h-8 w-auto" />

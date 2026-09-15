@@ -1,17 +1,24 @@
 <script setup>
 import SiteFooter from '@/components/layout/SiteFooter.vue'
 import SiteHeader from '@/components/layout/SiteHeader.vue'
+import ConsentBar from '@/components/ui/ConsentBar.vue'
 import Cursor from '@/components/ui/Cursor.vue'
 import { initSmoothScroll } from '@/lib/scroll'
+import { useAuthStore } from '@/stores/auth'
 import { computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
+const auth = useAuthStore()
 
 // The admin panel is its own world and wears neither the shop header nor footer.
 const bare = computed(() => route.meta.bare === true)
 
-onMounted(() => initSmoothScroll())
+onMounted(() => {
+  initSmoothScroll()
+  // A reloaded tab holds a token but knows nothing about whose it is.
+  if (auth.signedIn && !auth.user) auth.fetchUser()
+})
 </script>
 
 <template>
@@ -34,5 +41,6 @@ onMounted(() => initSmoothScroll())
     </main>
 
     <SiteFooter v-if="!bare" />
+    <ConsentBar />
   </div>
 </template>

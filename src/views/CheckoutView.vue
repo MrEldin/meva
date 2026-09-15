@@ -1,4 +1,5 @@
 <script setup>
+import { track } from '@/lib/tracking'
 import client from '@/api/client'
 import { money } from '@/lib/money'
 import { useCartStore } from '@/stores/cart'
@@ -36,6 +37,8 @@ const fields = [
 async function submit() {
   if (submitting.value || !cart.lines.length) return
 
+  track.beginCheckout(cart.lines, cart.subtotal)
+
   submitting.value = true
   errors.value = {}
   failure.value = null
@@ -47,6 +50,7 @@ async function submit() {
     })
 
     cart.clear()
+    track.purchase(data.data.reference, cart.lines, data.data.total ?? cart.subtotal)
     router.push({ name: 'thankyou', params: { reference: data.data.reference } })
   } catch (error) {
     const response = error.response
