@@ -31,6 +31,11 @@
   --color-shell: #fdf7f8;
   --color-shell-deep: #fbeff2;
 
+  /* The exact ground the hero film was shot on, so the section and the
+     footage meet with no visible edge. Sampled from the video itself. */
+  --color-peach: #e9ae95;
+  --color-peach-deep: #d9997f;
+
   /* Powder pink: the brand's own colour, and the only accent. */
   --color-blush-50: #fdf6f8;
   --color-blush-100: #fbeaef;
