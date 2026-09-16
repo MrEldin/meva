@@ -3,17 +3,19 @@ import logoBlack from '@/assets/brand/logo-black.png'
 import { useAuthStore } from '@/stores/auth'
 import { useCartStore } from '@/stores/cart'
 import { useCatalogStore } from '@/stores/catalog'
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 /**
  * The header.
  *
- * White, on every page. Its character comes from type and air, not colour:
- * a slim line at the top for the two facts every order confirms, the wordmark
- * with room around it, navigation in small tracked capitals with a fine pink
- * rule that draws itself under the item you are on, thin icons, and a single
- * pink hairline where the header ends.
+ * White on every page, organised in three rows the way a shop is: a pink
+ * line for the two facts every order confirms; the wordmark, a real search
+ * field and the account and basket with their names under them; and the
+ * shelves -- the categories -- in small tracked capitals with a fine pink
+ * rule that draws itself under the one you are on. Once you scroll, the
+ * facts fold away and the main row tightens so the header stops taking the
+ * screen. On a phone the search and the menu open as panels beneath it.
  */
 const route = useRoute()
 const router = useRouter()
@@ -24,11 +26,10 @@ const catalog = useCatalogStore()
 const menuOpen = ref(false)
 const searchOpen = ref(false)
 const term = ref('')
-
-watch(() => route.fullPath, () => {
-  menuOpen.value = false
-  searchOpen.value = false
-})
+const scrolled = ref(false)
+const searchField = ref(null)
+const phoneField = ref(null)
+const root = ref(null)
 
 const links = [
   { label: 'Svi proizvodi', to: { name: 'catalog' } },
@@ -36,126 +37,285 @@ const links = [
   { label: 'Kosa', to: { name: 'catalog', query: { kategorija: 'kosa' } } },
   { label: 'Seboreja', to: { name: 'catalog', query: { kategorija: 'seboreja' } } },
   { label: 'Psorijaza', to: { name: 'catalog', query: { kategorija: 'psorijaza' } } },
+  { label: 'Ekcem', to: { name: 'catalog', query: { kategorija: 'ekcem' } } },
   { label: 'Setovi', to: { name: 'catalog', query: { kategorija: 'setovi' } } },
+]
+
+const more = [
+  { label: 'Naša priča', to: { name: 'story' } },
+  { label: 'Dostava', to: { name: 'delivery' } },
+  { label: 'Česta pitanja', to: { name: 'faq' } },
 ]
 
 const matches = computed(() => {
   const needle = term.value.trim().toLowerCase()
   if (needle.length < 2) return []
-  return catalog.products.filter((p) => p.name.toLowerCase().includes(needle)).slice(0, 6)
+  return catalog.products.filter((p) => p.name.toLowerCase().includes(needle)).slice(0, 5)
 })
+
+const showResults = computed(() => searchOpen.value && term.value.trim().length >= 2)
 
 function search() {
   if (!term.value.trim()) return
   router.push({ name: 'catalog', query: { q: term.value.trim() } })
+  close()
+}
+
+function close() {
+  searchOpen.value = false
+  menuOpen.value = false
   term.value = ''
 }
 
-function openSearch() {
+function focusSearch() {
   catalog.load()
-  searchOpen.value = !searchOpen.value
+  searchOpen.value = true
+  menuOpen.value = false
 }
+
+async function togglePhoneSearch() {
+  catalog.load()
+  menuOpen.value = false
+  searchOpen.value = !searchOpen.value
+  if (searchOpen.value) {
+    await nextTick()
+    phoneField.value?.focus()
+  } else {
+    term.value = ''
+  }
+}
+
+function toggleMenu() {
+  searchOpen.value = false
+  menuOpen.value = !menuOpen.value
+}
+
+function onScroll() {
+  scrolled.value = window.scrollY > 24
+}
+
+function onKey(event) {
+  if (event.key === 'Escape') close()
+}
+
+function onPointer(event) {
+  if (!root.value?.contains(event.target)) {
+    searchOpen.value = false
+  }
+}
+
+watch(() => route.fullPath, close)
+
+onMounted(() => {
+  onScroll()
+  window.addEventListener('scroll', onScroll, { passive: true })
+  window.addEventListener('keydown', onKey)
+  window.addEventListener('pointerdown', onPointer)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('scroll', onScroll)
+  window.removeEventListener('keydown', onKey)
+  window.removeEventListener('pointerdown', onPointer)
+})
 </script>
 
 <template>
-  <header class="sticky top-0 z-40 bg-paper">
-    <!-- The two facts every one of 5.479 orders confirms: no delivery charge,
-         paid to the courier. One slim line, a hairline, nothing shouting. -->
-    <div class="border-b border-blush-100">
-      <div class="shell flex h-9 items-center justify-center gap-3 text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-blush-700 sm:text-[0.75rem]">
+  <header
+    ref="root"
+    class="sticky top-0 z-40 bg-paper transition-shadow duration-500"
+    :class="scrolled ? 'shadow-[0_12px_40px_-24px_rgba(120,56,78,0.35)]' : ''"
+  >
+    <!-- The two facts every one of 5.479 orders confirms. Pink, as it was;
+         it folds away once you start reading the page. -->
+    <div
+      class="overflow-hidden bg-blush-100 transition-[max-height] duration-500 ease-[var(--ease-silk)]"
+      :class="scrolled ? 'max-h-0' : 'max-h-10'"
+    >
+      <div class="shell flex h-10 items-center justify-center gap-3 text-[0.75rem] font-semibold tracking-[0.04em] text-blush-700 sm:text-[0.8125rem]">
         <svg viewBox="0 0 24 24" class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 7.5h11v9h-11zM13.5 10.5h3.6l3.4 3.2v2.8h-7z" /><circle cx="6" cy="18.3" r="1.5" /><circle cx="17.3" cy="18.3" r="1.5" /></svg>
-        <span>Besplatna dostava</span>
+        <span>Besplatna dostava u celoj Srbiji</span>
         <span class="h-[3px] w-[3px] rounded-full bg-blush-400" aria-hidden="true" />
         <span>Plaćanje pouzećem</span>
       </div>
     </div>
 
-    <div class="shell relative flex h-[4.5rem] items-center justify-between gap-4 lg:h-[5.25rem]">
-      <!-- Left: menu on a phone, the wordmark on a desktop -->
-      <div class="flex items-center gap-1">
-        <button
-          type="button"
-          class="grid h-11 w-11 place-items-center rounded-full transition-colors hover:bg-ink/5 lg:hidden"
-          :aria-expanded="menuOpen"
-          aria-label="Meni"
-          @click="menuOpen = !menuOpen"
-        >
-          <span class="relative block h-3 w-5">
-            <span class="absolute left-0 block h-[1.5px] w-5 rounded bg-current transition-all duration-300" :class="menuOpen ? 'top-1.5 rotate-45' : 'top-0'" />
-            <span class="absolute left-0 block h-[1.5px] w-5 rounded bg-current transition-all duration-300" :class="menuOpen ? 'top-1.5 -rotate-45' : 'top-3'" />
-          </span>
-        </button>
-        <RouterLink :to="{ name: 'home' }" aria-label="Meva Cosmetics" class="hidden lg:block">
-          <img :src="logoBlack" alt="Meva Cosmetics" class="h-10 w-auto" />
-        </RouterLink>
-      </div>
+    <!-- Main row: wordmark, search, account, basket -->
+    <div
+      class="shell relative flex items-center justify-between gap-4 transition-[height] duration-500 ease-[var(--ease-silk)] lg:gap-10"
+      :class="scrolled ? 'h-[4.25rem] lg:h-[4.75rem]' : 'h-[4.5rem] lg:h-[5.75rem]'"
+    >
+      <!-- Phone: menu -->
+      <button
+        type="button"
+        class="grid h-11 w-11 place-items-center rounded-full transition-colors hover:bg-blush-50 lg:hidden"
+        :aria-expanded="menuOpen"
+        aria-label="Meni"
+        @click="toggleMenu"
+      >
+        <span class="relative block h-3 w-5">
+          <span class="absolute left-0 block h-[1.5px] w-5 rounded bg-current transition-all duration-300" :class="menuOpen ? 'top-1.5 rotate-45' : 'top-0'" />
+          <span class="absolute left-0 block h-[1.5px] w-5 rounded bg-current transition-all duration-300" :class="menuOpen ? 'top-1.5 -rotate-45' : 'top-3'" />
+        </span>
+      </button>
 
-      <!-- Centre: the wordmark on a phone, the navigation on a desktop -->
-      <RouterLink :to="{ name: 'home' }" aria-label="Meva Cosmetics" class="absolute left-1/2 -translate-x-1/2 lg:hidden">
-        <img :src="logoBlack" alt="Meva Cosmetics" class="h-8 w-auto" />
+      <!-- Wordmark: centred on a phone, left on a desktop -->
+      <RouterLink
+        :to="{ name: 'home' }"
+        aria-label="Meva Cosmetics"
+        class="absolute left-1/2 -translate-x-1/2 lg:static lg:translate-x-0"
+      >
+        <img
+          :src="logoBlack"
+          alt="Meva Cosmetics"
+          class="w-auto transition-[height] duration-500 ease-[var(--ease-silk)]"
+          :class="scrolled ? 'h-10 lg:h-12' : 'h-11 lg:h-16'"
+        />
       </RouterLink>
 
-      <nav class="hidden items-center gap-7 lg:flex">
-        <RouterLink
-          v-for="link in links"
-          :key="link.label"
-          :to="link.to"
-          class="nav-item relative py-2 text-[0.75rem] font-semibold uppercase tracking-[0.16em] text-ink/70 transition-colors hover:text-ink"
-          active-class="is-on text-ink"
-        >
-          {{ link.label }}
-        </RouterLink>
-      </nav>
+      <!-- Desktop: the search field, a real one, in the middle -->
+      <form class="relative hidden w-full max-w-[26rem] lg:block xl:max-w-[30rem]" role="search" @submit.prevent="search">
+        <svg viewBox="0 0 24 24" class="pointer-events-none absolute left-4 top-1/2 h-[1.1rem] w-[1.1rem] -translate-y-1/2 text-ink/45" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" stroke-linecap="round" /></svg>
+        <input
+          ref="searchField"
+          v-model="term"
+          type="search"
+          autocomplete="off"
+          placeholder="Pretražite proizvode: šampon, seboreja, krema…"
+          class="h-11 w-full rounded-full border border-blush-200 bg-blush-50/60 pl-11 pr-4 text-[0.9rem] text-ink outline-none transition-all duration-300 placeholder:text-ink/40 focus:border-blush-400 focus:bg-paper focus:shadow-[0_0_0_4px_rgba(230,173,191,0.25)]"
+          @focus="focusSearch"
+        />
 
-      <!-- Right: search, account, basket -->
-      <div class="flex items-center gap-0.5">
-        <button type="button" class="grid h-11 w-11 place-items-center rounded-full transition-colors hover:bg-ink/5" aria-label="Pretraga" @click="openSearch">
-          <svg viewBox="0 0 24 24" class="h-[1.25rem] w-[1.25rem]" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" stroke-linecap="round" /></svg>
+        <!-- Results, floating under the field -->
+        <Transition enter-from-class="opacity-0 -translate-y-1" enter-active-class="transition duration-200" leave-to-class="opacity-0 -translate-y-1" leave-active-class="transition duration-150">
+          <div v-if="showResults" class="absolute left-0 right-0 top-[calc(100%+0.625rem)] overflow-hidden rounded-2xl border border-blush-100 bg-paper shadow-[0_24px_60px_-20px_rgba(120,56,78,0.3)]">
+            <ul v-if="matches.length" class="p-2">
+              <li v-for="product in matches" :key="product.slug">
+                <RouterLink :to="{ name: 'product', params: { slug: product.slug } }" class="flex items-center gap-3.5 rounded-xl px-2.5 py-2 transition-colors hover:bg-blush-50">
+                  <span class="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-lg bg-blush-50">
+                    <img v-if="product.image" :src="product.image" alt="" class="h-full w-full object-cover" />
+                  </span>
+                  <span class="min-w-0 flex-1 truncate text-[0.9rem] font-medium text-ink">{{ product.name }}</span>
+                  <span class="shrink-0 text-[0.85rem] font-semibold text-blush-700">{{ product.price?.formatted }}</span>
+                </RouterLink>
+              </li>
+            </ul>
+            <p v-else class="px-5 py-5 text-sm text-ink/55">Nema proizvoda sa tim nazivom. Pokušajte drugu reč ili pogledajte sve proizvode.</p>
+            <button type="submit" class="flex w-full items-center justify-between border-t border-blush-100 px-5 py-3 text-[0.8rem] font-semibold uppercase tracking-[0.12em] text-blush-700 transition-colors hover:bg-blush-50">
+              <span>Svi rezultati za „{{ term.trim() }}”</span>
+              <span aria-hidden="true">→</span>
+            </button>
+          </div>
+        </Transition>
+      </form>
+
+      <!-- Right: search (phone), account, basket -->
+      <div class="flex items-center gap-1 lg:gap-3">
+        <button type="button" class="grid h-11 w-11 place-items-center rounded-full transition-colors hover:bg-blush-50 lg:hidden" :aria-expanded="searchOpen" aria-label="Pretraga" @click="togglePhoneSearch">
+          <svg viewBox="0 0 24 24" class="h-[1.3rem] w-[1.3rem]" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" stroke-linecap="round" /></svg>
         </button>
+
         <RouterLink
           :to="auth.signedIn ? { name: 'account' } : { name: 'login' }"
-          class="hidden h-11 w-11 place-items-center rounded-full transition-colors hover:bg-ink/5 sm:grid"
-          :aria-label="auth.signedIn ? 'Moj nalog' : 'Prijava'"
+          class="hidden flex-col items-center gap-1 rounded-xl px-3 py-1.5 text-ink transition-colors hover:bg-blush-50 lg:flex"
         >
-          <svg viewBox="0 0 24 24" class="h-[1.25rem] w-[1.25rem]" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="3.6" /><path d="M4.8 20c0-3.6 3.3-6 7.2-6s7.2 2.4 7.2 6" stroke-linecap="round" /></svg>
+          <svg viewBox="0 0 24 24" class="h-[1.3rem] w-[1.3rem]" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="3.6" /><path d="M4.8 20c0-3.6 3.3-6 7.2-6s7.2 2.4 7.2 6" stroke-linecap="round" /></svg>
+          <span class="text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-ink/65">{{ auth.signedIn ? 'Nalog' : 'Prijava' }}</span>
         </RouterLink>
-        <RouterLink :to="{ name: 'cart' }" class="relative grid h-11 w-11 place-items-center rounded-full transition-colors hover:bg-ink/5" aria-label="Korpa">
-          <svg viewBox="0 0 24 24" class="h-[1.25rem] w-[1.25rem]" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 7h16l-1.3 12.2a2 2 0 0 1-2 1.8H7.3a2 2 0 0 1-2-1.8Z" stroke-linejoin="round" /><path d="M8.5 7V5.8a3.5 3.5 0 0 1 7 0V7" stroke-linecap="round" /></svg>
-          <span v-if="cart.count" class="absolute right-0.5 top-0.5 grid h-[1.125rem] min-w-[1.125rem] place-items-center rounded-full bg-blush-600 px-1 text-[0.625rem] font-bold text-paper">{{ cart.count }}</span>
+
+        <RouterLink :to="{ name: 'cart' }" class="relative flex flex-col items-center gap-1 rounded-xl px-3 py-1.5 text-ink transition-colors hover:bg-blush-50" aria-label="Korpa">
+          <span class="relative">
+            <svg viewBox="0 0 24 24" class="h-[1.3rem] w-[1.3rem]" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 7h16l-1.3 12.2a2 2 0 0 1-2 1.8H7.3a2 2 0 0 1-2-1.8Z" stroke-linejoin="round" /><path d="M8.5 7V5.8a3.5 3.5 0 0 1 7 0V7" stroke-linecap="round" /></svg>
+            <span v-if="cart.count" class="absolute -right-2.5 -top-2 grid h-[1.125rem] min-w-[1.125rem] place-items-center rounded-full bg-blush-600 px-1 text-[0.625rem] font-bold text-paper">{{ cart.count }}</span>
+          </span>
+          <span class="hidden text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-ink/65 lg:block">Korpa</span>
         </RouterLink>
       </div>
     </div>
 
-    <div class="h-px w-full bg-gradient-to-r from-blush-200 via-blush-300 to-blush-200" aria-hidden="true" />
+    <!-- The shelves -->
+    <nav class="hidden border-t border-blush-100 lg:block" aria-label="Kategorije">
+      <div class="shell flex h-11 items-center justify-between">
+        <div class="flex items-center gap-8">
+          <RouterLink
+            v-for="link in links"
+            :key="link.label"
+            :to="link.to"
+            class="nav-item relative py-3 text-[0.75rem] font-semibold uppercase tracking-[0.16em] text-ink/70 transition-colors hover:text-ink"
+            active-class="is-on text-ink"
+          >
+            {{ link.label }}
+          </RouterLink>
+        </div>
+        <div class="flex items-center gap-6">
+          <RouterLink
+            v-for="link in more"
+            :key="link.label"
+            :to="link.to"
+            class="font-display text-[0.9375rem] italic text-ink/60 transition-colors hover:text-blush-700"
+            active-class="text-blush-700"
+          >
+            {{ link.label }}
+          </RouterLink>
+        </div>
+      </div>
+    </nav>
 
-    <!-- Search -->
+    <div class="hidden h-px w-full bg-gradient-to-r from-blush-100 via-blush-300 to-blush-100 lg:block" aria-hidden="true" />
+    <div class="h-px w-full bg-blush-100 lg:hidden" aria-hidden="true" />
+
+    <!-- Phone: search panel -->
     <Transition enter-from-class="opacity-0 -translate-y-1" enter-active-class="transition duration-200" leave-to-class="opacity-0 -translate-y-1" leave-active-class="transition duration-150">
-      <div v-if="searchOpen" class="border-t border-blush-100 bg-paper">
+      <div v-if="searchOpen" class="border-t border-blush-100 bg-paper lg:hidden">
         <div class="shell py-4">
-          <form class="relative" @submit.prevent="search">
-            <input v-model="term" type="search" autofocus placeholder="Šta tražite? Na primer: šampon, seboreja, krema…"
-              class="w-full rounded-full border border-ink/15 bg-paper py-3.5 pl-5 pr-28 text-[0.9375rem] outline-none transition-colors placeholder:text-ink/40 focus:border-blush-500" />
-            <button type="submit" class="absolute right-1.5 top-1.5 rounded-full bg-blush-600 px-5 py-2 text-sm font-semibold text-paper transition-colors hover:bg-blush-700">Traži</button>
+          <form class="relative" role="search" @submit.prevent="search">
+            <svg viewBox="0 0 24 24" class="pointer-events-none absolute left-4 top-1/2 h-[1.1rem] w-[1.1rem] -translate-y-1/2 text-ink/45" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" stroke-linecap="round" /></svg>
+            <input
+              ref="phoneField"
+              v-model="term"
+              type="search"
+              autocomplete="off"
+              placeholder="Šampon, seboreja, krema…"
+              class="h-12 w-full rounded-full border border-blush-200 bg-blush-50/60 pl-11 pr-24 text-[0.95rem] text-ink outline-none transition-colors placeholder:text-ink/40 focus:border-blush-400 focus:bg-paper"
+            />
+            <button type="submit" class="absolute right-1.5 top-1.5 h-9 rounded-full bg-blush-600 px-4 text-[0.8125rem] font-semibold text-paper transition-colors hover:bg-blush-700">Traži</button>
           </form>
-          <ul v-if="matches.length" class="mt-3 space-y-1">
+          <ul v-if="matches.length" class="mt-3 divide-y divide-blush-100">
             <li v-for="product in matches" :key="product.slug">
-              <RouterLink :to="{ name: 'product', params: { slug: product.slug } }" class="flex items-center gap-3 rounded-xl px-2 py-2 transition-colors hover:bg-paper/60">
-                <img v-if="product.image" :src="product.image" alt="" class="h-11 w-11 rounded-lg object-cover" />
-                <span class="min-w-0 flex-1 truncate text-sm font-medium">{{ product.name }}</span>
-                <span class="shrink-0 text-sm text-ink/55">{{ product.price?.formatted }}</span>
+              <RouterLink :to="{ name: 'product', params: { slug: product.slug } }" class="flex items-center gap-3 py-2.5">
+                <span class="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-lg bg-blush-50">
+                  <img v-if="product.image" :src="product.image" alt="" class="h-full w-full object-cover" />
+                </span>
+                <span class="min-w-0 flex-1 truncate text-[0.9rem] font-medium text-ink">{{ product.name }}</span>
+                <span class="shrink-0 text-[0.85rem] font-semibold text-blush-700">{{ product.price?.formatted }}</span>
               </RouterLink>
             </li>
           </ul>
+          <p v-else-if="showResults" class="mt-3 text-sm text-ink/55">Nema proizvoda sa tim nazivom.</p>
         </div>
       </div>
     </Transition>
 
-    <!-- Menu (phone) -->
+    <!-- Phone: menu -->
     <Transition enter-from-class="opacity-0 -translate-y-1" enter-active-class="transition duration-200" leave-to-class="opacity-0 -translate-y-1" leave-active-class="transition duration-150">
       <nav v-if="menuOpen" class="border-t border-blush-100 bg-paper lg:hidden">
-        <div class="shell py-2">
-          <RouterLink v-for="link in links" :key="link.label" :to="link.to" class="block border-b border-ink/10 py-3.5 text-[1.0625rem] font-medium last:border-0">{{ link.label }}</RouterLink>
-          <RouterLink :to="auth.signedIn ? { name: 'account' } : { name: 'login' }" class="block py-3.5 text-[1.0625rem] font-medium sm:hidden">{{ auth.signedIn ? 'Moj nalog' : 'Prijava' }}</RouterLink>
+        <div class="shell py-3">
+          <p class="kicker pt-2 pb-1 text-blush-700">Proizvodi</p>
+          <RouterLink
+            v-for="link in links"
+            :key="link.label"
+            :to="link.to"
+            class="flex items-center justify-between border-b border-blush-100 py-3.5 text-[1.0625rem] font-medium text-ink last:border-0"
+          >
+            <span>{{ link.label }}</span>
+            <span class="text-blush-400" aria-hidden="true">→</span>
+          </RouterLink>
+
+          <p class="kicker pt-5 pb-1 text-blush-700">Meva</p>
+          <div class="flex flex-wrap gap-x-5 gap-y-2 py-2">
+            <RouterLink v-for="link in more" :key="link.label" :to="link.to" class="font-display text-[1.0625rem] italic text-ink/70">{{ link.label }}</RouterLink>
+            <RouterLink :to="auth.signedIn ? { name: 'account' } : { name: 'login' }" class="font-display text-[1.0625rem] italic text-ink/70">{{ auth.signedIn ? 'Moj nalog' : 'Prijava' }}</RouterLink>
+          </div>
         </div>
       </nav>
     </Transition>
