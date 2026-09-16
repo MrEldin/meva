@@ -689,3 +689,30 @@
     color: transparent;
   }
 }
+
+/*
+|--------------------------------------------------------------------------
+| Feathered edges for the hero film
+|--------------------------------------------------------------------------
+|
+| The film was shot on the same colour the section is painted, and by the
+| numbers they match to within two units. On a wide-gamut screen they still do
+| not: a browser composites video through a different colour path from CSS,
+| and the eye finds the rectangle at once. So the film has no rectangle -- its
+| edges fade into the section over the last stretch on every side, and there
+| is nothing left for a mismatch to draw a line along.
+|
+*/
+@layer utilities {
+  .feather {
+    --f: 9%;
+    -webkit-mask-image:
+      linear-gradient(to right,  transparent, #000 var(--f), #000 calc(100% - var(--f)), transparent),
+      linear-gradient(to bottom, #000, #000 calc(100% - var(--f)), transparent);
+    -webkit-mask-composite: source-in;
+    mask-image:
+      linear-gradient(to right,  transparent, #000 var(--f), #000 calc(100% - var(--f)), transparent),
+      linear-gradient(to bottom, #000, #000 calc(100% - var(--f)), transparent);
+    mask-composite: intersect;
+  }
+}

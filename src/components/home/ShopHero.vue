@@ -40,13 +40,13 @@ onBeforeUnmount(() => document.removeEventListener('visibilitychange', resume))
 
 <template>
   <section class="bg-peach text-ink">
-    <div class="shell grid items-center gap-2 pb-10 pt-4 lg:grid-cols-[minmax(0,44%)_minmax(0,56%)] lg:gap-10 lg:py-6">
+    <div class="shell grid items-center gap-0 pb-10 pt-0 lg:grid-cols-[minmax(0,44%)_minmax(0,56%)] lg:gap-10 lg:pb-0">
       <!-- The film. First on a phone, right on a desktop; whole, never cropped. -->
-      <div class="order-1 -mx-5 sm:mx-0 lg:order-2">
+      <div class="order-1 -mx-5 self-start sm:mx-0 lg:order-2">
         <video
           v-if="!reduced"
           ref="video"
-          class="block aspect-[1800/1100] w-full object-contain"
+          class="feather block aspect-[1800/1100] w-full object-contain"
           autoplay
           muted
           loop
@@ -59,11 +59,11 @@ onBeforeUnmount(() => document.removeEventListener('visibilitychange', resume))
           <source :src="heroMp4" type="video/mp4" media="(min-width: 768px)" />
           <source :src="heroSmallMp4" type="video/mp4" />
         </video>
-        <img v-else :src="heroPoster" alt="Meva preparati na kamenu" class="block aspect-[1800/1100] w-full object-contain" />
+        <img v-else :src="heroPoster" alt="Meva preparati na kamenu" class="feather block aspect-[1800/1100] w-full object-contain" />
       </div>
 
       <!-- The words. -->
-      <div class="order-2 lg:order-1 lg:py-10">
+      <div class="order-2 pt-6 lg:order-1 lg:py-10">
         <p class="text-[0.8125rem] font-bold uppercase tracking-[0.14em] text-ink/70">Prirodna kozmetika · Novi Pazar</p>
 
         <h1 class="mt-3 text-[2.25rem] leading-[1.06] sm:text-[2.875rem] lg:text-[3.5rem]" style="text-wrap: balance">
