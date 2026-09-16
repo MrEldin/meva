@@ -31,10 +31,11 @@
   --color-shell: #fdf7f8;
   --color-shell-deep: #fbeff2;
 
-  /* The exact ground the hero film was shot on, so the section and the
-     footage meet with no visible edge. Sampled from the video itself. */
-  --color-peach: #e9ae95;
-  --color-peach-deep: #d9997f;
+  /* The ground the hero film is painted on *by the browser* -- measured from
+     the shipped encodes with a canvas, not taken from the brief (#f1b5b3) or
+     from ffmpeg (#f6bbb3), both of which differ from what the eye sees. */
+  --color-peach: #f6bbb5;
+  --color-peach-deep: #e9a09c;
 
   /* Powder pink: the brand's own colour, and the only accent. */
   --color-blush-50: #fdf6f8;
@@ -89,7 +90,8 @@
   | to read and does not make anyone work; a single humanist sans does that
   | better than pairing a display serif with it, and it loads faster.
   */
-  --font-display: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Playfair Display", "Georgia", "Times New Roman", serif;
+  --font-script: "Caveat", "Segoe Script", cursive;
   --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "DM Sans", ui-monospace, monospace;
 
@@ -135,9 +137,9 @@
 
   h1, h2, h3, h4 {
     font-family: var(--font-display);
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    line-height: 1.12;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.1;
   }
 
   ::selection {
