@@ -31,11 +31,10 @@
   --color-shell: #fdf7f8;
   --color-shell-deep: #fbeff2;
 
-  /* The ground the hero film is painted on *by the browser* -- measured from
-     the shipped encodes with a canvas, not taken from the brief (#f1b5b3) or
-     from ffmpeg (#f6bbb3), both of which differ from what the eye sees. */
-  --color-peach: #f6bbb5;
-  --color-peach-deep: #e9a09c;
+  /* The hero film's ground as it shows on a Mac or iPhone -- read off the
+     playing film by Eldin. Not the brief's value and not a decoder's. */
+  --color-peach: #f8c1ba;
+  --color-peach-deep: #eaa39d;
 
   /* Powder pink: the brand's own colour, and the only accent. */
   --color-blush-50: #fdf6f8;
@@ -718,3 +717,4 @@
     mask-composite: intersect;
   }
 }
+
