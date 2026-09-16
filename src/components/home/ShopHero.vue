@@ -107,7 +107,7 @@ onBeforeUnmount(() => document.removeEventListener('visibilitychange', resume))
         </ul>
 
         <!-- Seals: the facts that earn trust before anyone reads further -->
-        <ul class="mt-6 grid grid-cols-3 gap-2 sm:gap-3">
+        <ul class="mt-6 grid gap-2 sm:grid-cols-3 sm:gap-3">
           <li v-for="seal in SEALS" :key="seal.big" class="flex items-center gap-2.5 rounded-2xl border border-ink/10 bg-paper/45 px-3 py-2.5 backdrop-blur-[2px]">
             <svg viewBox="0 0 32 32" class="h-8 w-8 shrink-0 text-blush-700" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <!-- laurel -->
@@ -117,7 +117,7 @@ onBeforeUnmount(() => document.removeEventListener('visibilitychange', resume))
               <path d="M16 6l1.6 3.3 3.6.5-2.6 2.5.6 3.6L16 14.2l-3.2 1.7.6-3.6-2.6-2.5 3.6-.5z" fill="currentColor" stroke="none" />
             </svg>
             <span class="min-w-0 leading-tight">
-              <span class="block truncate font-display text-[0.9375rem] font-semibold text-ink">{{ seal.big }}</span>
+              <span class="block font-display text-[0.9375rem] font-semibold leading-tight text-ink">{{ seal.big }}</span>
               <span class="block text-[0.6875rem] leading-snug text-ink/60">{{ seal.small }}</span>
             </span>
           </li>
