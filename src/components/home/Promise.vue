@@ -1,6 +1,6 @@
 <script setup>
 const POINTS = [
-  { title: 'Besplatna dostava', text: 'U celoj Srbiji, bez minimalnog iznosa. Stiže za 1–3 radna dana.', icon: 'van' },
+  { title: 'Besplatna dostava', text: 'U celoj Srbiji, bez minimalnog iznosa. Svih 5.479 porudžbina do sada.', icon: 'van' },
   { title: 'Plaćate kuriru', text: 'Pouzećem, kad paket stigne. Ništa unapred.', icon: 'cash' },
   { title: 'Sastav koji se čita', text: 'Svaki sastojak punim imenom. Bez sulfata i parabena.', icon: 'leaf' },
 ]

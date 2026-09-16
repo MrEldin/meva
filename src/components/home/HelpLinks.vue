@@ -3,7 +3,7 @@ import SectionHead from '@/components/home/SectionHead.vue'
 
 const LINKS = [
   { to: 'faq', title: 'Česta pitanja', text: 'Koliko traje pakovanje, kada se vide rezultati.' },
-  { to: 'delivery', title: 'Dostava', text: 'Besplatno, 1–3 radna dana, plaćate kuriru.' },
+  { to: 'delivery', title: 'Dostava', text: 'Besplatno u celoj Srbiji, plaćate kuriru.' },
   { to: 'returns', title: 'Povrat i reklamacije', text: '14 dana za odustajanje.' },
 ]
 </script>

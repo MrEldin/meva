@@ -18,11 +18,11 @@ import { onBeforeUnmount, onMounted, ref } from 'vue'
  */
 const PROMISES = ['Besplatna dostava', 'Plaćanje pouzećem', 'Bez registracije']
 
-// Only what is true. Each one is a fact the shop can stand behind.
+// Two seals, drawn as seals: text set round a circle, a mark in the middle.
+// Both are facts -- the laboratories that tested the range.
 const SEALS = [
-  { big: 'Ispitano', small: 'Institut za javno zdravlje Vojvodine' },
-  { big: 'Analiza sastava', small: 'Superlab laboratorija' },
-  { big: '5.479', small: 'porudžbina od 2010.' },
+  { id: 'izjzv', ring: 'ISPITANO  ·  INSTITUT ZA JAVNO ZDRAVLJE VOJVODINE  ·  ', mark: 'check' },
+  { id: 'superlab', ring: 'ANALIZA SASTAVA  ·  SUPERLAB LABORATORIJA  ·  ', mark: 'leaf' },
 ]
 
 const video = ref(null)
@@ -84,13 +84,13 @@ onBeforeUnmount(() => document.removeEventListener('visibilitychange', resume))
         <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
           <RouterLink
             :to="{ name: 'catalog' }"
-            class="inline-flex items-center justify-center rounded-full bg-ink px-8 py-4 text-[0.9375rem] font-bold text-paper shadow-[0_14px_30px_-14px_rgba(42,31,35,0.55)] transition-colors hover:bg-blush-700"
+            class="inline-flex items-center justify-center rounded-full bg-blush-600 px-8 py-4 text-[0.9375rem] font-bold text-paper shadow-[0_16px_34px_-16px_rgba(150,73,100,0.7)] transition-colors hover:bg-blush-700"
           >
             Pogledaj proizvode
           </RouterLink>
           <RouterLink
             :to="{ name: 'story' }"
-            class="inline-flex items-center justify-center gap-2 rounded-full border-[1.5px] border-ink/30 px-8 py-4 text-[0.9375rem] font-bold text-ink transition-colors hover:border-ink hover:bg-paper/40"
+            class="inline-flex items-center justify-center gap-2 rounded-full border border-paper/70 bg-paper/45 px-8 py-4 text-[0.9375rem] font-bold text-ink backdrop-blur-sm transition-colors hover:bg-paper/70"
           >
             Pronađi svoju rutinu
             <span aria-hidden="true">→</span>
@@ -106,22 +106,24 @@ onBeforeUnmount(() => document.removeEventListener('visibilitychange', resume))
           </li>
         </ul>
 
-        <!-- Seals: the facts that earn trust before anyone reads further -->
-        <ul class="mt-6 grid gap-2 sm:grid-cols-3 sm:gap-3">
-          <li v-for="seal in SEALS" :key="seal.big" class="flex items-center gap-2.5 rounded-2xl border border-ink/10 bg-paper/45 px-3 py-2.5 backdrop-blur-[2px]">
-            <svg viewBox="0 0 32 32" class="h-8 w-8 shrink-0 text-blush-700" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <!-- laurel -->
-              <path d="M9 26c-4-3-6-8-5-13 3 1 5 4 5 7M23 26c4-3 6-8 5-13-3 1-5 4-5 7" />
-              <path d="M8 21c-3-1-5-4-5-7 3 0 5 2 6 4M24 21c3-1 5-4 5-7-3 0-5 2-6 4" />
-              <path d="M9 15c-2-1-3-3-3-6 2 0 4 2 4 4M23 15c2-1 3-3 3-6-2 0-4 2-4 4" />
-              <path d="M16 6l1.6 3.3 3.6.5-2.6 2.5.6 3.6L16 14.2l-3.2 1.7.6-3.6-2.6-2.5 3.6-.5z" fill="currentColor" stroke="none" />
-            </svg>
-            <span class="min-w-0 leading-tight">
-              <span class="block font-display text-[0.9375rem] font-semibold leading-tight text-ink">{{ seal.big }}</span>
-              <span class="block text-[0.6875rem] leading-snug text-ink/60">{{ seal.small }}</span>
-            </span>
-          </li>
-        </ul>
+        <!-- Seals. Text set round a circle, as a stamp is; and one plain figure. -->
+        <div class="mt-7 flex items-center gap-5 sm:gap-7">
+          <svg v-for="seal in SEALS" :key="seal.id" viewBox="0 0 120 120" class="h-[6.25rem] w-[6.25rem] shrink-0 text-blush-700 sm:h-28 sm:w-28" role="img" :aria-label="seal.ring.replaceAll('  ·  ', ', ').trim()">
+            <defs><path :id="`ring-${seal.id}`" d="M60,60 m-44,0 a44,44 0 1,1 88,0 a44,44 0 1,1 -88,0" /></defs>
+            <circle cx="60" cy="60" r="55" fill="rgba(255,255,255,0.45)" stroke="currentColor" stroke-width="1" />
+            <circle cx="60" cy="60" r="33" fill="none" stroke="currentColor" stroke-width="0.8" stroke-dasharray="1.5 2.5" />
+            <text font-family="DM Sans, sans-serif" font-size="7.6" font-weight="700" letter-spacing="1.1" fill="currentColor">
+              <textPath :href="`#ring-${seal.id}`" startOffset="0">{{ seal.ring }}</textPath>
+            </text>
+            <g v-if="seal.mark === 'check'" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M46 61l9 9 19-20" /></g>
+            <g v-else fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M74 44c-1 14-8 22-20 22h-4c0-14 8-22 24-22z" /><path d="M50 72c3-6 7-11 13-15" /></g>
+          </svg>
+
+          <p class="min-w-0 leading-tight">
+            <span class="block font-display text-[1.75rem] font-semibold text-ink sm:text-[2rem]">5.479</span>
+            <span class="block text-[0.8125rem] text-ink/65">porudžbina od 2010.</span>
+          </p>
+        </div>
       </div>
     </div>
   </section>

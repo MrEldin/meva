@@ -215,7 +215,7 @@ const shareText = computed(() =>
           </div>
 
           <ul class="mt-5 grid gap-2 text-[0.875rem] text-mist-600">
-            <li v-for="line in ['Besplatna dostava u celoj Srbiji', 'Plaćanje pouzećem, kuriru pri preuzimanju', 'Isporuka 1–3 radna dana']" :key="line" class="flex items-center gap-2">
+            <li v-for="line in ['Besplatna dostava u celoj Srbiji', 'Plaćanje pouzećem, kuriru pri preuzimanju', 'Kurir vas pozove pre isporuke']" :key="line" class="flex items-center gap-2">
               <svg viewBox="0 0 16 16" class="h-4 w-4 shrink-0 text-blush-500" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 8.5l3.2 3.2L13 5" stroke-linecap="round" stroke-linejoin="round" /></svg>
               {{ line }}
             </li>
