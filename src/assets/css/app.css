@@ -718,3 +718,18 @@
   }
 }
 
+
+/* Navigation: a fine pink rule that draws itself under the item you are on. */
+@layer utilities {
+  .nav-item::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 1.5px;
+    background: var(--color-blush-500);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.35s var(--ease-silk);
+  }
+  .nav-item:hover::after, .nav-item.is-on::after { transform: scaleX(1); }
+}
