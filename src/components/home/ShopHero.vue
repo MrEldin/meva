@@ -2,7 +2,7 @@
 import heroMp4 from '@/assets/video/hero.mp4'
 import heroSmallMp4 from '@/assets/video/hero-small.mp4'
 import heroWebm from '@/assets/video/hero.webm'
-import heroPoster from '@/assets/video/hero-poster.jpg'
+import heroPoster from '@/assets/video/hero-poster.webp'
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 
 /**
