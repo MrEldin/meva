@@ -6,13 +6,20 @@ import heroPoster from '@/assets/video/hero-poster.webp'
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 
 /**
- * The opening: a thirty-second film on the ground it was shot on.
+ * The opening: a thirty-second film, on itself.
  *
- * The section is painted the colour of the footage, and the film's left, right
- * and bottom edges dissolve into it, so there is no rectangle; the top edge is
- * solid and flush with the header, because the hand enters from above. On a
- * phone the film comes first, full width; on a desktop it sits to the right of
- * the words.
+ * No CSS colour can match the film. A browser paints video through a different
+ * colour path from CSS -- a GPU layer, then the display's own colour
+ * management -- so the same ground measured #f6bbb5 in headless Chrome and
+ * #f8c1ba on Eldin's Mac, and every device would disagree by its own few
+ * units. So the section is not painted at all. Behind everything runs a second
+ * copy of the same film, stretched and blurred into a soft wash: the ground is
+ * the footage's own pixels, through the same decoder and the same compositor,
+ * and there is nothing left to differ. The solid colour stays only as a
+ * fallback for a browser that refuses to play video.
+ *
+ * On a phone the film comes first, full width; on a desktop it takes the
+ * right three fifths and runs to the edge of the page.
  *
  * The words carry what earns trust at first sight, and nothing invented: the
  * two laboratories that tested the range, the count of orders behind it, and
@@ -32,9 +39,10 @@ const video = ref(null)
 const reduced = ref(false)
 
 // iOS pauses autoplaying video when the tab is hidden and does not always
-// resume it; a nudge on return keeps the loop going.
+// resume it; a nudge on return keeps both loops going.
 function resume() {
-  if (document.visibilityState === 'visible' && !reduced.value) video.value?.play?.().catch(() => {})
+  if (document.visibilityState !== 'visible' || reduced.value) return
+  document.querySelectorAll('section video').forEach((v) => v.play?.().catch(() => {}))
 }
 
 onMounted(() => {
@@ -46,10 +54,21 @@ onBeforeUnmount(() => document.removeEventListener('visibilitychange', resume))
 </script>
 
 <template>
-  <section class="bg-peach text-ink">
-    <div class="shell grid items-center gap-0 pb-10 pt-0 lg:grid-cols-[minmax(0,44%)_minmax(0,56%)] lg:gap-10 lg:pb-0">
-      <!-- The film. First on a phone, right on a desktop; whole, never cropped. -->
-      <div class="order-1 -mx-5 self-start sm:mx-0 lg:order-2">
+  <section class="relative isolate overflow-hidden bg-peach text-ink">
+    <!-- The ground: the same film, stretched over the whole section and blurred
+         into a wash. Same pixels as the film in front, so no colour can differ. -->
+    <video
+      v-if="!reduced"
+      class="pointer-events-none absolute inset-0 -z-10 h-full w-full scale-125 object-cover blur-2xl"
+      autoplay muted loop playsinline preload="metadata" aria-hidden="true" tabindex="-1"
+    >
+      <source :src="heroSmallMp4" type="video/mp4" />
+    </video>
+    <img v-else :src="heroPoster" alt="" aria-hidden="true" class="pointer-events-none absolute inset-0 -z-10 h-full w-full scale-125 object-cover blur-2xl" />
+
+    <div class="shell grid items-center gap-0 pb-10 pt-0 lg:grid-cols-[minmax(0,38%)_minmax(0,62%)] lg:gap-8 lg:pb-0">
+      <!-- The film. First on a phone, right on a desktop and out to the page's edge; whole, never cropped. -->
+      <div class="order-1 -mx-5 self-start sm:mx-0 lg:order-2 lg:-mr-10 xl:-mr-16">
         <video
           v-if="!reduced"
           ref="video"
