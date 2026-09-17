@@ -124,12 +124,12 @@ onBeforeUnmount(() => {
   <header
     ref="root"
     class="sticky top-0 z-40 bg-paper transition-shadow duration-500"
-    :class="scrolled ? 'shadow-[0_12px_40px_-24px_rgba(120,56,78,0.35)]' : ''"
+    :class="scrolled ? 'shadow-[0_12px_40px_-24px_rgba(142,59,69,0.35)]' : ''"
   >
     <!-- The two facts every one of 5.479 orders confirms. Pink, as it was;
          it folds away once you start reading the page. -->
     <div
-      class="overflow-hidden bg-blush-100 transition-[max-height] duration-500 ease-[var(--ease-silk)]"
+      class="overflow-hidden bg-peach transition-[max-height] duration-500 ease-[var(--ease-silk)]"
       :class="scrolled ? 'max-h-0' : 'max-h-10'"
     >
       <div class="shell flex h-10 items-center justify-center gap-3 text-[0.75rem] font-semibold tracking-[0.04em] text-blush-700 sm:text-[0.8125rem]">
@@ -188,7 +188,7 @@ onBeforeUnmount(() => {
 
         <!-- Results, floating under the field -->
         <Transition enter-from-class="opacity-0 -translate-y-1" enter-active-class="transition duration-200" leave-to-class="opacity-0 -translate-y-1" leave-active-class="transition duration-150">
-          <div v-if="showResults" class="absolute left-0 right-0 top-[calc(100%+0.625rem)] overflow-hidden rounded-2xl border border-blush-100 bg-paper shadow-[0_24px_60px_-20px_rgba(120,56,78,0.3)]">
+          <div v-if="showResults" class="absolute left-0 right-0 top-[calc(100%+0.625rem)] overflow-hidden rounded-2xl border border-blush-100 bg-paper shadow-[0_24px_60px_-20px_rgba(142,59,69,0.3)]">
             <ul v-if="matches.length" class="p-2">
               <li v-for="product in matches" :key="product.slug">
                 <RouterLink :to="{ name: 'product', params: { slug: product.slug } }" class="flex items-center gap-3.5 rounded-xl px-2.5 py-2 transition-colors hover:bg-blush-50">
@@ -261,8 +261,8 @@ onBeforeUnmount(() => {
       </div>
     </nav>
 
-    <div class="hidden h-px w-full bg-gradient-to-r from-blush-100 via-blush-300 to-blush-100 lg:block" aria-hidden="true" />
-    <div class="h-px w-full bg-blush-100 lg:hidden" aria-hidden="true" />
+    <div class="hidden h-px w-full bg-gradient-to-r from-blush-100 via-peach to-blush-100 lg:block" aria-hidden="true" />
+    <div class="h-px w-full bg-peach lg:hidden" aria-hidden="true" />
 
     <!-- Phone: search panel -->
     <Transition enter-from-class="opacity-0 -translate-y-1" enter-active-class="transition duration-200" leave-to-class="opacity-0 -translate-y-1" leave-active-class="transition duration-150">

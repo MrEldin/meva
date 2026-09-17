@@ -28,23 +28,27 @@
   --color-ink-soft: #2a2a2a;
   --color-paper: #ffffff;
   /* A white with a little warmth, for the bands between white sections. */
-  --color-shell: #fdf7f8;
-  --color-shell-deep: #fbeff2;
+  --color-shell: #fdf7f5;
+  --color-shell-deep: #fbefeb;
 
   /* The hero film's ground as it shows on a Mac or iPhone -- read off the
      playing film by Eldin. Not the brief's value and not a decoder's. */
   --color-peach: #f8c1ba;
   --color-peach-deep: #eaa39d;
 
-  /* Powder pink: the brand's own colour, and the only accent. */
-  --color-blush-50: #fdf6f8;
-  --color-blush-100: #fbeaef;
-  --color-blush-200: #f4d2dc;
-  --color-blush-300: #e6adbf;
-  --color-blush-400: #cd8298;
-  --color-blush-500: #b3617e;
-  --color-blush-600: #964964;
-  --color-blush-700: #78384e;
+  /* Powder pink: the brand's own colour, and the only accent.
+     The scale is the hero film's pink, not a second one -- 200 is that colour
+     exactly, the lighter steps are it mixed with white, and the darker steps
+     turn it toward a deep rose that still reads as the same pink at a glance
+     and holds its contrast under white text. */
+  --color-blush-50: #fef6f4;
+  --color-blush-100: #fdeae6;
+  --color-blush-200: #f8c1ba;
+  --color-blush-300: #e1a4a0;
+  --color-blush-400: #c88585;
+  --color-blush-500: #b0666a;
+  --color-blush-600: #9e4f56;
+  --color-blush-700: #8e3b45;
 
   /* Greys, from the ink towards the paper. */
   --color-mist-50: #f7f7f7;
@@ -56,30 +60,30 @@
   --color-mist-600: #4a4a4a;
 
   /* Kept so the admin desk, which is not part of this redesign, still builds. */
-  --color-cream: #fdf7f8;
-  --color-sand: #fbeff2;
+  --color-cream: #fdf7f5;
+  --color-sand: #fbefeb;
   --color-forest: #121212;
   --color-forest-soft: #2a2a2a;
-  --color-sage: #f4d2dc;
-  --color-sage-deep: #964964;
-  --color-clay-50: #fdf6f8;
-  --color-clay-100: #fbeaef;
-  --color-clay-200: #f4d2dc;
-  --color-clay-300: #e6adbf;
-  --color-clay-400: #cd8298;
-  --color-clay-500: #b3617e;
-  --color-clay-600: #964964;
-  --color-clay-700: #78384e;
-  --color-rose: #f4d2dc;
+  --color-sage: #f8c1ba;
+  --color-sage-deep: #9e4f56;
+  --color-clay-50: #fef6f4;
+  --color-clay-100: #fdeae6;
+  --color-clay-200: #f8c1ba;
+  --color-clay-300: #e1a4a0;
+  --color-clay-400: #c88585;
+  --color-clay-500: #b0666a;
+  --color-clay-600: #9e4f56;
+  --color-clay-700: #8e3b45;
+  --color-rose: #f8c1ba;
   --color-wheat: #f0ece6;
   --color-mint: #eaf1ec;
   --color-sky: #e9eef2;
   --color-linen: #f2ece8;
 
   --color-desk-overview: #4b7f9b;
-  --color-desk-orders: #b3617e;
+  --color-desk-orders: #b0666a;
   --color-desk-products: #5c8560;
-  --color-desk-marketing: #b3617e;
+  --color-desk-marketing: #b0666a;
   --color-desk-email: #b08a34;
   --color-desk-team: #7a6a92;
   --color-desk-account: #6e6e6e;
@@ -428,7 +432,7 @@
   --color-desk-overview: #4b7f9b;
   --color-desk-orders: #c56d59;
   --color-desk-products: #5c8560;
-  --color-desk-marketing: #b3617e;
+  --color-desk-marketing: #b0666a;
   --color-desk-email: #b08a34;
   --color-desk-team: #7a6a92;
   --color-desk-account: #6e776f;
@@ -669,8 +673,8 @@
      sits in a box. */
   .bloom-pink {
     background:
-      radial-gradient(60% 55% at 30% 35%, rgba(230, 173, 191, 0.55), transparent 70%),
-      radial-gradient(50% 50% at 75% 70%, rgba(244, 210, 220, 0.75), transparent 72%);
+      radial-gradient(60% 55% at 30% 35%, rgba(225, 164, 160, 0.55), transparent 70%),
+      radial-gradient(50% 50% at 75% 70%, rgba(248, 193, 186, 0.75), transparent 72%);
   }
 
   /* Paper grain, barely there, so large flat areas are not dead. */
@@ -753,13 +757,13 @@
   .disc > * { position: relative; }
   .group:hover .disc::before { transform: scale(1.06); }
 
-  .tint-rose { --disc-hi: #fdf2f5; --disc-lo: #f6dae3; }
-  .tint-peach { --disc-hi: #fdf3f0; --disc-lo: #f9ddd6; }
-  .tint-sand { --disc-hi: #fbf6ef; --disc-lo: #f1e6d7; }
-  .tint-pearl { --disc-hi: #f6f8fa; --disc-lo: #e6ecf1; }
+  .tint-rose { --disc-hi: #fef6f4; --disc-lo: #f8c9c2; }
+  .tint-peach { --disc-hi: #fef5f0; --disc-lo: #f8cfc0; }
+  .tint-sand { --disc-hi: #fdf8f1; --disc-lo: #f0e2d2; }
+  .tint-pearl { --disc-hi: #f8f7f8; --disc-lo: #e9e4e6; }
 
   .cutout {
-    filter: drop-shadow(0 16px 18px rgba(120, 56, 78, 0.16)) drop-shadow(0 2px 4px rgba(120, 56, 78, 0.08));
+    filter: drop-shadow(0 16px 18px rgba(142, 59, 69, 0.16)) drop-shadow(0 2px 4px rgba(142, 59, 69, 0.08));
     transition: transform 0.6s var(--ease-silk);
   }
 

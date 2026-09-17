@@ -80,16 +80,16 @@ function addSet() {
         <!-- The set itself -->
         <div class="relative flex items-center justify-center py-4">
           <svg class="absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-            <g fill="none" stroke="#e6adbf" stroke-width="1" vector-effect="non-scaling-stroke">
+            <g fill="none" stroke="#e1a4a0" stroke-width="1" vector-effect="non-scaling-stroke">
               <path v-for="y in anchors" :key="`l${y}`" :d="`M0 ${y} C 22 ${y}, 30 50, 46 50`" />
               <path v-for="y in anchors" :key="`r${y}`" :d="`M100 ${y} C 78 ${y}, 70 50, 54 50`" />
             </g>
-            <circle v-for="y in anchors" :key="`dl${y}`" cx="0.6" :cy="y" r="2.2" fill="#cd8298" />
-            <circle v-for="y in anchors" :key="`dr${y}`" cx="99.4" :cy="y" r="2.2" fill="#cd8298" />
+            <circle v-for="y in anchors" :key="`dl${y}`" cx="0.6" :cy="y" r="2.2" fill="#c88585" />
+            <circle v-for="y in anchors" :key="`dr${y}`" cx="99.4" :cy="y" r="2.2" fill="#c88585" />
           </svg>
 
           <div class="relative z-10 w-full text-center">
-            <div class="mx-auto w-full max-w-[17rem] rounded-full bg-paper p-2 shadow-[0_30px_70px_-40px_rgba(120,56,78,0.55)] ring-1 ring-blush-100">
+            <div class="mx-auto w-full max-w-[17rem] rounded-full bg-paper p-2 shadow-[0_30px_70px_-40px_rgba(142,59,69,0.55)] ring-1 ring-blush-100">
               <RouterLink :to="{ name: 'product', params: { slug: set.slug } }" class="group block">
                 <ProductFigure :product="set" tint="rose" sizes="280px" />
               </RouterLink>

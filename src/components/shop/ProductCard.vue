@@ -30,13 +30,13 @@ function add(product) {
 </script>
 
 <template>
-  <article class="group flex flex-col rounded-[1.5rem] border border-blush-100/80 bg-paper p-3 transition-all duration-500 hover:-translate-y-1 hover:border-blush-200 hover:shadow-[0_28px_60px_-34px_rgba(120,56,78,0.45)]">
+  <article class="group flex flex-col rounded-[1.5rem] border border-blush-100/80 bg-paper p-3 transition-all duration-500 hover:-translate-y-1 hover:border-blush-200 hover:shadow-[0_28px_60px_-34px_rgba(142,59,69,0.45)]">
     <RouterLink :to="{ name: 'product', params: { slug: product.slug } }" class="block flex-1">
       <div class="relative">
         <ProductFigure :product="product" :tint="tint" :eager="eager" sizes="(min-width: 1024px) 22vw, 45vw" />
         <span
           v-if="badge"
-          class="absolute left-0 top-0 rounded-full bg-blush-600 px-3 py-1 text-[0.625rem] font-bold uppercase tracking-[0.1em] text-paper shadow-[0_6px_16px_-6px_rgba(120,56,78,0.6)]"
+          class="absolute left-0 top-0 rounded-full bg-blush-600 px-3 py-1 text-[0.625rem] font-bold uppercase tracking-[0.1em] text-paper shadow-[0_6px_16px_-6px_rgba(142,59,69,0.6)]"
         >{{ badge }}</span>
       </div>
       <h3 class="mt-3 px-1 text-[0.9375rem] font-semibold leading-snug text-ink">{{ product.name }}</h3>
