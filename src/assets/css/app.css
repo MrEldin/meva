@@ -780,11 +780,16 @@
    picture and the thumb is one invisible pixel, so the value maps straight
    onto the position of the rule drawn over it. */
 @layer utilities {
+  /* The picture takes the drag; the browser keeps vertical scrolling. */
+  .compare-surface {
+    touch-action: pan-y;
+    cursor: ew-resize;
+  }
+
   .compare-range {
     appearance: none;
     margin: 0;
     background: transparent;
-    cursor: ew-resize;
   }
 
   .compare-range::-webkit-slider-thumb {

@@ -219,11 +219,14 @@ function addSet() {
           >{{ added ? 'Dodato ✓' : 'Uzmi ceo set' }}</button>
         </div>
 
-        <ol class="relative mt-8 pl-9">
-          <span class="absolute bottom-7 left-[1.5625rem] top-7 w-px bg-gradient-to-b from-peach via-blush-300 to-peach" aria-hidden="true" />
-          <li v-for="step in steps" :key="step.slug" class="relative py-2.5">
-            <span class="absolute -left-9 top-6 grid h-7 w-7 place-items-center rounded-full bg-blush-600 text-[0.6875rem] font-bold text-paper ring-4 ring-blush-50">{{ step.index }}</span>
-            <RouterLink :to="{ name: 'product', params: { slug: step.product.slug } }" class="flex items-center gap-3.5">
+        <!-- The numbers are a column of their own, so every one of them sits on
+             the line and level with its own bottle however long the wording
+             beside it runs. -->
+        <ol class="relative mt-8">
+          <span class="absolute bottom-10 left-[0.875rem] top-10 w-px -translate-x-1/2 bg-gradient-to-b from-peach via-blush-300 to-peach" aria-hidden="true" />
+          <li v-for="step in steps" :key="step.slug" class="relative flex min-h-[5.75rem] items-center gap-3.5 py-2">
+            <span class="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-blush-600 text-[0.6875rem] font-bold text-paper ring-4 ring-blush-50">{{ step.index }}</span>
+            <RouterLink :to="{ name: 'product', params: { slug: step.product.slug } }" class="flex min-w-0 flex-1 items-center gap-3.5">
               <span class="w-16 shrink-0 rounded-full bg-paper ring-1 ring-blush-100"><ProductFigure :product="step.product" :tint="step.index" sizes="72px" /></span>
               <span class="min-w-0 flex-1">
                 <span class="block text-[0.6875rem] font-bold uppercase tracking-[0.14em] text-blush-600">{{ step.where }}</span>

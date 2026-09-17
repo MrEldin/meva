@@ -11,11 +11,16 @@ import { onBeforeUnmount, onMounted, ref } from 'vue'
  * on the other, and the visitor moves the line themselves -- which is a good
  * deal more convincing than a sentence, and takes no reading at all.
  *
- * The line is a range input with an invisible one-pixel thumb rather than
- * hand-rolled pointer maths: the whole picture becomes the track, so a press
- * anywhere moves the line, a drag follows the finger, and the arrow keys work
- * without a line of code. The handle and the dashed rule are drawn on top and
- * take no pointer events of their own.
+ * The drag is handled from pointer events rather than left to a range input.
+ * A range input is perfect on a desktop, where pressing anywhere on the track
+ * moves the thumb; on iOS it is not -- pressing the track does nothing at all
+ * there, and the thumb has to be grabbed, which is impossible when the thumb
+ * is the one invisible pixel that keeps the value and the drawn line in step.
+ * So the whole picture takes the pointer, and the input stays underneath,
+ * unreachable by pointer but still on the tab order, for the arrow keys.
+ *
+ * `touch-action: pan-y` is what makes both gestures live together: the
+ * browser keeps vertical scrolling, and a sideways drag comes here.
  *
  * Nobody drags something they have not been told is draggable, so the first
  * time the picture comes into view it sweeps itself a few times -- not to the
@@ -35,14 +40,15 @@ const box = ref(null)
 
 let frame = 0
 let observer = null
+let dragging = false
 
-/** Where the sweep goes, and back: wide first, then settling. */
+/* ── The sweep that shows it can be dragged ─────────────────────────────── */
+
+/** Where it goes, and back: wide first, then settling. */
 const SWEEP = [66, 34, 63, 37, 58, 44, 50]
 const LEG = 520
 
-function ease(t) {
-  return 0.5 - Math.cos(Math.PI * t) / 2
-}
+const ease = (t) => 0.5 - Math.cos(Math.PI * t) / 2
 
 function sweep() {
   if (touched.value) return
@@ -64,8 +70,7 @@ function sweep() {
     }
 
     const leg = legs[Math.floor(elapsed / LEG)]
-    const t = ease((elapsed % LEG) / LEG)
-    pos.value = leg.from + (leg.to - leg.from) * t
+    pos.value = leg.from + (leg.to - leg.from) * ease((elapsed % LEG) / LEG)
     frame = requestAnimationFrame(step)
   }
 
@@ -77,9 +82,31 @@ function stop() {
   demoing.value = false
 }
 
-function grab() {
+/* ── The drag ───────────────────────────────────────────────────────────── */
+
+function moveTo(event) {
+  const rect = box.value?.getBoundingClientRect()
+
+  if (!rect?.width) return
+
+  pos.value = Math.min(100, Math.max(0, ((event.clientX - rect.left) / rect.width) * 100))
+}
+
+function down(event) {
   touched.value = true
   stop()
+  dragging = true
+  box.value?.setPointerCapture?.(event.pointerId)
+  moveTo(event)
+}
+
+function move(event) {
+  if (dragging) moveTo(event)
+}
+
+function up(event) {
+  dragging = false
+  box.value?.releasePointerCapture?.(event.pointerId)
 }
 
 onMounted(() => {
@@ -105,15 +132,22 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div ref="box" class="relative h-full w-full select-none" @pointerdown="grab" @keydown="grab">
+  <div
+    ref="box"
+    class="compare-surface relative h-full w-full select-none"
+    @pointerdown="down"
+    @pointermove="move"
+    @pointerup="up"
+    @pointercancel="up"
+  >
     <!-- Flaking, underneath -->
-    <img :src="on" alt="Koža glave sa seborejom i peruti" class="absolute inset-0 h-full w-full object-contain" draggable="false" />
+    <img :src="on" alt="Koža glave sa seborejom i peruti" class="pointer-events-none absolute inset-0 h-full w-full object-contain" draggable="false" />
 
     <!-- Clear, revealed from the line rightwards -->
     <img
       :src="off"
       alt="Smireno teme, bez peruti"
-      class="absolute inset-0 h-full w-full object-contain"
+      class="pointer-events-none absolute inset-0 h-full w-full object-contain"
       :style="{ clipPath: `inset(0 0 0 ${pos}%)` }"
       draggable="false"
     />
@@ -136,15 +170,17 @@ onBeforeUnmount(() => {
       </span>
     </div>
 
+    <!-- Kept for the keyboard: reachable by tab, never by pointer. -->
     <input
       v-model.number="pos"
-      class="compare-range absolute inset-0 z-20 h-full w-full"
+      class="compare-range pointer-events-none absolute inset-0 z-20 h-full w-full"
       type="range"
       autocomplete="off"
       min="0"
       max="100"
       step="0.5"
       aria-label="Prevucite da uporedite kožu glave sa seborejom i bez nje"
+      @keydown="touched = true"
     />
   </div>
 </template>
