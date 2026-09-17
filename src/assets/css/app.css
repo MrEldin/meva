@@ -533,8 +533,8 @@
      same fine grain the opening scene uses, so it reads as paper rather than
      as chrome. */
   .desk-rail {
-    background: var(--color-paper);
-    border-right: 1px solid color-mix(in oklab, var(--color-forest) 10%, transparent);
+    background: var(--color-cream);
+    border-right: 1px solid color-mix(in oklab, var(--color-forest) 8%, transparent);
   }
 
   /* A hairline rule with the brand's own weight to it. */
