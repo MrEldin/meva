@@ -806,13 +806,16 @@
   .compare-range:focus-visible + *, .compare-range:focus-visible { outline: none; }
 
   /* Until it has been touched once, the handle breathes -- just enough to say
-     it is a control and not a decoration. */
+     it is a control and not a decoration. Only `scale` is animated: the
+     centring lives in the independent `translate` property, and restating it
+     here as a `transform` would compose with it and push the handle half its
+     own width off the line it sits on. */
   .nudge { animation: nudge 2.6s var(--ease-silk) infinite; }
 
   @keyframes nudge {
-    0%, 62%, 100% { transform: translate(-50%, -50%) scale(1); }
-    72% { transform: translate(-50%, -50%) scale(1.09); }
-    86% { transform: translate(-50%, -50%) scale(1); }
+    0%, 62%, 100% { scale: 1; }
+    72% { scale: 1.09; }
+    86% { scale: 1; }
   }
 
   @media (prefers-reduced-motion: reduce) {

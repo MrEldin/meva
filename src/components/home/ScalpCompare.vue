@@ -140,6 +140,7 @@ onBeforeUnmount(() => {
       v-model.number="pos"
       class="compare-range absolute inset-0 z-20 h-full w-full"
       type="range"
+      autocomplete="off"
       min="0"
       max="100"
       step="0.5"
