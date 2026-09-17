@@ -7,6 +7,7 @@ import ShopHero from '@/components/home/ShopHero.vue'
 import ShopByConcern from '@/components/home/ShopByConcern.vue'
 import BestSellers from '@/components/home/BestSellers.vue'
 import Promise from '@/components/home/Promise.vue'
+import SetAnatomy from '@/components/home/SetAnatomy.vue'
 import { setMeta } from '@/lib/meta'
 import { useCatalogStore } from '@/stores/catalog'
 import { onMounted } from 'vue'
@@ -50,6 +51,7 @@ onMounted(() => {
     <ShopHero />
     <ShopByConcern />
     <BestSellers />
+    <SetAnatomy />
     <LabProof />
     <Promise />
     <Reviews />

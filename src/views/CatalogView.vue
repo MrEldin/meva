@@ -126,7 +126,7 @@ setMeta({
     </div>
 
     <div v-else-if="visible.length" class="mt-12 grid grid-cols-2 gap-x-4 gap-y-12 lg:grid-cols-4 lg:gap-8">
-      <ProductCard v-for="product in visible" :key="product.id" :product="product" />
+      <ProductCard v-for="(product, i) in visible" :key="product.id" :product="product" :tint="i" :eager="i < 4" />
     </div>
 
     <div v-else class="py-24 text-center">

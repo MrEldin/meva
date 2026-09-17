@@ -20,8 +20,8 @@ const cart = useCartStore()
       <ul class="divide-y divide-mist-200 border-y border-mist-200">
         <li v-for="line in cart.lines" :key="line.id" class="flex gap-4 py-6 md:gap-6">
           <RouterLink :to="{ name: 'product', params: { slug: line.slug } }" class="w-24 shrink-0 md:w-28">
-            <div class="aspect-square overflow-hidden bg-mist-50">
-              <img v-if="line.image" :src="line.image" :alt="line.name" class="h-full w-full object-cover" />
+            <div class="aspect-square overflow-hidden rounded-[0.875rem] bg-blush-50">
+              <img v-if="line.image" :src="line.image" :alt="line.name" class="h-full w-full object-contain p-1" />
             </div>
           </RouterLink>
 

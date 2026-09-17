@@ -43,6 +43,8 @@ const items = computed(() => {
         v-for="(product, i) in items"
         :key="product.slug"
         :product="product"
+        :tint="i"
+        :eager="i < 4"
         :badge="i === 0 ? 'Najprodavanije' : null"
       />
     </div>

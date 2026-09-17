@@ -146,14 +146,21 @@ const shareText = computed(() =>
       </nav>
 
       <div class="grid gap-10 md:grid-cols-2 md:gap-16">
-        <!-- Gallery -->
+        <!-- Gallery. The cutout comes first from the API, so the page opens
+             with the product standing on light rather than sitting in a box;
+             the studio photographs follow as thumbnails. -->
         <div>
-          <div class="aspect-square overflow-hidden bg-mist-50">
+          <div
+            class="relative aspect-square overflow-hidden rounded-[1.75rem]"
+            :class="images[activeImage]?.cutout ? 'disc tint-rose bg-paper ring-1 ring-blush-100' : 'bg-blush-50'"
+          >
             <img
               v-if="images[activeImage]"
               :src="images[activeImage].url"
               :alt="product.name"
-              class="h-full w-full object-cover"
+              fetchpriority="high"
+              class="h-full w-full"
+              :class="images[activeImage]?.cutout ? 'cutout object-contain p-[8%]' : 'object-cover'"
             />
           </div>
 
@@ -162,11 +169,14 @@ const shareText = computed(() =>
               v-for="(image, i) in images.slice(0, 5)"
               :key="image.url"
               type="button"
-              class="aspect-square overflow-hidden border transition-colors duration-300"
-              :class="i === activeImage ? 'border-ink' : 'border-transparent hover:border-mist-300'"
+              class="aspect-square overflow-hidden rounded-[0.875rem] border transition-colors duration-300"
+              :class="[
+                i === activeImage ? 'border-blush-500' : 'border-blush-100 hover:border-blush-300',
+                image.cutout ? 'bg-blush-50/70' : 'bg-blush-50',
+              ]"
               @click="activeImage = i"
             >
-              <img :src="image.url" alt="" class="h-full w-full object-cover" />
+              <img :src="image.url" alt="" loading="lazy" class="h-full w-full" :class="image.cutout ? 'object-contain p-1.5' : 'object-cover'" />
             </button>
           </div>
         </div>
@@ -259,7 +269,7 @@ const shareText = computed(() =>
       <section v-if="related.length" class="mt-20 md:mt-28">
         <h2 class="font-display text-2xl text-ink md:text-3xl">Moglo bi vam se svideti</h2>
         <div class="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
-          <ProductCard v-for="item in related" :key="item.id" :product="item" />
+          <ProductCard v-for="(item, i) in related" :key="item.id" :product="item" :tint="i" />
         </div>
       </section>
     </template>

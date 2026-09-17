@@ -733,3 +733,40 @@
   }
   .nav-item:hover::after, .nav-item.is-on::after { transform: scaleX(1); }
 }
+
+/* ── Cutouts ────────────────────────────────────────────────────────────────
+   Every product has been photographed and lifted off its background, so it
+   can stand on a tinted disc or in open white rather than sit in a
+   photographed box. The disc fades out before its edge, so nothing draws a
+   circle the eye has to read; the shadow is cast by the bottle's own
+   silhouette, which is what a cutout makes possible. */
+@layer utilities {
+  .disc::before {
+    content: "";
+    position: absolute;
+    inset: 4%;
+    border-radius: 9999px;
+    background: radial-gradient(circle at 50% 44%, var(--disc-hi) 0%, var(--disc-lo) 62%, transparent 72%);
+    transition: transform 0.6s var(--ease-silk);
+  }
+
+  .disc > * { position: relative; }
+  .group:hover .disc::before { transform: scale(1.06); }
+
+  .tint-rose { --disc-hi: #fdf2f5; --disc-lo: #f6dae3; }
+  .tint-peach { --disc-hi: #fdf3f0; --disc-lo: #f9ddd6; }
+  .tint-sand { --disc-hi: #fbf6ef; --disc-lo: #f1e6d7; }
+  .tint-pearl { --disc-hi: #f6f8fa; --disc-lo: #e6ecf1; }
+
+  .cutout {
+    filter: drop-shadow(0 16px 18px rgba(120, 56, 78, 0.16)) drop-shadow(0 2px 4px rgba(120, 56, 78, 0.08));
+    transition: transform 0.6s var(--ease-silk);
+  }
+
+  .group:hover .cutout { transform: translateY(-6px) scale(1.03); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .disc::before, .cutout { transition: none; }
+    .group:hover .disc::before, .group:hover .cutout { transform: none; }
+  }
+}

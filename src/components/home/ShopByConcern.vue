@@ -1,4 +1,5 @@
 <script setup>
+import ProductFigure from '@/components/shop/ProductFigure.vue'
 import SectionHead from '@/components/home/SectionHead.vue'
 import { useCatalogStore } from '@/stores/catalog'
 import { computed } from 'vue'
@@ -19,8 +20,8 @@ const concerns = computed(() =>
   CONCERNS.map((concern) => ({
     ...concern,
     count: catalog.collections.find((c) => c.slug === concern.slug)?.products_count ?? null,
-    image: catalog.products.find((p) => p.slug?.startsWith(concern.face) && p.image)?.image
-      ?? catalog.products.find((p) => p.categories?.some((c) => c.slug === concern.slug) && p.image)?.image
+    product: catalog.products.find((p) => p.slug?.startsWith(concern.face) && p.image)
+      ?? catalog.products.find((p) => p.categories?.some((c) => c.slug === concern.slug) && p.image)
       ?? null,
   })),
 )
@@ -31,13 +32,13 @@ const concerns = computed(() =>
     <SectionHead title="Šta vam treba?" :to="{ name: 'catalog' }" link="Svi proizvodi" />
 
     <ul class="mt-5 grid grid-cols-3 gap-3 lg:grid-cols-6 lg:gap-4">
-      <li v-for="concern in concerns" :key="concern.slug">
+      <li v-for="(concern, i) in concerns" :key="concern.slug">
         <RouterLink :to="{ name: 'catalog', query: { kategorija: concern.slug } }" class="group block text-center">
-          <div class="mx-auto aspect-square w-full overflow-hidden rounded-full border-4 border-blush-100 bg-blush-50 transition-colors group-hover:border-blush-300">
-            <img v-if="concern.image" :src="concern.image" alt="" loading="lazy" class="h-full w-full object-cover" />
+          <div class="relative mx-auto aspect-square w-full rounded-full ring-1 ring-inset ring-blush-100 transition-all duration-500 group-hover:ring-blush-300 group-hover:ring-2">
+            <ProductFigure v-if="concern.product" :product="concern.product" :tint="i" sizes="(min-width: 1024px) 14vw, 30vw" />
           </div>
-          <span class="mt-2.5 block text-[0.875rem] font-bold text-ink">{{ concern.label }}</span>
-          <span v-if="concern.count" class="block text-xs text-mist-500">{{ concern.count }}</span>
+          <span class="mt-3 block text-[0.875rem] font-bold text-ink">{{ concern.label }}</span>
+          <span v-if="concern.count" class="block text-xs text-ink/45">{{ concern.count }} proizvoda</span>
         </RouterLink>
       </li>
     </ul>
