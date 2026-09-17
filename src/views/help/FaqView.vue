@@ -1,4 +1,5 @@
 <script setup>
+import HelpFooter from '@/components/help/HelpFooter.vue'
 import PageHead from '@/components/layout/PageHead.vue'
 import { setMeta } from '@/lib/meta'
 import { onMounted, ref } from 'vue'
@@ -57,39 +58,51 @@ onMounted(() => {
 </script>
 
 <template>
-  <div>
-    <PageHead title="Česta pitanja" note="Ako ne nađete odgovor, pišite nam — javljamo se isti dan." />
+  <div class="bg-paper">
+    <PageHead
+      title="Česta pitanja"
+      note="Ono što nas kupci zaista pitaju, odgovoreno kratko. Ako ne nađete odgovor, pišite nam — javljamo se isti dan."
+      :facts="['Bez sulfata i parabena', 'Poručivanje bez naloga', 'Račun ide u paketu']"
+    />
 
-    <div class="shell max-w-3xl py-10 lg:py-14">
+    <div class="shell max-w-3xl py-10 lg:py-16">
       <section v-for="(group, gi) in GROUPS" :key="group.title" class="mb-10 last:mb-0">
-        <h2 class="text-xl font-bold">{{ group.title }}</h2>
+        <div class="flex items-center gap-3">
+          <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-blush-50 text-blush-700" aria-hidden="true">
+            <svg v-if="gi === 0" viewBox="0 0 24 24" class="h-[1.125rem] w-[1.125rem]" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6v3.5l3 4.5v8a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-8l3-4.5z" /><path d="M6.5 14h11" /></svg>
+            <svg v-else viewBox="0 0 24 24" class="h-[1.125rem] w-[1.125rem]" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16l-1.3 12.2a2 2 0 0 1-2 1.8H7.3a2 2 0 0 1-2-1.8Z" /><path d="M8.5 7V5.8a3.5 3.5 0 0 1 7 0V7" /></svg>
+          </span>
+          <h2 class="font-display text-[1.375rem] leading-tight text-ink sm:text-[1.5rem]">{{ group.title }}</h2>
+        </div>
 
-        <ul class="mt-4 divide-y divide-mist-200 border-y border-mist-200">
-          <li v-for="(item, ii) in group.items" :key="item[0]">
+        <ul class="mt-4 space-y-2.5">
+          <li
+            v-for="(item, ii) in group.items"
+            :key="item[0]"
+            class="overflow-hidden rounded-[1.25rem] bg-paper ring-1 transition-colors duration-300"
+            :class="open.has(`${gi}-${ii}`) ? 'bg-blush-50/60 ring-blush-200' : 'ring-blush-100'"
+          >
             <button
               type="button"
-              class="flex w-full items-start justify-between gap-4 py-4 text-left"
+              class="flex w-full items-start justify-between gap-4 p-5 text-left"
               :aria-expanded="open.has(`${gi}-${ii}`)"
               @click="toggle(`${gi}-${ii}`)"
             >
-              <span class="text-[0.9375rem] font-semibold leading-snug">{{ item[0] }}</span>
+              <span class="text-[0.9375rem] font-semibold leading-snug text-ink sm:text-base">{{ item[0] }}</span>
               <span
-                class="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full border border-mist-300 transition-transform duration-300"
-                :class="open.has(`${gi}-${ii}`) && 'rotate-45 border-ink bg-ink text-paper'"
+                class="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full transition-all duration-300"
+                :class="open.has(`${gi}-${ii}`) ? 'rotate-45 bg-blush-600 text-paper' : 'bg-blush-50 text-blush-700'"
               >
-                <svg viewBox="0 0 16 16" class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3v10M3 8h10" stroke-linecap="round" /></svg>
+                <svg viewBox="0 0 16 16" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3v10M3 8h10" stroke-linecap="round" /></svg>
               </span>
             </button>
 
-            <p v-if="open.has(`${gi}-${ii}`)" class="pb-5 pr-10 text-[0.9375rem] leading-relaxed text-mist-600">{{ item[1] }}</p>
+            <p v-if="open.has(`${gi}-${ii}`)" class="px-5 pb-5 pr-14 text-[0.9375rem] leading-relaxed text-ink/70">{{ item[1] }}</p>
           </li>
         </ul>
       </section>
 
-      <div class="rounded-2xl bg-shell p-6 text-center">
-        <p class="text-[0.9375rem] font-semibold">Niste našli odgovor?</p>
-        <p class="mt-1 text-sm text-mist-600">Pišite nam na <a href="mailto:porudzbine@meva.life" class="font-semibold text-blush-500 underline underline-offset-4">porudzbine@meva.life</a></p>
-      </div>
+      <HelpFooter current="faq" />
     </div>
   </div>
 </template>
