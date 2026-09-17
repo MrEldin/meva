@@ -59,6 +59,26 @@ const router = createRouter({
   },
 })
 
+/*
+ * A page whose chunk is no longer on the server.
+ *
+ * Every view is a lazy import under a hashed name, so a deploy renames all of
+ * them. A tab opened before that deploy still holds the old index and asks for
+ * a file that has been replaced; the navigation then fails silently and the
+ * click looks broken. The server keeps the previous build's chunks for a
+ * fortnight, and for anything older than that this loads the page properly
+ * instead -- once, so a genuinely broken route cannot loop.
+ */
+router.onError((error, to) => {
+  const missing = /dynamically imported module|Importing a module script failed|error loading/i
+
+  if (!missing.test(String(error?.message ?? '')) || !to?.fullPath) return
+  if (sessionStorage.getItem('reloaded-for') === to.fullPath) return
+
+  sessionStorage.setItem('reloaded-for', to.fullPath)
+  window.location.assign(to.fullPath)
+})
+
 router.beforeEach(async (to) => {
   const auth = useAuthStore()
 
