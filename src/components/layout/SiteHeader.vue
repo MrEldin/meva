@@ -107,8 +107,36 @@ function toggleMenu() {
   menuOpen.value = !menuOpen.value
 }
 
+/*
+ * Collapsing on the way down, and only unfolding again at the very top.
+ *
+ * The strip and the taller row are in the flow, so folding them away makes
+ * the page about a hundred pixels shorter and pulls everything up -- which
+ * moves the scroll position back across a threshold set anywhere near it,
+ * unfolds the header, pushes the page down again, and crosses it once more.
+ * At a single threshold that is a loop, and the header visibly shakes.
+ *
+ * So there are two, far enough apart that the shift cannot reach from one to
+ * the other: it folds a good way down the page, and unfolds only when the
+ * visitor is back at the top, where growing downwards moves nothing they are
+ * looking at. Read in an animation frame, so a fast wheel asks once a frame
+ * rather than once an event.
+ */
+let ticking = false
+
 function onScroll() {
-  scrolled.value = window.scrollY > 24
+  if (ticking) return
+
+  ticking = true
+
+  requestAnimationFrame(() => {
+    const y = window.scrollY
+
+    if (!scrolled.value && y > 160) scrolled.value = true
+    else if (scrolled.value && y < 8) scrolled.value = false
+
+    ticking = false
+  })
 }
 
 function onKey(event) {
