@@ -1,8 +1,7 @@
 <script setup>
 import PageHeader from '@/components/admin/PageHeader.vue'
 import client from '@/api/client'
-import BarList from '@/components/admin/BarList.vue'
-import StatTile from '@/components/admin/StatTile.vue'
+import Breakdown from '@/components/admin/Breakdown.vue'
 import { setMeta } from '@/lib/meta'
 import { computed, onMounted, ref } from 'vue'
 
@@ -21,9 +20,22 @@ const LISTS = [
 
 const money = (minor) => `${new Intl.NumberFormat('sr-RS', { maximumFractionDigits: 0 }).format(minor / 100)} RSD`
 const number = (value) => new Intl.NumberFormat('sr-RS').format(value)
-const revenueOf = (row) => money(row.revenue)
 
 const rows = computed(() => insights.value?.[tab.value] ?? [])
+
+/** The four figures that decide who is written to, and when. */
+const summaryTiles = computed(() => {
+  const s = insights.value?.summary
+
+  if (!s) return []
+
+  return [
+    { label: 'Kupaca ukupno', value: number(s.customers), hint: 'u celoj istoriji' },
+    { label: 'Kupilo više puta', value: `${s.repeat_rate}%`, hint: `${number(s.repeat_customers)} kupaca` },
+    { label: 'Prosek između porudžbina', value: `${s.average_gap_days} dana`, hint: 'kad ih treba podsetiti' },
+    { label: 'Prosečno potrošeno', value: money(s.average_spend), hint: 'po kupcu, ukupno' },
+  ]
+})
 const note = computed(() => LISTS.find((l) => l.key === tab.value)?.note)
 
 // A phone number a person can be reached on, in the two ways this shop's
@@ -63,7 +75,7 @@ const spend = ref(0)
 const campaignRevenue = computed(() => campaigns.value.reduce((total, row) => total + row.revenue, 0))
 const roas = computed(() => (spend.value > 0 ? (campaignRevenue.value / 100 / spend.value).toFixed(2) : null))
 
-const feedUrl = `${window.location.origin}/feed/proizvodi.xml`
+const feedUrl = `${window.location.origin}/feed/products.xml`
 
 async function download(path, name) {
   const { data } = await client.get(path, { responseType: 'blob' })
@@ -110,10 +122,11 @@ onMounted(async () => {
     <template v-else>
       <!-- What the history says about repeat business -->
       <div v-if="insights" class="grid gap-4 pt-6 sm:grid-cols-2 xl:grid-cols-4">
-        <StatTile label="Kupaca ukupno" tone="marketing" :value="number(insights.summary.customers)" />
-        <StatTile label="Kupilo više puta" tone="products" :value="`${insights.summary.repeat_rate}%`" :hint="`${number(insights.summary.repeat_customers)} kupaca`" />
-        <StatTile label="Prosek između porudžbina" tone="email" :value="`${insights.summary.average_gap_days} dana`" hint="kad ih treba podsetiti" />
-        <StatTile label="Prosečno potrošeno" tone="orders" :value="money(insights.summary.average_spend)" hint="po kupcu, ukupno" />
+        <div v-for="tile in summaryTiles" :key="tile.label" class="stat-tile">
+          <p class="label text-forest/50">{{ tile.label }}</p>
+          <p class="mt-2 font-display text-[1.75rem] leading-none tabular-nums">{{ tile.value }}</p>
+          <p class="mt-2 text-[0.8125rem] text-forest/50">{{ tile.hint }}</p>
+        </div>
       </div>
 
       <!-- The three lists -->
@@ -188,7 +201,7 @@ onMounted(async () => {
           </ul>
         </section>
 
-        <BarList title="Šta donosi novac" :rows="campaigns" :format="revenueOf" empty="Kad krenu kampanje, ovde se vidi šta se isplati." />
+        <Breakdown :tabs="[{ key: 'campaigns', label: 'Šta donosi novac', rows: campaigns, metric: 'revenue', unit: 'money', empty: 'Kad krenu kampanje, ovde se vidi šta se isplati.' }]" />
       </div>
 
       <!-- Tools -->
