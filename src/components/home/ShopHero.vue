@@ -19,10 +19,25 @@ import { onBeforeUnmount, onMounted, ref } from 'vue'
 const PROMISES = ['Besplatna dostava', 'Plaćanje pouzećem', 'Bez registracije']
 
 // Two seals, drawn as seals: text set round a circle, a mark in the middle.
-// Both are facts -- the laboratories that tested the range.
+// Both are facts -- the laboratories that tested the range -- and a seal
+// carrying a `href` becomes a link to the laboratory that issued it, so the
+// claim can be checked rather than only read.
 const SEALS = [
-  { id: 'izjzv', ring: 'ISPITANO  ·  INSTITUT ZA JAVNO ZDRAVLJE VOJVODINE  ·  ', mark: 'check' },
-  { id: 'superlab', ring: 'ANALIZA SASTAVA  ·  SUPERLAB LABORATORIJA  ·  ', mark: 'leaf' },
+  {
+    id: 'izjzv',
+    ring: 'ISPITANO  ·  INSTITUT ZA JAVNO ZDRAVLJE VOJVODINE  ·  ',
+    mark: 'check',
+    href: 'https://izjzv.org.rs',
+  },
+  {
+    id: 'superlab',
+    ring: 'ANALIZA SASTAVA  ·  SUPERLAB LABORATORIJA  ·  ',
+    mark: 'leaf',
+    // Waiting on Eldin for the address: superlab.rs is a supplier of
+    // laboratory equipment, and a link to the wrong company would be worse
+    // than none. Fill this in and it becomes a link like the other.
+    href: null,
+  },
 ]
 
 const video = ref(null)
@@ -108,7 +123,18 @@ onBeforeUnmount(() => document.removeEventListener('visibilitychange', resume))
 
         <!-- Seals. Text set round a circle, as a stamp is; and one plain figure. -->
         <div class="mt-7 flex items-center gap-5 sm:gap-7">
-          <svg v-for="seal in SEALS" :key="seal.id" viewBox="0 0 120 120" class="h-[6.25rem] w-[6.25rem] shrink-0 text-blush-700 sm:h-28 sm:w-28" role="img" :aria-label="seal.ring.replaceAll('  ·  ', ', ').trim()">
+          <component
+            :is="seal.href ? 'a' : 'div'"
+            v-for="seal in SEALS"
+            :key="seal.id"
+            :href="seal.href ?? undefined"
+            :target="seal.href ? '_blank' : undefined"
+            :rel="seal.href ? 'noopener noreferrer' : undefined"
+            :title="seal.href ? `${seal.ring.replaceAll('  ·  ', ', ').trim()} — otvorite sajt laboratorije` : undefined"
+            class="shrink-0 rounded-full transition-transform duration-500"
+            :class="seal.href ? 'hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blush-700' : ''"
+          >
+          <svg viewBox="0 0 120 120" class="h-[6.25rem] w-[6.25rem] text-blush-700 sm:h-28 sm:w-28" role="img" :aria-label="seal.ring.replaceAll('  ·  ', ', ').trim()">
             <defs><path :id="`ring-${seal.id}`" d="M60,60 m-44,0 a44,44 0 1,1 88,0 a44,44 0 1,1 -88,0" /></defs>
             <circle cx="60" cy="60" r="55" fill="rgba(255,255,255,0.45)" stroke="currentColor" stroke-width="1" />
             <circle cx="60" cy="60" r="33" fill="none" stroke="currentColor" stroke-width="0.8" stroke-dasharray="1.5 2.5" />
@@ -118,6 +144,7 @@ onBeforeUnmount(() => document.removeEventListener('visibilitychange', resume))
             <g v-if="seal.mark === 'check'" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M46 61l9 9 19-20" /></g>
             <g v-else fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M74 44c-1 14-8 22-20 22h-4c0-14 8-22 24-22z" /><path d="M50 72c3-6 7-11 13-15" /></g>
           </svg>
+          </component>
 
           <p class="min-w-0 leading-tight">
             <span class="block font-display text-[1.75rem] font-semibold text-ink sm:text-[2rem]">5.479</span>
