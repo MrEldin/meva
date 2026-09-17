@@ -20,6 +20,7 @@ const SECTIONS = [
   { to: 'admin.overview', label: 'Pregled', permission: 'analytics.view', tone: 'overview', note: 'Promet i kupci' },
   { to: 'admin.orders', label: 'Porudžbine', permission: 'orders.view', tone: 'orders', note: 'Ko je šta poručio' },
   { to: 'admin.products', label: 'Proizvodi', permission: 'products.view', tone: 'products', note: 'Katalog i cene' },
+  { to: 'admin.reviews', label: 'Recenzije', permission: 'products.manage', tone: 'products', note: 'Reči kupaca' },
   { to: 'admin.marketing', label: 'Marketing', permission: 'marketing.manage', tone: 'marketing', note: 'Koga kontaktirati' },
   { to: 'admin.email', label: 'Kampanje', permission: 'marketing.manage', tone: 'email', note: 'Pisanje i slanje' },
   { to: 'admin.team', label: 'Tim', permission: 'users.manage', tone: 'team', note: 'Nalozi i prava' },
