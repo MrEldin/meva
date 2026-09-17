@@ -126,7 +126,7 @@ onBeforeUnmount(() => {
     class="sticky top-0 z-40 bg-paper transition-shadow duration-500"
     :class="scrolled ? 'shadow-[0_12px_40px_-24px_rgba(142,59,69,0.35)]' : ''"
   >
-    <!-- The two facts every one of 5.479 orders confirms. Pink, as it was;
+    <!-- The two facts every order confirms. Pink, as it was;
          it folds away once you start reading the page. -->
     <div
       class="overflow-hidden bg-peach transition-[max-height] duration-500 ease-[var(--ease-silk)]"

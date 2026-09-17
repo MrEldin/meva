@@ -45,25 +45,29 @@ async function join() {
           Šta pomaže kod seboreje i osetljive kože, i kad stigne nešto novo. Odjava je jedan klik, u svakom pismu.
         </p>
 
-        <form class="mx-auto mt-7 max-w-md" @submit.prevent="join">
-          <div class="flex flex-col gap-2.5 rounded-full bg-paper p-1.5 shadow-[0_18px_40px_-24px_rgba(142,59,69,0.5)] sm:flex-row sm:gap-0">
-            <label class="sr-only" for="newsletter-email">Vaša e-mail adresa</label>
-            <input
-              id="newsletter-email"
-              v-model="email"
-              type="email"
-              required
-              placeholder="Vaša e-mail adresa"
-              class="min-w-0 flex-1 rounded-full bg-transparent px-5 py-3 text-[0.9375rem] text-ink outline-none placeholder:text-ink/40"
-            />
-            <button
-              type="submit"
-              :disabled="state === 'sending'"
-              class="shrink-0 rounded-full bg-blush-600 px-7 py-3 text-[0.9375rem] font-bold text-paper transition-colors hover:bg-blush-700 disabled:opacity-60"
-            >
-              {{ state === 'sending' ? 'Šaljem…' : 'Prijavi se' }}
-            </button>
-          </div>
+        <!-- One pill holding both, but only where they sit side by side: a
+             stacked pair inside a rounded-full box has the box curving away
+             under the button. Narrow screens get two pills instead. -->
+        <form
+          class="mx-auto mt-7 flex max-w-md flex-col gap-2.5 sm:flex-row sm:gap-0 sm:rounded-full sm:bg-paper sm:p-1.5 sm:shadow-[0_18px_40px_-24px_rgba(142,59,69,0.5)]"
+          @submit.prevent="join"
+        >
+          <label class="sr-only" for="newsletter-email">Vaša e-mail adresa</label>
+          <input
+            id="newsletter-email"
+            v-model="email"
+            type="email"
+            required
+            placeholder="Vaša e-mail adresa"
+            class="min-w-0 rounded-full bg-paper px-5 py-3.5 text-[0.9375rem] text-ink shadow-[0_12px_30px_-20px_rgba(142,59,69,0.5)] outline-none placeholder:text-ink/40 sm:flex-1 sm:bg-transparent sm:py-3 sm:shadow-none"
+          />
+          <button
+            type="submit"
+            :disabled="state === 'sending'"
+            class="shrink-0 rounded-full bg-blush-600 px-7 py-3.5 text-[0.9375rem] font-bold text-paper transition-colors hover:bg-blush-700 disabled:opacity-60 sm:py-3"
+          >
+            {{ state === 'sending' ? 'Šaljem…' : 'Prijavi se' }}
+          </button>
         </form>
 
         <p v-if="state === 'done'" class="mt-3.5 text-[0.9375rem] font-semibold text-blush-700">Hvala. Javljamo se uskoro.</p>

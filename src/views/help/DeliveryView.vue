@@ -7,10 +7,12 @@ import { onMounted } from 'vue'
 /**
  * How a parcel gets here, and what it costs -- which is nothing.
  *
- * Every figure on this page comes from the order archive: 5,478 of 5,479
- * completed orders carry no delivery charge, all of them were paid to the
- * courier, and 88 of them went abroad. The one thing the archive does not
- * record is how long delivery takes, so this page does not say.
+ * The archive of orders placed through the website -- 5,479 of them -- shows
+ * no delivery charge on any but the first day's setup test, every one paid to
+ * the courier, and 88 going abroad. The total on this page is larger than
+ * that archive because the shop has sold since 2010 through more than the
+ * website; the figure is Eldin's. The one thing neither records is how long
+ * delivery takes, so this page does not say.
  */
 const STEPS = [
   { title: 'Poručite', text: 'Bez naloga, ako ne želite. Potrebni su ime, adresa i broj telefona.', icon: 'cart' },
@@ -48,12 +50,12 @@ onMounted(() => setMeta({
           <p class="mt-2 text-[0.8125rem] font-semibold text-ink/65">dostava, bez obzira na iznos</p>
         </div>
         <div class="rounded-[1.25rem] bg-blush-50 p-5 text-center">
-          <p class="font-display text-[2rem] leading-none text-blush-700">5.479</p>
+          <p class="font-display text-[2rem] leading-none text-blush-700">90.000+</p>
           <p class="mt-2 text-[0.8125rem] font-semibold text-ink/65">porudžbina poslato od 2010.</p>
         </div>
         <div class="rounded-[1.25rem] bg-blush-50 p-5 text-center">
-          <p class="font-display text-[2rem] leading-none text-blush-700">4</p>
-          <p class="mt-2 text-[0.8125rem] font-semibold text-ink/65">zemlje van Srbije, do sada</p>
+          <p class="font-display text-[2rem] leading-none text-blush-700">2010.</p>
+          <p class="mt-2 text-[0.8125rem] font-semibold text-ink/65">od te godine šaljemo pakete</p>
         </div>
       </div>
 

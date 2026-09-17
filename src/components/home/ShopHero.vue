@@ -122,7 +122,7 @@ onBeforeUnmount(() => document.removeEventListener('visibilitychange', resume))
         </ul>
 
         <!-- Seals. Text set round a circle, as a stamp is; and one plain figure. -->
-        <div class="mt-7 flex items-center gap-5 sm:gap-7">
+        <div class="mt-7 flex flex-wrap items-center gap-x-5 gap-y-4 sm:gap-x-7">
           <component
             :is="seal.href ? 'a' : 'div'"
             v-for="seal in SEALS"
@@ -147,8 +147,9 @@ onBeforeUnmount(() => document.removeEventListener('visibilitychange', resume))
           </component>
 
           <p class="min-w-0 leading-tight">
-            <span class="block font-display text-[1.75rem] font-semibold text-ink sm:text-[2rem]">5.479</span>
-            <span class="block text-[0.8125rem] text-ink/65">porudžbina od 2010.</span>
+            <span class="block text-[0.6875rem] font-bold uppercase tracking-[0.16em] text-ink/55">preko</span>
+            <span class="block font-display text-[1.75rem] font-semibold leading-none text-ink sm:text-[2.125rem]">90.000</span>
+            <span class="mt-1 block text-[0.8125rem] text-ink/65">porudžbina od 2010.</span>
           </p>
         </div>
       </div>
