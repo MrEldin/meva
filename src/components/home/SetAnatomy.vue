@@ -1,4 +1,5 @@
 <script setup>
+import ScalpCompare from '@/components/home/ScalpCompare.vue'
 import ProductFigure from '@/components/shop/ProductFigure.vue'
 import { ROUTINE, ROUTINE_SET } from '@/data/routine'
 import { useCartStore } from '@/stores/cart'
@@ -6,20 +7,53 @@ import { useCatalogStore } from '@/stores/catalog'
 import { computed, ref } from 'vue'
 
 /**
- * The best-selling set, taken apart.
+ * The best-selling set, drawn around the thing it is bought for.
  *
- * A hundred people have bought the seborrhoea set -- more than any other
- * single thing in the shop -- and until now nothing on the site said what the
- * eight bottles inside it are for. So it is drawn rather than listed: the set
- * in the middle, its contents around it in the order they are used, each one
- * connected by a hairline and labelled with where it goes and what it does.
+ * A hundred people have bought the eight-bottle seborrhoea set -- more than
+ * any other single thing in the shop -- and nothing on the site said what the
+ * eight bottles are for. So it is drawn rather than listed: in the middle, a
+ * scalp with a line you drag across it, flaking on one side and clear on the
+ * other; around it, the eight preparations in the order they are used, each
+ * on the end of a curve that leaves the circle along its own radius.
  *
- * On a phone the circle would be unreadable, so the same eight become a
- * numbered routine down the page, which is how it is actually followed.
+ * The diagram is one coordinate space. The curves are computed from the same
+ * numbers that place the labels -- a thousand-and-something units wide, laid
+ * over a box with that aspect ratio -- so a line always arrives exactly at
+ * the middle of its thumbnail, at any width, with no measuring at runtime.
+ *
+ * A phone gets no circle: the scalp goes on top, full width, and the eight
+ * become the numbered routine they actually are.
  */
 const catalog = useCatalogStore()
 const cart = useCartStore()
 const added = ref(false)
+
+/* The drawing. Everything below is in these units. */
+const W = 1200
+const H = 780
+const CX = 600
+const CY = 390
+const R = 215
+const ROWS = [92, 288, 492, 688]
+const THUMB = 32
+const LEFT_THUMB = 308
+const RIGHT_THUMB = 892
+const TEXT = 242
+
+const pc = (value, total) => `${((value / total) * 100).toFixed(4)}%`
+
+/** A curve that leaves the circle along its own radius and arrives level. */
+function curve(ax, ay) {
+  const dx = ax - CX
+  const dy = ay - CY
+  const length = Math.hypot(dx, dy)
+  const ux = dx / length
+  const uy = dy / length
+  const sx = CX + ux * (R + 12)
+  const sy = CY + uy * (R + 12)
+
+  return `M${sx.toFixed(1)} ${sy.toFixed(1)} C ${(sx + ux * 62).toFixed(1)} ${(sy + uy * 62).toFixed(1)}, ${ax + (ax < CX ? 104 : -104)} ${ay}, ${ax} ${ay}`
+}
 
 const set = computed(() => catalog.products.find((p) => p.slug === ROUTINE_SET) ?? null)
 
@@ -31,11 +65,34 @@ const steps = computed(() =>
   })).filter((step) => step.product),
 )
 
-const left = computed(() => steps.value.slice(0, 4))
-const right = computed(() => steps.value.slice(4))
+/** Each step with the geometry that places it and the line that reaches it. */
+const placed = computed(() =>
+  steps.value.map((step, i) => {
+    const side = i < 4 ? 'left' : 'right'
+    const y = ROWS[i % 4]
+    const cx = side === 'left' ? LEFT_THUMB : RIGHT_THUMB
+    const anchor = side === 'left' ? cx + THUMB : cx - THUMB
 
-/** Where each hairline meets the middle column, as a share of its height. */
-const anchors = [12.5, 37.5, 62.5, 87.5]
+    return {
+      ...step,
+      side,
+      path: curve(anchor, y),
+      dot: { x: anchor, y },
+      thumb: {
+        left: pc(cx - THUMB, W),
+        top: pc(y - THUMB, H),
+        width: pc(THUMB * 2, W),
+      },
+      text: {
+        top: pc(y, H),
+        width: pc(TEXT, W),
+        ...(side === 'left'
+          ? { right: pc(W - (cx - THUMB - 18), W) }
+          : { left: pc(cx + THUMB + 18, W) }),
+      },
+    }
+  }),
+)
 
 function addSet() {
   if (!set.value) return
@@ -46,111 +103,132 @@ function addSet() {
 </script>
 
 <template>
-  <section v-if="set && steps.length === 8" class="relative overflow-hidden bg-blush-50/60 py-12 lg:py-20">
+  <section v-if="set && steps.length === 8" class="bg-blush-50 py-12 lg:py-20">
     <div class="shell">
       <div class="mx-auto max-w-2xl text-center">
-        <p class="kicker text-blush-700">Korak po korak</p>
-        <h2 class="mt-2 font-display text-[1.75rem] leading-[1.15] text-ink lg:text-[2.5rem]">
+        <p class="kicker text-blush-700">Šta je u setu</p>
+        <h2 class="mt-2 font-display text-[1.75rem] leading-[1.15] text-ink lg:text-[2.75rem]">
           Set za seboreju, <em class="not-italic text-blush-700">rasklopljen</em>
         </h2>
         <p class="mx-auto mt-3 max-w-xl text-[0.9375rem] leading-relaxed text-ink/65 lg:text-base">
-          Osam preparata za kosu, kožu glave i lice — najprodavaniji set u radnji. Evo šta ide na šta i kojim redom.
+          Osam preparata za kožu glave, kosu i lice — najprodavaniji set u radnji.
+          Prevucite liniju preko temena, pa pogledajte šta ide na šta i kojim redom.
         </p>
       </div>
 
-      <!-- Desktop: the set in the middle, its contents around it -->
-      <div class="mt-12 hidden grid-cols-[minmax(0,1fr)_minmax(0,20rem)_minmax(0,1fr)] gap-x-4 lg:grid xl:grid-cols-[minmax(0,1fr)_minmax(0,23rem)_minmax(0,1fr)] xl:gap-x-8">
-        <!-- Left four -->
-        <ul class="grid grid-rows-4">
-          <li v-for="step in left" :key="step.slug" class="flex items-center justify-end">
-            <RouterLink :to="{ name: 'product', params: { slug: step.product.slug } }" class="group flex w-full max-w-[21rem] items-center gap-3 text-right">
-              <span class="min-w-0 flex-1">
-                <span class="block text-[0.6875rem] font-bold uppercase tracking-[0.14em] text-blush-600">{{ step.index }} · {{ step.where }}</span>
-                <span class="mt-0.5 block text-[0.9375rem] font-semibold leading-snug text-ink transition-colors group-hover:text-blush-700">{{ step.product.name }}</span>
-                <span class="mt-0.5 block text-[0.8125rem] leading-snug text-ink/55">{{ step.does }}</span>
-              </span>
-              <span class="w-[4.5rem] shrink-0">
-                <ProductFigure :product="step.product" :tint="step.index" sizes="80px" />
-              </span>
-            </RouterLink>
-            <span class="ml-2 hidden h-px w-6 shrink-0 bg-blush-300 xl:block" aria-hidden="true" />
-          </li>
-        </ul>
+      <!-- Desktop: one drawing -->
+      <div class="relative mx-auto mt-10 hidden w-full max-w-[82rem] lg:block" style="aspect-ratio: 1200 / 780">
+        <svg class="absolute inset-0 h-full w-full" :viewBox="`0 0 ${W} ${H}`" fill="none" aria-hidden="true">
+          <defs>
+            <radialGradient :id="'anatomy-fade'">
+              <stop offset="0.74" stop-color="#000" />
+              <stop offset="1" stop-color="#fff" />
+            </radialGradient>
+            <mask id="anatomy-mask">
+              <rect :width="W" :height="H" fill="#fff" />
+              <circle :cx="CX" :cy="CY" :r="R + 120" fill="url(#anatomy-fade)" />
+            </mask>
+          </defs>
 
-        <!-- The set itself -->
-        <div class="relative flex items-center justify-center py-4">
-          <svg class="absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-            <g fill="none" stroke="#e1a4a0" stroke-width="1" vector-effect="non-scaling-stroke">
-              <path v-for="y in anchors" :key="`l${y}`" :d="`M0 ${y} C 22 ${y}, 30 50, 46 50`" />
-              <path v-for="y in anchors" :key="`r${y}`" :d="`M100 ${y} C 78 ${y}, 70 50, 54 50`" />
-            </g>
-            <circle v-for="y in anchors" :key="`dl${y}`" cx="0.6" :cy="y" r="2.2" fill="#c88585" />
-            <circle v-for="y in anchors" :key="`dr${y}`" cx="99.4" :cy="y" r="2.2" fill="#c88585" />
-          </svg>
+          <!-- The ring the curves leave from -->
+          <circle :cx="CX" :cy="CY" :r="R + 16" stroke="#f8c1ba" stroke-width="1.5" stroke-dasharray="2 9" stroke-linecap="round" />
 
-          <div class="relative z-10 w-full text-center">
-            <div class="mx-auto w-full max-w-[17rem] rounded-full bg-paper p-2 shadow-[0_30px_70px_-40px_rgba(142,59,69,0.55)] ring-1 ring-blush-100">
-              <RouterLink :to="{ name: 'product', params: { slug: set.slug } }" class="group block">
-                <ProductFigure :product="set" tint="rose" sizes="280px" />
-              </RouterLink>
-            </div>
-            <h3 class="mt-4 font-display text-[1.25rem] leading-tight text-ink">{{ set.name }}</h3>
-            <p class="mt-1 text-[1.125rem] font-bold text-blush-700">{{ set.price?.formatted }}</p>
-            <button
-              type="button"
-              class="mt-3 w-full max-w-[15rem] rounded-full py-3 text-[0.875rem] font-bold text-paper transition-colors"
-              :class="added ? 'bg-blush-700' : 'bg-blush-600 hover:bg-blush-700'"
-              @click="addSet"
-            >{{ added ? 'Dodato ✓' : 'Uzmi ceo set' }}</button>
-          </div>
+          <g mask="url(#anatomy-mask)">
+            <path v-for="step in placed" :key="step.slug" :d="step.path" stroke="#e1a4a0" stroke-width="1.5" />
+          </g>
+
+          <circle v-for="step in placed" :key="`d-${step.slug}`" :cx="step.dot.x" :cy="step.dot.y" r="3.5" fill="#c88585" />
+        </svg>
+
+        <!-- The scalp, in the middle -->
+        <div
+          class="absolute -translate-y-1/2"
+          :style="{ left: pc(CX - R, W), top: '50%', width: pc(R * 2, W), aspectRatio: '1' }"
+        >
+          <div class="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_50%_46%,#ffffff_0%,#fdeae6_58%,transparent_72%)]" aria-hidden="true" />
+          <ScalpCompare class="relative" />
         </div>
 
-        <!-- Right four -->
-        <ul class="grid grid-rows-4">
-          <li v-for="step in right" :key="step.slug" class="flex items-center">
-            <span class="mr-2 hidden h-px w-6 shrink-0 bg-blush-300 xl:block" aria-hidden="true" />
-            <RouterLink :to="{ name: 'product', params: { slug: step.product.slug } }" class="group flex w-full max-w-[21rem] items-center gap-3">
-              <span class="w-[4.5rem] shrink-0">
-                <ProductFigure :product="step.product" :tint="step.index" sizes="80px" />
-              </span>
-              <span class="min-w-0 flex-1">
-                <span class="block text-[0.6875rem] font-bold uppercase tracking-[0.14em] text-blush-600">{{ step.index }} · {{ step.where }}</span>
-                <span class="mt-0.5 block text-[0.9375rem] font-semibold leading-snug text-ink transition-colors group-hover:text-blush-700">{{ step.product.name }}</span>
-                <span class="mt-0.5 block text-[0.8125rem] leading-snug text-ink/55">{{ step.does }}</span>
-              </span>
-            </RouterLink>
-          </li>
-        </ul>
+        <!-- The eight, on the ends of the lines -->
+        <template v-for="step in placed" :key="step.slug">
+          <RouterLink
+            :to="{ name: 'product', params: { slug: step.product.slug } }"
+            class="group absolute grid place-items-center rounded-full bg-paper ring-1 ring-blush-100 transition-all duration-500 hover:ring-blush-300 hover:shadow-[0_14px_30px_-14px_rgba(142,59,69,0.5)]"
+            :style="step.thumb"
+            tabindex="-1"
+            aria-hidden="true"
+          >
+            <ProductFigure :product="step.product" :tint="step.index" sizes="80px" />
+          </RouterLink>
+
+          <RouterLink
+            :to="{ name: 'product', params: { slug: step.product.slug } }"
+            class="group absolute -translate-y-1/2"
+            :class="step.side === 'left' ? 'text-right' : 'text-left'"
+            :style="step.text"
+          >
+            <span class="block text-[0.6875rem] font-bold uppercase tracking-[0.14em] text-blush-600">
+              <span class="tabular-nums">{{ step.index }}</span> · {{ step.where }}
+            </span>
+            <span class="mt-1 block font-display text-[1.0625rem] leading-tight text-ink transition-colors group-hover:text-blush-700">{{ step.product.name }}</span>
+            <span class="mt-1 block text-[0.8125rem] leading-snug text-ink/55">{{ step.does }}</span>
+          </RouterLink>
+        </template>
       </div>
 
-      <!-- Phone: the same eight, as the routine they are -->
-      <div class="mt-8 lg:hidden">
-        <RouterLink :to="{ name: 'product', params: { slug: set.slug } }" class="group flex items-center gap-4 rounded-[1.5rem] border border-blush-100 bg-paper p-3">
-          <span class="w-[6.5rem] shrink-0"><ProductFigure :product="set" tint="rose" sizes="110px" /></span>
-          <span class="min-w-0 flex-1">
-            <span class="block font-display text-[1.0625rem] leading-tight text-ink">{{ set.name }}</span>
-            <span class="mt-1 block text-[1.0625rem] font-bold text-blush-700">{{ set.price?.formatted }}</span>
-            <span class="mt-0.5 block text-[0.8125rem] text-ink/55">8 preparata · najprodavaniji set</span>
-          </span>
+      <!-- The set itself, under the drawing -->
+      <div class="mx-auto mt-10 hidden max-w-[34rem] items-center gap-6 rounded-[1.75rem] border border-blush-100 bg-paper p-4 lg:flex">
+        <RouterLink :to="{ name: 'product', params: { slug: set.slug } }" class="group w-28 shrink-0">
+          <ProductFigure :product="set" tint="rose" sizes="120px" />
         </RouterLink>
-
+        <div class="min-w-0 flex-1">
+          <p class="kicker text-blush-600">Ceo set, jedna cena</p>
+          <RouterLink :to="{ name: 'product', params: { slug: set.slug } }" class="mt-1 block font-display text-[1.25rem] leading-tight text-ink hover:text-blush-700">{{ set.name }}</RouterLink>
+          <p class="mt-1 text-[1.25rem] font-bold text-blush-700">{{ set.price?.formatted }}</p>
+        </div>
         <button
           type="button"
-          class="mt-3 w-full rounded-full py-3.5 text-[0.9375rem] font-bold text-paper transition-colors"
-          :class="added ? 'bg-blush-700' : 'bg-blush-600'"
+          class="shrink-0 rounded-full px-7 py-3.5 text-[0.9375rem] font-bold text-paper transition-colors"
+          :class="added ? 'bg-blush-700' : 'bg-blush-600 hover:bg-blush-700'"
           @click="addSet"
         >{{ added ? 'Dodato ✓' : 'Uzmi ceo set' }}</button>
+      </div>
 
-        <ol class="relative mt-7 pl-8">
-          <span class="absolute bottom-6 left-[1.4375rem] top-6 w-px bg-blush-200" aria-hidden="true" />
+      <!-- Phone: the scalp on top, then the routine -->
+      <div class="lg:hidden">
+        <div class="relative mx-auto mt-8 aspect-square w-full max-w-[22rem]">
+          <div class="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_50%_46%,#ffffff_0%,#fdeae6_58%,transparent_72%)]" aria-hidden="true" />
+          <div class="absolute inset-0 rounded-full border-2 border-dashed border-peach" aria-hidden="true" />
+          <ScalpCompare class="relative p-[4%]" />
+        </div>
+
+        <div class="mt-7 rounded-[1.5rem] border border-blush-100 bg-paper p-3">
+          <RouterLink :to="{ name: 'product', params: { slug: set.slug } }" class="group flex items-center gap-4">
+            <span class="w-24 shrink-0"><ProductFigure :product="set" tint="rose" sizes="110px" /></span>
+            <span class="min-w-0 flex-1">
+              <span class="kicker block text-blush-600">Ceo set</span>
+              <span class="mt-0.5 block font-display text-[1.0625rem] leading-tight text-ink">{{ set.name }}</span>
+              <span class="mt-1 block text-[1.125rem] font-bold text-blush-700">{{ set.price?.formatted }}</span>
+            </span>
+          </RouterLink>
+          <button
+            type="button"
+            class="mt-3 w-full rounded-full py-3.5 text-[0.9375rem] font-bold text-paper transition-colors"
+            :class="added ? 'bg-blush-700' : 'bg-blush-600'"
+            @click="addSet"
+          >{{ added ? 'Dodato ✓' : 'Uzmi ceo set' }}</button>
+        </div>
+
+        <ol class="relative mt-8 pl-9">
+          <span class="absolute bottom-7 left-[1.5625rem] top-7 w-px bg-gradient-to-b from-peach via-blush-300 to-peach" aria-hidden="true" />
           <li v-for="step in steps" :key="step.slug" class="relative py-2.5">
-            <span class="absolute -left-8 top-5 grid h-6 w-6 place-items-center rounded-full bg-blush-600 text-[0.6875rem] font-bold text-paper">{{ step.index }}</span>
-            <RouterLink :to="{ name: 'product', params: { slug: step.product.slug } }" class="flex items-center gap-3">
-              <span class="w-14 shrink-0"><ProductFigure :product="step.product" :tint="step.index" sizes="64px" /></span>
+            <span class="absolute -left-9 top-6 grid h-7 w-7 place-items-center rounded-full bg-blush-600 text-[0.6875rem] font-bold text-paper ring-4 ring-blush-50">{{ step.index }}</span>
+            <RouterLink :to="{ name: 'product', params: { slug: step.product.slug } }" class="flex items-center gap-3.5">
+              <span class="w-16 shrink-0 rounded-full bg-paper ring-1 ring-blush-100"><ProductFigure :product="step.product" :tint="step.index" sizes="72px" /></span>
               <span class="min-w-0 flex-1">
                 <span class="block text-[0.6875rem] font-bold uppercase tracking-[0.14em] text-blush-600">{{ step.where }}</span>
-                <span class="block text-[0.9375rem] font-semibold leading-snug text-ink">{{ step.product.name }}</span>
-                <span class="mt-0.5 block text-[0.8125rem] leading-snug text-ink/55">{{ step.does }}</span>
+                <span class="block font-display text-[1rem] leading-tight text-ink">{{ step.product.name }}</span>
+                <span class="mt-1 block text-[0.8125rem] leading-snug text-ink/55">{{ step.does }}</span>
               </span>
             </RouterLink>
           </li>

@@ -774,3 +774,48 @@
     .group:hover .disc::before, .group:hover .cutout { transform: none; }
   }
 }
+
+/* ── The scalp comparison ───────────────────────────────────────────────────
+   A range input doing the work of a drag handle: the track is the whole
+   picture and the thumb is one invisible pixel, so the value maps straight
+   onto the position of the rule drawn over it. */
+@layer utilities {
+  .compare-range {
+    appearance: none;
+    margin: 0;
+    background: transparent;
+    cursor: ew-resize;
+  }
+
+  .compare-range::-webkit-slider-thumb {
+    appearance: none;
+    width: 1px;
+    height: 100%;
+    background: transparent;
+    border: 0;
+  }
+
+  .compare-range::-moz-range-thumb {
+    width: 1px;
+    height: 100%;
+    background: transparent;
+    border: 0;
+  }
+
+  .compare-range::-moz-range-track { background: transparent; }
+  .compare-range:focus-visible + *, .compare-range:focus-visible { outline: none; }
+
+  /* Until it has been touched once, the handle breathes -- just enough to say
+     it is a control and not a decoration. */
+  .nudge { animation: nudge 2.6s var(--ease-silk) infinite; }
+
+  @keyframes nudge {
+    0%, 62%, 100% { transform: translate(-50%, -50%) scale(1); }
+    72% { transform: translate(-50%, -50%) scale(1.09); }
+    86% { transform: translate(-50%, -50%) scale(1); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nudge { animation: none; }
+  }
+}

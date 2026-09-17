@@ -14,3 +14,7 @@ dist
 !.yarn/patches
 .pnp.*
 public/_shot.html
+
+# The scalp comparison is committed as the WebP the page loads; the source
+# PNGs stay on the machine that made them.
+src/assets/seboreja-*.png
