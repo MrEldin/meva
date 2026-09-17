@@ -2,7 +2,8 @@
 import logoBlack from '@/assets/brand/logo-black.png'
 import { useAuthStore } from '@/stores/auth'
 import { useCartStore } from '@/stores/cart'
-import { useCatalogStore } from '@/stores/catalog'
+import SearchResults from '@/components/search/SearchResults.vue'
+import { useSearch } from '@/lib/useSearch'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
@@ -21,13 +22,11 @@ const route = useRoute()
 const router = useRouter()
 const cart = useCartStore()
 const auth = useAuthStore()
-const catalog = useCatalogStore()
+const search = useSearch()
 
 const menuOpen = ref(false)
 const searchOpen = ref(false)
-const term = ref('')
 const scrolled = ref(false)
-const searchField = ref(null)
 const phoneField = ref(null)
 const root = ref(null)
 
@@ -61,41 +60,45 @@ function isOn(link) {
   return (route.query.kategorija ?? null) === (link.to.query?.kategorija ?? null)
 }
 
-const matches = computed(() => {
-  const needle = term.value.trim().toLowerCase()
-  if (needle.length < 2) return []
-  return catalog.products.filter((p) => p.name.toLowerCase().includes(needle)).slice(0, 5)
-})
-
-const showResults = computed(() => searchOpen.value && term.value.trim().length >= 2)
-
-function search() {
-  if (!term.value.trim()) return
-  router.push({ name: 'catalog', query: { q: term.value.trim() } })
-  close()
-}
+const showResults = computed(() => searchOpen.value && search.term.value.trim().length >= 2)
 
 function close() {
   searchOpen.value = false
   menuOpen.value = false
-  term.value = ''
+  search.reset()
+}
+
+/** Enter takes the highlighted hit, or the whole catalogue for these words. */
+function submit() {
+  search.submit()
+  close()
+}
+
+/** The arrow keys walk the drop-down as though it were a single column. */
+function onKeys(event) {
+  if (event.key === 'ArrowDown') {
+    event.preventDefault()
+    search.move(1)
+  } else if (event.key === 'ArrowUp') {
+    event.preventDefault()
+    search.move(-1)
+  }
 }
 
 function focusSearch() {
-  catalog.load()
   searchOpen.value = true
   menuOpen.value = false
 }
 
 async function togglePhoneSearch() {
-  catalog.load()
   menuOpen.value = false
   searchOpen.value = !searchOpen.value
+
   if (searchOpen.value) {
     await nextTick()
     phoneField.value?.focus()
   } else {
-    term.value = ''
+    search.reset()
   }
 }
 
@@ -188,37 +191,30 @@ onBeforeUnmount(() => {
       </RouterLink>
 
       <!-- Desktop: the search field, a real one, in the middle -->
-      <form class="relative hidden w-full max-w-[26rem] lg:block xl:max-w-[30rem]" role="search" @submit.prevent="search">
+      <form class="relative hidden w-full max-w-[26rem] lg:block xl:max-w-[30rem]" role="search" @submit.prevent="submit">
         <svg viewBox="0 0 24 24" class="pointer-events-none absolute left-4 top-1/2 h-[1.1rem] w-[1.1rem] -translate-y-1/2 text-ink/45" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" stroke-linecap="round" /></svg>
         <input
-          ref="searchField"
-          v-model="term"
+          v-model="search.term.value"
           type="search"
           autocomplete="off"
-          placeholder="Pretražite proizvode: šampon, seboreja, krema…"
-          class="h-11 w-full rounded-full border border-blush-200 bg-blush-50/60 pl-11 pr-4 text-[0.9rem] text-ink outline-none transition-all duration-300 placeholder:text-ink/40 focus:border-blush-400 focus:bg-paper focus:shadow-[0_0_0_4px_rgba(230,173,191,0.25)]"
+          placeholder="Pretražite: šampon, seboreja, perut, dostava…"
+          class="h-11 w-full rounded-full border border-blush-200 bg-blush-50/60 pl-11 pr-4 text-[0.9rem] text-ink outline-none transition-all duration-300 placeholder:text-ink/40 focus:border-blush-400 focus:bg-paper focus:shadow-[0_0_0_4px_rgba(225,164,160,0.3)]"
           @focus="focusSearch"
+          @keydown="onKeys"
         />
 
-        <!-- Results, floating under the field -->
         <Transition enter-from-class="opacity-0 -translate-y-1" enter-active-class="transition duration-200" leave-to-class="opacity-0 -translate-y-1" leave-active-class="transition duration-150">
           <div v-if="showResults" class="absolute left-0 right-0 top-[calc(100%+0.625rem)] overflow-hidden rounded-2xl border border-blush-100 bg-paper shadow-[0_24px_60px_-20px_rgba(142,59,69,0.3)]">
-            <ul v-if="matches.length" class="p-2">
-              <li v-for="product in matches" :key="product.slug">
-                <RouterLink :to="{ name: 'product', params: { slug: product.slug } }" class="flex items-center gap-3.5 rounded-xl px-2.5 py-2 transition-colors hover:bg-blush-50">
-                  <span class="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-lg bg-blush-50">
-                    <img v-if="product.image" :src="product.image" alt="" class="h-full w-full object-cover" />
-                  </span>
-                  <span class="min-w-0 flex-1 truncate text-[0.9rem] font-medium text-ink">{{ product.name }}</span>
-                  <span class="shrink-0 text-[0.85rem] font-semibold text-blush-700">{{ product.price?.formatted }}</span>
-                </RouterLink>
-              </li>
-            </ul>
-            <p v-else class="px-5 py-5 text-sm text-ink/55">Nema proizvoda sa tim nazivom. Pokušajte drugu reč ili pogledajte sve proizvode.</p>
-            <button type="submit" class="flex w-full items-center justify-between border-t border-blush-100 px-5 py-3 text-[0.8rem] font-semibold uppercase tracking-[0.12em] text-blush-700 transition-colors hover:bg-blush-50">
-              <span>Svi rezultati za „{{ term.trim() }}”</span>
-              <span aria-hidden="true">→</span>
-            </button>
+            <SearchResults
+              :groups="search.groups.value"
+              :flat="search.flat.value"
+              :loading="search.loading.value"
+              :empty="search.empty.value"
+              :term="search.term.value"
+              :highlighted="search.highlighted.value"
+              :destination="search.destination"
+              @choose="close"
+            />
           </div>
         </Transition>
       </form>
@@ -281,31 +277,33 @@ onBeforeUnmount(() => {
     <!-- Phone: search panel -->
     <Transition enter-from-class="opacity-0 -translate-y-1" enter-active-class="transition duration-200" leave-to-class="opacity-0 -translate-y-1" leave-active-class="transition duration-150">
       <div v-if="searchOpen" class="border-t border-blush-100 bg-paper lg:hidden">
-        <div class="shell py-4">
-          <form class="relative" role="search" @submit.prevent="search">
+        <div class="shell pb-2 pt-4">
+          <form class="relative" role="search" @submit.prevent="submit">
             <svg viewBox="0 0 24 24" class="pointer-events-none absolute left-4 top-1/2 h-[1.1rem] w-[1.1rem] -translate-y-1/2 text-ink/45" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" stroke-linecap="round" /></svg>
             <input
               ref="phoneField"
-              v-model="term"
+              v-model="search.term.value"
               type="search"
               autocomplete="off"
-              placeholder="Šampon, seboreja, krema…"
+              placeholder="Šampon, seboreja, perut, dostava…"
               class="h-12 w-full rounded-full border border-blush-200 bg-blush-50/60 pl-11 pr-24 text-[0.95rem] text-ink outline-none transition-colors placeholder:text-ink/40 focus:border-blush-400 focus:bg-paper"
+              @keydown="onKeys"
             />
             <button type="submit" class="absolute right-1.5 top-1.5 h-9 rounded-full bg-blush-600 px-4 text-[0.8125rem] font-semibold text-paper transition-colors hover:bg-blush-700">Traži</button>
           </form>
-          <ul v-if="matches.length" class="mt-3 divide-y divide-blush-100">
-            <li v-for="product in matches" :key="product.slug">
-              <RouterLink :to="{ name: 'product', params: { slug: product.slug } }" class="flex items-center gap-3 py-2.5">
-                <span class="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-lg bg-blush-50">
-                  <img v-if="product.image" :src="product.image" alt="" class="h-full w-full object-cover" />
-                </span>
-                <span class="min-w-0 flex-1 truncate text-[0.9rem] font-medium text-ink">{{ product.name }}</span>
-                <span class="shrink-0 text-[0.85rem] font-semibold text-blush-700">{{ product.price?.formatted }}</span>
-              </RouterLink>
-            </li>
-          </ul>
-          <p v-else-if="showResults" class="mt-3 text-sm text-ink/55">Nema proizvoda sa tim nazivom.</p>
+        </div>
+
+        <div v-if="showResults" class="border-t border-blush-100">
+            <SearchResults
+            :groups="search.groups.value"
+            :flat="search.flat.value"
+            :loading="search.loading.value"
+            :empty="search.empty.value"
+            :term="search.term.value"
+            :highlighted="search.highlighted.value"
+            :destination="search.destination"
+            @choose="close"
+            />
         </div>
       </div>
     </Transition>
