@@ -47,6 +47,20 @@ const more = [
   { label: 'Česta pitanja', to: { name: 'faq' } },
 ]
 
+/*
+ * Which shelf you are on.
+ *
+ * Every one of these links goes to /proizvodi and differs only in its query,
+ * and RouterLink's own active class compares paths and ignores the query --
+ * so on any category page it marked all seven at once. The category in the
+ * address is what decides it, and "Svi proizvodi" is the one with none.
+ */
+function isOn(link) {
+  if (route.name !== 'catalog') return false
+
+  return (route.query.kategorija ?? null) === (link.to.query?.kategorija ?? null)
+}
+
 const matches = computed(() => {
   const needle = term.value.trim().toLowerCase()
   if (needle.length < 2) return []
@@ -241,8 +255,8 @@ onBeforeUnmount(() => {
             v-for="link in links"
             :key="link.label"
             :to="link.to"
-            class="nav-item relative py-3 text-[0.75rem] font-semibold uppercase tracking-[0.16em] text-ink/70 transition-colors hover:text-ink"
-            active-class="is-on text-ink"
+            class="nav-item relative py-3 text-[0.75rem] font-semibold uppercase tracking-[0.16em] transition-colors hover:text-ink"
+            :class="isOn(link) ? 'is-on text-ink' : 'text-ink/70'"
           >
             {{ link.label }}
           </RouterLink>

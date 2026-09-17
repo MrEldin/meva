@@ -90,16 +90,6 @@ setMeta({
           {{ category.name }}
         </button>
 
-        <button
-          type="button"
-          class="shrink-0 rounded-full border px-4 py-2 text-[0.875rem] font-semibold transition-colors"
-          :class="onlySets
-            ? 'border-blush-500 bg-blush-500 text-paper'
-            : 'border-blush-100 bg-paper text-mist-600 hover:border-blush-300'"
-          @click="filterBy({ tip: 'set' })"
-        >
-          Setovi
-        </button>
       </div>
 
       <label class="relative shrink-0 lg:w-72">
