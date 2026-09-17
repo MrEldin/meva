@@ -12,6 +12,25 @@ const insights = ref(null)
 const loading = ref(true)
 const tab = ref('due')
 
+/*
+ * Four jobs, not one page.
+ *
+ * Everything here was stacked down a single column -- four figures, a table
+ * of customers wide enough to need its own sideways scroll, what sells
+ * together, three tools and the mailing list -- so reaching the last of them
+ * meant scrolling past all of the others every time. They are separate jobs
+ * done on separate days, so they are separate views now, and the four
+ * figures stay above them because they are the context for all four.
+ */
+const VIEWS = [
+  { key: 'people', label: 'Koga kontaktirati', note: 'Tri liste izvučene iz istorije kupovina.' },
+  { key: 'what', label: 'Šta se prodaje', note: 'Šta ide uz šta, i koja kampanja donosi novac.' },
+  { key: 'tools', label: 'Alati', note: 'Linkovi za kampanje, isplativost reklame i katalog feed.' },
+  { key: 'list', label: 'Newsletter', note: 'Ko je ostavio adresu i odakle.' },
+]
+
+const view = ref('people')
+
 const LISTS = [
   { key: 'due', label: 'Na redu za dopunu', note: 'Poslednju porudžbinu su napravili pre 45–110 dana. Pakovanje im je pri kraju — ovo je trenutak za poruku.' },
   { key: 'winback', label: 'Za vraćanje', note: 'Kupovali su, pa se nisu vratili više od pola godine. Njima ide drugačija poruka: podsetnik i razlog.' },
@@ -109,19 +128,17 @@ onMounted(async () => {
 
 <template>
   <div>
-    <PageHeader tone="marketing" eyebrow="Marketing" title="Koga danas kontaktirati" note="Liste izvučene iz stvarne istorije kupovina.">
+    <PageHeader tone="marketing" eyebrow="Marketing" title="Koga danas kontaktirati" note="Sve iz stvarne istorije kupovina — ništa izmišljeno.">
       <template #actions>
-      <RouterLink :to="{ name: 'admin.email' }" class="btn btn-primary">
-        Email kampanje
-      </RouterLink>
+        <RouterLink :to="{ name: 'admin.email' }" class="btn btn-primary">Email kampanje</RouterLink>
       </template>
     </PageHeader>
 
     <p v-if="loading" class="py-16 text-center text-sm text-forest/65">Učitavanje…</p>
 
     <template v-else>
-      <!-- What the history says about repeat business -->
-      <div v-if="insights" class="grid gap-4 pt-6 sm:grid-cols-2 xl:grid-cols-4">
+      <!-- The context for everything below -->
+      <div v-if="insights" class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <div v-for="tile in summaryTiles" :key="tile.label" class="stat-tile">
           <p class="label text-forest/50">{{ tile.label }}</p>
           <p class="mt-2 font-display text-[1.75rem] leading-none tabular-nums">{{ tile.value }}</p>
@@ -129,74 +146,99 @@ onMounted(async () => {
         </div>
       </div>
 
-      <!-- The three lists -->
-      <section v-if="insights" class="mt-5 rounded-[1.5rem] bg-sand p-5 sm:p-6">
+      <!-- Which job -->
+      <div class="mt-5 border-b border-forest/10">
+        <div class="tabs -mb-px">
+          <button
+            v-for="item in VIEWS"
+            :key="item.key"
+            type="button"
+            class="shrink-0 border-b-2 px-4 py-3 text-[0.9375rem] font-semibold transition-colors"
+            :class="view === item.key ? 'border-clay-600 text-clay-700' : 'border-transparent text-forest/50 hover:text-forest'"
+            @click="view = item.key"
+          >{{ item.label }}</button>
+        </div>
+      </div>
+
+      <p class="mt-3 text-[0.875rem] text-forest/55">{{ VIEWS.find((v) => v.key === view)?.note }}</p>
+
+      <!-- ── Who to contact ─────────────────────────────────────────────── -->
+      <section v-if="view === 'people' && insights" class="mt-4">
         <div class="flex flex-wrap items-center justify-between gap-3">
           <div class="segment">
-            <button v-for="list in LISTS" :key="list.key" type="button"
+            <button
+              v-for="list in LISTS"
+              :key="list.key"
+              type="button"
               :class="tab === list.key ? 'is-on' : ''"
-              @click="tab = list.key">
-              {{ list.label }} ({{ number(insights[`${list.key}_total`] ?? insights[list.key].length) }})
-            </button>
+              @click="tab = list.key"
+            >{{ list.label }} ({{ number(insights[`${list.key}_total`] ?? insights[list.key].length) }})</button>
           </div>
-          <button type="button" class="btn btn-ghost"
-            @click="download(`/admin/marketing/lists/${tab}`, `meva-${tab}.csv`)">
+          <button type="button" class="btn btn-ghost" @click="download(`/admin/marketing/lists/${tab}`, `meva-${tab}.csv`)">
             Preuzmi CSV
           </button>
         </div>
 
-        <p class="mt-4 max-w-3xl text-sm leading-relaxed text-forest/65">{{ note }}</p>
+        <p class="mt-3 max-w-3xl rounded-xl bg-clay-50 px-4 py-3 text-[0.875rem] leading-relaxed text-forest/70">{{ note }}</p>
 
-        <div class="mt-4 panel overflow-x-auto p-2 sm:p-3">
-          <table class="desk-table min-w-[46rem]">
-            <thead>
-              <tr class="text-left">
-                <th class="th">Kupac</th>
-                <th class="th">Poslednji put kupio</th>
-                <th class="th">Pre</th>
-                <th class="th">Porudžbina</th>
-                <th class="th text-right">Potrošio</th>
-                <th class="th text-right">Javi se</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="person in rows" :key="person.email">
-                <td>
-                  <span class="block max-w-48 truncate font-medium">{{ person.name ?? person.email }}</span>
-                  <span class="block max-w-48 truncate text-xs text-forest/60">{{ person.city ?? person.email }}</span>
-                </td>
-                <td>
-                  <span class="block max-w-64 truncate text-forest/70">{{ person.last_products ?? '—' }}</span>
-                </td>
-                <td class="tabular-nums text-forest/70">{{ person.days_since }} d</td>
-                <td class="tabular-nums text-forest/70">{{ person.orders }}</td>
-                <td class="text-right tabular-nums">{{ person.spent_formatted }}</td>
-                <td>
-                  <div class="flex justify-end gap-2">
-                    <a v-if="person.phone" :href="viber(person.phone)" class="chip bg-sky text-forest transition-opacity hover:opacity-80" title="Pozovi na Viberu">Viber</a>
-                    <a v-if="person.phone" :href="whatsapp(person.phone)" target="_blank" rel="noopener" class="chip bg-sage text-sage-deep transition-opacity hover:opacity-80" title="Piši na WhatsAppu">WhatsApp</a>
-                    <a v-if="person.email" :href="`mailto:${person.email}`" class="chip bg-wheat text-forest transition-opacity hover:opacity-80" title="Pošalji mejl">Mejl</a>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <p v-if="(insights?.[`${tab}_total`] ?? 0) > rows.length" class="mt-3 text-xs text-forest/60">
-            Prikazano {{ rows.length }} od {{ number(insights[`${tab}_total`]) }} — ceo spisak je u CSV-u.
-          </p>
-          <p v-if="!rows.length" class="py-8 text-center text-sm text-forest/65">Ova lista je trenutno prazna.</p>
-        </div>
+        <!-- One card per person: no sideways scrolling, and the way to reach
+             them is on the same line as the reason to. -->
+        <ul v-if="rows.length" class="panel mt-3 divide-y divide-forest/8 overflow-hidden">
+          <li v-for="person in rows" :key="person.email" class="flex flex-wrap items-center gap-x-4 gap-y-3 p-4">
+            <span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-clay-100 text-[0.8125rem] font-bold text-clay-700">
+              {{ (person.name ?? person.email ?? '?').trim()[0]?.toUpperCase() }}
+            </span>
+
+            <div class="min-w-[10rem] flex-1">
+              <p class="truncate text-[0.9375rem] font-bold">{{ person.name ?? person.email }}</p>
+              <p class="truncate text-[0.8125rem] text-forest/50">{{ person.city ?? person.email }}</p>
+            </div>
+
+            <div class="min-w-[12rem] flex-[2]">
+              <p class="label text-forest/40">Poslednji put</p>
+              <p class="truncate text-[0.875rem] text-forest/70">{{ person.last_products ?? '—' }}</p>
+            </div>
+
+            <div class="shrink-0 text-right">
+              <p class="text-[0.9375rem] font-bold tabular-nums">{{ person.spent_formatted }}</p>
+              <p class="text-[0.75rem] text-forest/45 tabular-nums">{{ person.orders }}× · pre {{ person.days_since }} d</p>
+            </div>
+
+            <div class="flex shrink-0 gap-1.5">
+              <a v-if="person.phone" :href="viber(person.phone)" class="grid h-9 w-9 place-items-center rounded-full bg-sky text-forest/70 transition-colors hover:bg-forest hover:text-white" title="Viber" aria-label="Viber">
+                <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 3.5h3l1.5 4-2 1.5a12 12 0 0 0 6 6l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A16.5 16.5 0 0 1 4.5 5.7a2 2 0 0 1 2-2.2z" /></svg>
+              </a>
+              <a v-if="person.phone" :href="whatsapp(person.phone)" target="_blank" rel="noopener" class="grid h-9 w-9 place-items-center rounded-full bg-sage text-sage-deep transition-colors hover:bg-sage-deep hover:text-white" title="WhatsApp" aria-label="WhatsApp">
+                <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.8 20.2 5 16.5a8 8 0 1 1 3 3z" /></svg>
+              </a>
+              <a v-if="person.email" :href="`mailto:${person.email}`" class="grid h-9 w-9 place-items-center rounded-full bg-wheat text-forest/70 transition-colors hover:bg-forest hover:text-white" title="Mejl" aria-label="Mejl">
+                <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.5" /><path d="m4 7 8 5.5L20 7" /></svg>
+              </a>
+            </div>
+          </li>
+        </ul>
+
+        <p v-else class="panel mt-3 px-6 py-14 text-center text-sm text-forest/60">Ova lista je trenutno prazna.</p>
+
+        <p v-if="(insights?.[`${tab}_total`] ?? 0) > rows.length" class="mt-3 text-[0.8125rem] text-forest/55">
+          Prikazano {{ rows.length }} od {{ number(insights[`${tab}_total`]) }} — ceo spisak je u CSV-u.
+        </p>
       </section>
 
-      <!-- What sells together -->
-      <div class="mt-5 grid gap-5 lg:grid-cols-2">
-        <section v-if="insights?.pairs?.length" class="rounded-[1.5rem] bg-sand p-5 sm:p-6">
-          <h2 class="label text-forest/65">Šta se kupuje zajedno</h2>
-          <p class="mt-2 text-xs text-forest/65">Gotovi setovi i „ide uz ovo" preporuke — iz stvarnih korpi.</p>
-          <ul class="mt-4 space-y-2">
-            <li v-for="pair in insights.pairs" :key="pair.first + pair.second" class="flex items-center justify-between gap-3 rounded-xl bg-cream px-3 py-2 text-sm">
-              <span class="min-w-0"><span class="truncate">{{ pair.first }}</span> <span class="text-forest/58">+</span> <span class="truncate">{{ pair.second }}</span></span>
-              <span class="shrink-0 tabular-nums text-forest/65">{{ number(pair.together) }}×</span>
+      <!-- ── What sells ─────────────────────────────────────────────────── -->
+      <div v-else-if="view === 'what'" class="mt-4 grid gap-3 lg:grid-cols-2">
+        <section v-if="insights?.pairs?.length" class="panel p-4 sm:p-5">
+          <h2 class="font-display text-[1.25rem] leading-tight">Šta se kupuje zajedno</h2>
+          <p class="mt-0.5 text-[0.8125rem] text-forest/50">Iz stvarnih korpi — gotovi setovi i „ide uz ovo" preporuke.</p>
+
+          <ul class="mt-4 space-y-1.5">
+            <li v-for="pair in insights.pairs" :key="pair.first + pair.second" class="flex items-center justify-between gap-3 rounded-xl bg-cream px-3.5 py-2.5 text-[0.875rem]">
+              <span class="min-w-0">
+                <span class="font-semibold">{{ pair.first }}</span>
+                <span class="mx-1.5 text-clay-500">+</span>
+                <span class="font-semibold">{{ pair.second }}</span>
+              </span>
+              <span class="shrink-0 font-bold tabular-nums text-forest/60">{{ number(pair.together) }}×</span>
             </li>
           </ul>
         </section>
@@ -204,73 +246,106 @@ onMounted(async () => {
         <Breakdown :tabs="[{ key: 'campaigns', label: 'Šta donosi novac', rows: campaigns, metric: 'revenue', unit: 'money', empty: 'Kad krenu kampanje, ovde se vidi šta se isplati.' }]" />
       </div>
 
-      <!-- Tools -->
-      <div class="mt-5 grid gap-5 lg:grid-cols-2">
-        <section class="rounded-[1.5rem] bg-sand p-5 sm:p-6">
-          <h2 class="label text-forest/65">Link za kampanju</h2>
-          <p class="mt-2 text-xs text-forest/65">Linkovi napravljeni ovde se posle vide u analitici, po izvoru i kampanji.</p>
+      <!-- ── Tools ──────────────────────────────────────────────────────── -->
+      <div v-else-if="view === 'tools'" class="mt-4 grid gap-3 lg:grid-cols-2">
+        <section class="panel p-4 sm:p-5">
+          <h2 class="font-display text-[1.25rem] leading-tight">Link za kampanju</h2>
+          <p class="mt-0.5 text-[0.8125rem] text-forest/50">Linkovi napravljeni ovde se posle vide u Pregledu, po izvoru i kampanji.</p>
 
           <div class="mt-4 space-y-3">
-            <input v-model="builder.url" type="url" class="field w-full" />
+            <label class="block">
+              <span class="label text-forest/55">Adresa</span>
+              <input v-model="builder.url" type="url" class="field mt-1.5 w-full" />
+            </label>
+
             <div class="grid gap-3 sm:grid-cols-2">
-              <input v-model="builder.source" list="utm-sources" placeholder="izvor" class="field" />
-              <datalist id="utm-sources"><option v-for="source in SOURCES" :key="source" :value="source" /></datalist>
-              <input v-model="builder.medium" placeholder="vrsta" class="field" />
-              <input v-model="builder.campaign" placeholder="kampanja, npr. seboreja-jesen" class="field" />
-              <input v-model="builder.content" placeholder="oznaka, npr. story-1" class="field" />
+              <label class="block">
+                <span class="label text-forest/55">Izvor</span>
+                <input v-model="builder.source" list="utm-sources" placeholder="instagram" class="field mt-1.5 w-full" />
+                <datalist id="utm-sources"><option v-for="source in SOURCES" :key="source" :value="source" /></datalist>
+              </label>
+              <label class="block">
+                <span class="label text-forest/55">Vrsta</span>
+                <input v-model="builder.medium" placeholder="social" class="field mt-1.5 w-full" />
+              </label>
+              <label class="block">
+                <span class="label text-forest/55">Kampanja</span>
+                <input v-model="builder.campaign" placeholder="seboreja-jesen" class="field mt-1.5 w-full" />
+              </label>
+              <label class="block">
+                <span class="label text-forest/55">Oznaka</span>
+                <input v-model="builder.content" placeholder="story-1" class="field mt-1.5 w-full" />
+              </label>
             </div>
-            <div class="rounded-2xl bg-cream p-4">
-              <p class="break-all font-mono text-xs text-forest/75">{{ taggedUrl }}</p>
+
+            <div class="rounded-xl bg-cream p-4">
+              <p class="break-all font-mono text-[0.75rem] text-forest/70">{{ taggedUrl }}</p>
               <button type="button" class="btn btn-primary mt-3" @click="copy">{{ copied ? 'Kopirano ✓' : 'Kopiraj link' }}</button>
             </div>
           </div>
         </section>
 
-        <section class="rounded-[1.5rem] bg-sand p-5 sm:p-6">
-          <h2 class="label text-forest/65">Da li se reklama isplati</h2>
-          <label class="mt-3 block">
-            <span class="text-xs text-forest/65">Koliko ste potrošili na reklame (RSD)</span>
-            <input v-model.number="spend" type="number" min="0" step="1000" class="field mt-1 w-full tabular-nums" />
-          </label>
-          <dl class="mt-4 space-y-2 text-sm">
-            <div class="flex justify-between"><dt class="text-forest/65">Promet iz kampanja</dt><dd class="tabular-nums">{{ money(campaignRevenue) }}</dd></div>
-            <div class="flex justify-between"><dt class="text-forest/65">Uloženo</dt><dd class="tabular-nums">{{ number(spend) }} RSD</dd></div>
-            <div v-if="roas" class="flex justify-between border-t border-forest/10 pt-2 text-base font-semibold">
-              <dt>Na svaki dinar</dt><dd class="tabular-nums">{{ roas }} RSD</dd>
+        <div class="space-y-3">
+          <section class="panel p-4 sm:p-5">
+            <h2 class="font-display text-[1.25rem] leading-tight">Da li se reklama isplati</h2>
+
+            <label class="mt-4 block">
+              <span class="label text-forest/55">Koliko ste potrošili na reklame</span>
+              <span class="relative mt-1.5 block">
+                <input v-model.number="spend" type="number" min="0" step="1000" class="field w-full pr-14 tabular-nums" />
+                <span class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[0.8125rem] font-semibold text-forest/40">RSD</span>
+              </span>
+            </label>
+
+            <dl class="mt-4 space-y-2 text-[0.875rem]">
+              <div class="flex justify-between"><dt class="text-forest/55">Promet iz kampanja</dt><dd class="font-semibold tabular-nums">{{ money(campaignRevenue) }}</dd></div>
+              <div class="flex justify-between"><dt class="text-forest/55">Uloženo</dt><dd class="font-semibold tabular-nums">{{ number(spend) }} RSD</dd></div>
+              <div v-if="roas" class="flex justify-between border-t border-forest/10 pt-2">
+                <dt class="font-bold">Na svaki dinar</dt>
+                <dd class="font-display text-[1.25rem] leading-none tabular-nums">{{ roas }} RSD</dd>
+              </div>
+            </dl>
+
+            <p v-if="roas" class="mt-3 rounded-lg px-3 py-2 text-[0.8125rem] font-semibold" :class="Number(roas) >= 3 ? 'bg-sage text-sage-deep' : 'bg-clay-100 text-clay-700'">
+              {{ Number(roas) >= 3 ? 'Isplati se — vredi povećati ulaganje.' : 'Ispod tri prema jedan; pogledajte koja kampanja vuče naniže.' }}
+            </p>
+          </section>
+
+          <section class="panel p-4 sm:p-5">
+            <h2 class="font-display text-[1.25rem] leading-tight">Katalog za Instagram i Google</h2>
+            <p class="mt-1.5 text-[0.875rem] leading-relaxed text-forest/60">
+              Zalepite u Meta Commerce Manager (Katalog → Dodaj proizvode → Zakazani feed) i u Google Merchant Center.
+              Sam se osvežava kad promenite cenu ili opis.
+            </p>
+            <div class="mt-3 rounded-xl bg-cream p-4">
+              <p class="break-all font-mono text-[0.75rem] text-forest/70">{{ feedUrl }}</p>
+              <a :href="feedUrl" target="_blank" rel="noopener" class="mt-3 inline-block text-[0.8125rem] font-bold text-clay-600 hover:text-clay-700">Otvori feed →</a>
             </div>
-          </dl>
-          <p v-if="roas" class="mt-3 text-xs" :class="Number(roas) >= 3 ? 'text-sage-deep' : 'text-clay-600'">
-            {{ Number(roas) >= 3 ? 'Isplati se — vredi povećati ulaganje.' : 'Ispod tri prema jedan; pogledajte koja kampanja vuče naniže.' }}
-          </p>
-        </section>
-
-        <section class="rounded-[1.5rem] bg-sand p-5 sm:p-6">
-          <h2 class="label text-forest/65">Katalog za Instagram i Google</h2>
-          <p class="mt-2 text-sm leading-relaxed text-forest/70">
-            Zalepite u Meta Commerce Manager (Katalog → Dodaj proizvode → Zakazani feed) i u Google Merchant Center.
-            Sam se osvežava kad promenite cenu ili opis.
-          </p>
-          <div class="mt-4 rounded-2xl bg-cream p-4">
-            <p class="break-all font-mono text-xs text-forest/75">{{ feedUrl }}</p>
-            <a :href="feedUrl" target="_blank" rel="noopener" class="label mt-3 inline-block text-clay-600 hover:text-clay-700">Otvori feed →</a>
-          </div>
-        </section>
-
-        <section class="rounded-[1.5rem] bg-sand p-5 sm:p-6">
-          <div class="flex items-center justify-between gap-3">
-            <h2 class="label text-forest/65">Lista za newsletter ({{ subscriberMeta?.total ?? 0 }})</h2>
-            <button v-if="subscribers.length" type="button" class="label text-clay-600 hover:text-clay-700"
-              @click="download('/admin/marketing/subscribers/export', 'meva-lista.csv')">CSV</button>
-          </div>
-          <ul v-if="subscribers.length" class="mt-4 space-y-2 text-sm">
-            <li v-for="person in subscribers" :key="person.email" class="flex items-center justify-between gap-3 rounded-xl bg-cream px-3 py-2">
-              <span class="min-w-0 truncate">{{ person.email }}</span>
-              <span class="shrink-0 text-xs text-forest/60">{{ person.utm_source ?? person.source }}</span>
-            </li>
-          </ul>
-          <p v-else class="mt-4 text-sm text-forest/65">Još niko nije ostavio e-mail.</p>
-        </section>
+          </section>
+        </div>
       </div>
+
+      <!-- ── The mailing list ───────────────────────────────────────────── -->
+      <section v-else-if="view === 'list'" class="panel mt-4 overflow-hidden">
+        <div class="flex items-center justify-between gap-3 border-b border-forest/8 p-4 sm:p-5">
+          <div>
+            <h2 class="font-display text-[1.25rem] leading-tight">Newsletter</h2>
+            <p class="mt-0.5 text-[0.8125rem] text-forest/50">{{ subscriberMeta?.total ?? 0 }} adresa ukupno.</p>
+          </div>
+          <button v-if="subscribers.length" type="button" class="btn btn-ghost" @click="download('/admin/marketing/subscribers/export', 'meva-lista.csv')">
+            Preuzmi CSV
+          </button>
+        </div>
+
+        <ul v-if="subscribers.length" class="divide-y divide-forest/8">
+          <li v-for="person in subscribers" :key="person.email" class="flex items-center justify-between gap-3 px-4 py-3 sm:px-5">
+            <span class="min-w-0 truncate text-[0.875rem]">{{ person.email }}</span>
+            <span class="shrink-0 text-[0.75rem] font-semibold text-forest/45">{{ person.utm_source ?? person.source ?? '—' }}</span>
+          </li>
+        </ul>
+
+        <p v-else class="px-6 py-14 text-center text-sm text-forest/60">Još nema nijedne prijave.</p>
+      </section>
     </template>
   </div>
 </template>
