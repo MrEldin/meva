@@ -1,54 +1,62 @@
 <script setup>
-import logoWhite from '@/assets/brand/logo-white.png'
+import logoBlack from '@/assets/brand/logo-black.png'
 import { useAuthStore } from '@/stores/auth'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
-const auth = useAuthStore()
-const router = useRouter()
+/**
+ * The desk.
+ *
+ * The rail used to be a dark column of small grey type over a numbered
+ * spine, which was hard to read and told you nothing about where you were.
+ * It is white now, the sections carry icons rather than numbers, and the one
+ * you have open is the only coloured thing on it. The sections are grouped
+ * the way the work is: what is selling, what is for sale, who is being
+ * written to, and the shop itself.
+ */
 const route = useRoute()
+const router = useRouter()
+const auth = useAuthStore()
+
 const open = ref(false)
 
-/*
- * The rail is written in the shop's own language rather than a dashboard's:
- * mono numerals, the section named in the display serif, and a spine of colour
- * down the left of each row -- the same mark the labels on the bottles carry.
- * Each section keeps its colour on the heading of the page it opens, so the
- * rail and the page always agree about where you are.
- */
-const SECTIONS = [
-  { to: 'admin.overview', label: 'Pregled', permission: 'analytics.view', tone: 'overview', note: 'Promet i kupci' },
-  { to: 'admin.orders', label: 'Porudžbine', permission: 'orders.view', tone: 'orders', note: 'Ko je šta poručio' },
-  { to: 'admin.products', label: 'Proizvodi', permission: 'products.view', tone: 'products', note: 'Katalog i cene' },
-  { to: 'admin.reviews', label: 'Recenzije', permission: 'products.manage', tone: 'products', note: 'Reči kupaca' },
-  { to: 'admin.marketing', label: 'Marketing', permission: 'marketing.manage', tone: 'marketing', note: 'Koga kontaktirati' },
-  { to: 'admin.email', label: 'Kampanje', permission: 'marketing.manage', tone: 'email', note: 'Pisanje i slanje' },
-  { to: 'admin.team', label: 'Tim', permission: 'users.manage', tone: 'team', note: 'Nalozi i prava' },
-  { to: 'admin.profile', label: 'Nalog', permission: null, tone: 'account', note: 'Lozinka i podaci' },
+const GROUPS = [
+  {
+    title: 'Prodaja',
+    items: [
+      { to: 'admin.overview', label: 'Pregled', permission: 'analytics.view', icon: 'chart' },
+      { to: 'admin.orders', label: 'Porudžbine', permission: 'orders.view', icon: 'box' },
+    ],
+  },
+  {
+    title: 'Katalog',
+    items: [
+      { to: 'admin.products', label: 'Proizvodi', permission: 'products.view', icon: 'bottle' },
+      { to: 'admin.reviews', label: 'Recenzije', permission: 'products.manage', icon: 'star' },
+    ],
+  },
+  {
+    title: 'Kupci',
+    items: [
+      { to: 'admin.marketing', label: 'Marketing', permission: 'marketing.manage', icon: 'people' },
+      { to: 'admin.email', label: 'Kampanje', permission: 'marketing.manage', icon: 'mail' },
+    ],
+  },
+  {
+    title: 'Podešavanja',
+    items: [
+      { to: 'admin.team', label: 'Tim', permission: 'users.manage', icon: 'key' },
+      { to: 'admin.profile', label: 'Moj nalog', permission: null, icon: 'user' },
+    ],
+  },
 ]
 
-// Written out rather than built from strings, so Tailwind keeps the classes.
-const SPINE = {
-  overview: 'bg-desk-overview',
-  orders: 'bg-desk-orders',
-  products: 'bg-desk-products',
-  marketing: 'bg-desk-marketing',
-  email: 'bg-desk-email',
-  team: 'bg-desk-team',
-  account: 'bg-desk-account',
-}
-
-const INK = {
-  overview: 'text-desk-overview',
-  orders: 'text-desk-orders',
-  products: 'text-desk-products',
-  marketing: 'text-desk-marketing',
-  email: 'text-desk-email',
-  team: 'text-desk-team',
-  account: 'text-desk-account',
-}
-
-const links = computed(() => SECTIONS.filter((s) => !s.permission || auth.can(s.permission)))
+const groups = computed(() =>
+  GROUPS.map((group) => ({
+    ...group,
+    items: group.items.filter((item) => !item.permission || auth.can(item.permission)),
+  })).filter((group) => group.items.length),
+)
 
 const isActive = (name) => route.name === name || String(route.name ?? '').startsWith(`${name}.`)
 
@@ -62,6 +70,8 @@ const initials = computed(() =>
     .toUpperCase(),
 )
 
+watch(() => route.fullPath, () => (open.value = false))
+
 function signOut() {
   auth.logout()
   router.push({ name: 'login' })
@@ -70,81 +80,70 @@ function signOut() {
 
 <template>
   <div class="min-h-screen bg-cream text-forest lg:flex">
-    <aside class="desk-rail text-cream lg:sticky lg:top-0 lg:flex lg:h-screen lg:w-[17.5rem] lg:shrink-0 lg:flex-col">
-      <div class="flex items-center justify-between gap-4 px-6 py-5 lg:py-7">
+    <aside class="desk-rail lg:sticky lg:top-0 lg:flex lg:h-screen lg:w-[16.5rem] lg:shrink-0 lg:flex-col">
+      <div class="flex items-center justify-between gap-4 px-5 py-4 lg:px-6 lg:py-6">
         <RouterLink :to="{ name: 'admin.overview' }" class="min-w-0">
-          <img :src="logoWhite" alt="Meva" class="h-8 w-auto" />
-          <span class="label mt-2 block text-cream/40">Admin · Novi Pazar</span>
+          <img :src="logoBlack" alt="Meva" class="h-8 w-auto" />
+          <span class="label mt-1.5 block text-forest/40">Admin</span>
         </RouterLink>
         <button
           type="button"
-          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-cream/25 lg:hidden"
+          class="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-forest/12 lg:hidden"
           :aria-expanded="open"
           aria-label="Meni"
           @click="open = !open"
         >
           <span class="relative block h-3 w-4">
-            <span class="absolute left-0 block h-px w-4 bg-current transition-all duration-300" :class="open ? 'top-1.5 rotate-45' : 'top-0'" />
-            <span class="absolute left-0 block h-px w-4 bg-current transition-all duration-300" :class="open ? 'top-1.5 -rotate-45' : 'top-3'" />
+            <span class="absolute left-0 block h-[1.5px] w-4 rounded bg-current transition-all duration-300" :class="open ? 'top-1.5 rotate-45' : 'top-0'" />
+            <span class="absolute left-0 block h-[1.5px] w-4 rounded bg-current transition-all duration-300" :class="open ? 'top-1.5 -rotate-45' : 'top-3'" />
           </span>
         </button>
       </div>
 
-      <div class="rule-soft mx-6 h-px" :class="open ? 'block' : 'hidden lg:block'" />
+      <nav class="px-3 pb-2 lg:min-h-0 lg:flex-1 lg:overflow-y-auto" :class="open ? 'block' : 'hidden lg:block'">
+        <div v-for="group in groups" :key="group.title" class="mb-5 last:mb-0">
+          <p class="label px-3 pb-2 text-forest/35">{{ group.title }}</p>
 
-      <nav class="px-3 py-4 lg:min-h-0 lg:flex-1 lg:overflow-y-auto" :class="open ? 'block' : 'hidden lg:block'">
-        <RouterLink
-          v-for="(link, index) in links"
-          :key="link.to"
-          :to="{ name: link.to }"
-          class="group relative mb-0.5 flex items-baseline gap-3 overflow-hidden rounded-xl py-2.5 pl-4 pr-3 transition-colors duration-300"
-          :class="isActive(link.to) ? 'bg-cream text-forest' : 'text-cream/85 hover:bg-cream/[0.07]'"
-          @click="open = false"
-        >
-          <!-- The spine: a thin mark that fills out when the section is open -->
-          <span
-            class="absolute inset-y-1.5 left-0 w-[3px] rounded-full transition-all duration-300"
-            :class="[SPINE[link.tone], isActive(link.to) ? 'opacity-100' : 'opacity-35 group-hover:opacity-70']"
-          />
-
-          <span
-            class="font-mono text-[0.6875rem] tabular-nums transition-colors"
-            :class="isActive(link.to) ? INK[link.tone] : 'text-cream/35'"
+          <RouterLink
+            v-for="link in group.items"
+            :key="link.to"
+            :to="{ name: link.to }"
+            class="relative mb-0.5 flex items-center gap-3 rounded-xl px-3 py-2.5 text-[0.9375rem] font-semibold transition-colors duration-200"
+            :class="isActive(link.to) ? 'bg-clay-600 text-white' : 'text-forest/75 hover:bg-sand hover:text-forest'"
           >
-            {{ String(index + 1).padStart(2, '0') }}
-          </span>
-
-          <span class="min-w-0 flex-1">
-            <span class="block truncate font-display text-[1.0625rem] leading-tight tracking-tight">{{ link.label }}</span>
-            <span class="mt-0.5 block truncate text-xs" :class="isActive(link.to) ? 'text-forest/55' : 'text-cream/40'">{{ link.note }}</span>
-          </span>
-        </RouterLink>
+            <svg viewBox="0 0 24 24" class="h-[1.125rem] w-[1.125rem] shrink-0" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <template v-if="link.icon === 'chart'"><path d="M4 19V5M4 19h16" /><path d="m7.5 14 3.5-4 3 2.5L19 7" /></template>
+              <template v-else-if="link.icon === 'box'"><path d="M3.5 7.5 12 3.5l8.5 4v9L12 20.5 3.5 16.5z" /><path d="M3.5 7.5 12 11.5l8.5-4M12 11.5v9" /></template>
+              <template v-else-if="link.icon === 'bottle'"><path d="M10 2.5h4v3l2.2 3.2a4 4 0 0 1 .8 2.4v8.4a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2v-8.4a4 4 0 0 1 .8-2.4L10 5.5z" /><path d="M7.4 13.5h9.2" /></template>
+              <template v-else-if="link.icon === 'star'"><path d="m12 3.6 2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 17l-5.2 2.7 1-5.8L3.5 9.8l5.9-.9z" /></template>
+              <template v-else-if="link.icon === 'people'"><circle cx="9" cy="8" r="3.4" /><path d="M2.8 20c0-3.4 2.8-5.6 6.2-5.6s6.2 2.2 6.2 5.6" /><path d="M16.5 5.2a3.4 3.4 0 0 1 0 6.4M17.5 14.8c2.2.6 3.7 2.4 3.7 5.2" /></template>
+              <template v-else-if="link.icon === 'mail'"><rect x="3" y="5.5" width="18" height="13" rx="2.5" /><path d="m4 7 8 5.5L20 7" /></template>
+              <template v-else-if="link.icon === 'key'"><circle cx="8" cy="12" r="4" /><path d="M12 12h9M18 12v3.2M15.5 12v2.4" /></template>
+              <template v-else><circle cx="12" cy="8" r="3.6" /><path d="M4.8 20c0-3.6 3.3-6 7.2-6s7.2 2.4 7.2 6" /></template>
+            </svg>
+            {{ link.label }}
+          </RouterLink>
+        </div>
       </nav>
 
       <!-- Who is signed in, and the two ways out -->
-      <div class="px-6 pb-5 pt-1 lg:pb-6" :class="open ? 'block' : 'hidden lg:block'">
-        <div class="rule-soft mb-4 h-px" />
-
+      <div class="border-t border-forest/8 px-5 py-4 lg:px-6" :class="open ? 'block' : 'hidden lg:block'">
         <div class="flex items-center gap-3">
-          <span class="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-cream/20 font-mono text-xs text-cream">{{ initials || '·' }}</span>
+          <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-clay-100 text-[0.75rem] font-bold text-clay-700">{{ initials || '·' }}</span>
           <div class="min-w-0">
-            <p class="truncate text-sm font-semibold">{{ auth.name }}</p>
-            <p class="truncate font-mono text-[0.6875rem] text-cream/45">{{ auth.roles.join(' · ') }}</p>
+            <p class="truncate text-[0.875rem] font-bold">{{ auth.name }}</p>
+            <p class="truncate text-[0.75rem] text-forest/45">{{ auth.roles.join(' · ') }}</p>
           </div>
         </div>
 
-        <div class="mt-4 flex items-center gap-2">
-          <RouterLink :to="{ name: 'home' }" class="btn flex-1 border border-cream/25 px-3 text-cream transition-colors hover:bg-cream hover:text-forest">
+        <div class="mt-3 flex items-center gap-2">
+          <RouterLink :to="{ name: 'home' }" class="flex-1 rounded-full border border-forest/12 px-3 py-2 text-center text-[0.8125rem] font-semibold transition-colors hover:bg-sand">
             Prodavnica
           </RouterLink>
-          <button type="button" class="btn border border-cream/25 px-3 text-cream/80 transition-colors hover:border-clay-500 hover:bg-clay-500 hover:text-white" @click="signOut">
+          <button type="button" class="rounded-full border border-forest/12 px-3 py-2 text-[0.8125rem] font-semibold text-forest/70 transition-colors hover:border-clay-600 hover:bg-clay-600 hover:text-white" @click="signOut">
             Odjava
           </button>
         </div>
-
-        <p class="mt-4 font-mono text-[0.625rem] leading-relaxed tracking-[0.12em] text-cream/35 uppercase">
-          Ručno rađeno · od 2010.
-        </p>
       </div>
     </aside>
 

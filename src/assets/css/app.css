@@ -59,13 +59,21 @@
   --color-mist-500: #6e6e6e;
   --color-mist-600: #4a4a4a;
 
-  /* Kept so the admin desk, which is not part of this redesign, still builds. */
-  --color-cream: #fdf7f5;
-  --color-sand: #fbefeb;
-  --color-forest: #121212;
-  --color-forest-soft: #2a2a2a;
-  --color-sage: #f8c1ba;
-  --color-sage-deep: #9e4f56;
+  /*
+  | The desk.
+  |
+  | One accent -- the shop's own pink -- instead of seven hues that agreed
+  | with nothing. Everything else is a warm neutral, so the only coloured
+  | things on a page are the ones that mean something: what is open, what is
+  | up, what is down. The chart palette is five muted colours that sit beside
+  | the pink rather than argue with it.
+  */
+  --color-cream: #faf8f7;
+  --color-sand: #f4eeec;
+  --color-forest: #1a1416;
+  --color-forest-soft: #3a3033;
+  --color-sage: #eaf1ec;
+  --color-sage-deep: #3f7d5c;
   --color-clay-50: #fef6f4;
   --color-clay-100: #fdeae6;
   --color-clay-200: #f8c1ba;
@@ -80,13 +88,24 @@
   --color-sky: #e9eef2;
   --color-linen: #f2ece8;
 
-  --color-desk-overview: #4b7f9b;
-  --color-desk-orders: #b0666a;
-  --color-desk-products: #5c8560;
-  --color-desk-marketing: #b0666a;
-  --color-desk-email: #b08a34;
-  --color-desk-team: #7a6a92;
-  --color-desk-account: #6e6e6e;
+  /* Up, down, and neither. */
+  --color-up: #3f7d5c;
+  --color-down: #b3453f;
+
+  /* For charts, where more than one colour is the point. */
+  --color-plot-1: #b0666a;
+  --color-plot-2: #8a6a8f;
+  --color-plot-3: #5f8f8a;
+  --color-plot-4: #b3893f;
+  --color-plot-5: #c08a6a;
+
+  --color-desk-overview: #b0666a;
+  --color-desk-orders: #8e3b45;
+  --color-desk-products: #5f8f8a;
+  --color-desk-marketing: #8a6a8f;
+  --color-desk-email: #b3893f;
+  --color-desk-team: #c08a6a;
+  --color-desk-account: #6b5c60;
 
   /*
   | One family, in several weights. The client asked for a font that is easy
@@ -425,9 +444,9 @@
 
   /* A panel on the desk. */
   .panel {
-    border-radius: 1.5rem;
-    background: var(--color-sand);
-    border: 1px solid color-mix(in oklab, var(--color-forest) 7%, transparent);
+    background: var(--color-paper);
+    border: 1px solid color-mix(in oklab, var(--color-forest) 8%, transparent);
+    border-radius: 1.25rem;
   }
 
   /* Text input, textarea and select share one shape. */
@@ -514,16 +533,12 @@
      same fine grain the opening scene uses, so it reads as paper rather than
      as chrome. */
   .desk-rail {
-    background-color: var(--color-forest);
-    background-image:
-      radial-gradient(110% 55% at 100% 38%, rgba(217, 228, 198, 0.07), transparent 65%),
-      linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent 30%, rgba(0, 0, 0, 0.22)),
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.035 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-    background-size: auto, auto, 140px 140px;
+    background: var(--color-paper);
+    border-right: 1px solid color-mix(in oklab, var(--color-forest) 10%, transparent);
   }
 
   /* A hairline rule with the brand's own weight to it. */
-  .rule-soft { background: linear-gradient(90deg, rgba(242, 239, 232, 0.22), rgba(242, 239, 232, 0.04)); }
+  .rule-soft { background: color-mix(in oklab, var(--color-forest) 9%, transparent); }
 
   /* A figure on the desk wears its colour as a wash rather than a stripe: a
      bar across the top of a rounded, bordered card never sits flush with the
@@ -785,4 +800,54 @@
   @media (prefers-reduced-motion: reduce) {
     .nudge { animation: none; }
   }
+}
+
+/* ── The desk, continued ────────────────────────────────────────────────── */
+@layer utilities {
+  /* A figure worth reading at a glance, and what it did since last time. */
+  .stat-tile {
+    background: var(--color-paper);
+    border: 1px solid color-mix(in oklab, var(--color-forest) 8%, transparent);
+    border-radius: 1.25rem;
+    padding: 1.25rem 1.25rem 1.125rem;
+  }
+
+  .delta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    border-radius: 9999px;
+    padding: 0.1875rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .delta-up { background: color-mix(in oklab, var(--color-up) 12%, transparent); color: var(--color-up); }
+  .delta-down { background: color-mix(in oklab, var(--color-down) 12%, transparent); color: var(--color-down); }
+  .delta-flat { background: color-mix(in oklab, var(--color-forest) 7%, transparent); color: color-mix(in oklab, var(--color-forest) 55%, transparent); }
+
+  /* Tabs across the top of a panel, where several lists share one frame. */
+  .tabs {
+    display: flex;
+    gap: 0.25rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .tabs::-webkit-scrollbar { display: none; }
+
+  .tab {
+    flex-shrink: 0;
+    border-radius: 9999px;
+    padding: 0.4375rem 0.875rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: color-mix(in oklab, var(--color-forest) 60%, transparent);
+    transition: background-color 0.2s, color 0.2s;
+    white-space: nowrap;
+  }
+
+  .tab:hover { background: var(--color-sand); color: var(--color-forest); }
+  .tab.is-on { background: var(--color-forest); color: var(--color-paper); }
 }
