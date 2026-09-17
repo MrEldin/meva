@@ -32,12 +32,12 @@ const root = ref(null)
 
 const links = [
   { label: 'Svi proizvodi', to: { name: 'catalog' } },
-  { label: 'Nega kože', to: { name: 'catalog', query: { kategorija: 'preparati-za-lice' } } },
-  { label: 'Kosa', to: { name: 'catalog', query: { kategorija: 'kosa' } } },
-  { label: 'Seboreja', to: { name: 'catalog', query: { kategorija: 'seboreja' } } },
-  { label: 'Psorijaza', to: { name: 'catalog', query: { kategorija: 'psorijaza' } } },
-  { label: 'Ekcem', to: { name: 'catalog', query: { kategorija: 'ekcem' } } },
-  { label: 'Setovi', to: { name: 'catalog', query: { kategorija: 'setovi' } } },
+  { label: 'Nega kože', to: { name: 'catalog', query: { category: 'preparati-za-lice' } } },
+  { label: 'Kosa', to: { name: 'catalog', query: { category: 'kosa' } } },
+  { label: 'Seboreja', to: { name: 'catalog', query: { category: 'seboreja' } } },
+  { label: 'Psorijaza', to: { name: 'catalog', query: { category: 'psorijaza' } } },
+  { label: 'Ekcem', to: { name: 'catalog', query: { category: 'ekcem' } } },
+  { label: 'Setovi', to: { name: 'catalog', query: { category: 'setovi' } } },
 ]
 
 const more = [
@@ -57,7 +57,7 @@ const more = [
 function isOn(link) {
   if (route.name !== 'catalog') return false
 
-  return (route.query.kategorija ?? null) === (link.to.query?.kategorija ?? null)
+  return (route.query.category ?? null) === (link.to.query?.category ?? null)
 }
 
 const showResults = computed(() => searchOpen.value && search.term.value.trim().length >= 2)

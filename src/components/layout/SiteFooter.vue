@@ -3,9 +3,9 @@ import logoBlack from '@/assets/brand/logo-black.png'
 
 const SHOP = [
   { label: 'Svi proizvodi', to: { name: 'catalog' } },
-  { label: 'Nega kože', to: { name: 'catalog', query: { kategorija: 'preparati-za-lice' } } },
-  { label: 'Kosa', to: { name: 'catalog', query: { kategorija: 'kosa' } } },
-  { label: 'Setovi', to: { name: 'catalog', query: { kategorija: 'setovi' } } },
+  { label: 'Nega kože', to: { name: 'catalog', query: { category: 'preparati-za-lice' } } },
+  { label: 'Kosa', to: { name: 'catalog', query: { category: 'kosa' } } },
+  { label: 'Setovi', to: { name: 'catalog', query: { category: 'setovi' } } },
 ]
 
 const HELP = [

@@ -33,7 +33,7 @@ const concerns = computed(() =>
 
     <ul class="mt-5 grid grid-cols-3 gap-3 lg:grid-cols-6 lg:gap-4">
       <li v-for="(concern, i) in concerns" :key="concern.slug">
-        <RouterLink :to="{ name: 'catalog', query: { kategorija: concern.slug } }" class="group block text-center">
+        <RouterLink :to="{ name: 'catalog', query: { category: concern.slug } }" class="group block text-center">
           <div class="relative mx-auto aspect-square w-full rounded-full ring-1 ring-inset ring-blush-100 transition-all duration-500 group-hover:ring-blush-300 group-hover:ring-2">
             <ProductFigure v-if="concern.product" :product="concern.product" :tint="i" sizes="(min-width: 1024px) 14vw, 30vw" />
           </div>

@@ -40,7 +40,7 @@ export function useSearch() {
   /** Where a hit takes you when it is chosen. */
   function destination({ kind, item }) {
     if (kind === 'product') return { name: 'product', params: { slug: item.slug } }
-    if (kind === 'collection') return { name: 'catalog', query: { kategorija: item.slug } }
+    if (kind === 'collection') return { name: 'catalog', query: { category: item.slug } }
     if (kind === 'review') {
       return item.product_slug
         ? { name: 'product', params: { slug: item.product_slug } }

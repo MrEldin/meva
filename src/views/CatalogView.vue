@@ -14,7 +14,7 @@ const search = ref('')
 
 onMounted(() => catalog.load())
 
-const activeCategory = computed(() => route.query.kategorija ?? null)
+const activeCategory = computed(() => route.query.category ?? null)
 const onlySets = computed(() => route.query.tip === 'set')
 
 const visible = computed(() => {
@@ -85,7 +85,7 @@ setMeta({
           :class="activeCategory === category.slug
             ? 'border-blush-500 bg-blush-500 text-paper'
             : 'border-blush-100 bg-paper text-mist-600 hover:border-blush-300'"
-          @click="filterBy({ kategorija: category.slug })"
+          @click="filterBy({ category: category.slug })"
         >
           {{ category.name }}
         </button>
