@@ -156,7 +156,7 @@ onMounted(() => {
       tone="products"
       eyebrow="Reči kupaca"
       title="Recenzije"
-      note="Šta stoji na početnoj strani, ispod proizvoda. Recenzija vezana za proizvod prikazuje se sa njegovom slikom i vodi na njega."
+      note="Ovo stoji na početnoj strani. Recenzija vezana za proizvod prikazuje se sa njegovom slikom i vodi na njega."
     >
       <template #actions>
         <button type="button" class="btn btn-primary" @click="editing === 'new' ? cancel() : add()">
@@ -165,56 +165,71 @@ onMounted(() => {
       </template>
     </PageHeader>
 
-    <p v-if="notice" class="mb-4 rounded-2xl bg-sage px-4 py-3 text-sm text-sage-deep">{{ notice }}</p>
+    <p v-if="notice" class="mb-4 rounded-xl bg-sage px-4 py-3 text-sm font-semibold text-sage-deep">{{ notice }}</p>
 
-    <p v-if="!loading && unattached" class="mb-4 rounded-2xl bg-sand px-4 py-3 text-sm text-forest/70">
-      {{ unattached }} {{ unattached === 1 ? 'recenzija nije vezana' : 'recenzije nisu vezane' }} za proizvod — prikazuju se bez slike.
-      Izaberite proizvod u redu ispod i dobiće je.
+    <p v-if="!loading && unattached" class="mb-4 flex items-start gap-3 rounded-xl bg-clay-50 px-4 py-3 text-[0.875rem] text-forest/70">
+      <svg viewBox="0 0 24 24" class="mt-0.5 h-4 w-4 shrink-0 text-clay-600" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 11v5.5M12 7.6v.1" /></svg>
+      <span>
+        {{ unattached }} {{ unattached === 1 ? 'recenzija nije vezana' : 'recenzije nisu vezane' }} za proizvod — prikazuju se bez slike.
+        Izaberite proizvod u redu ispod i dobiće je.
+      </span>
     </p>
 
-    <!-- The form -->
-    <form v-if="editing" class="mb-6 rounded-[1.5rem] bg-sand p-5 sm:p-6" @submit.prevent="save">
-      <div class="grid gap-4 sm:grid-cols-2">
+    <!-- Writing one -->
+    <form v-if="editing" class="panel mb-4 p-4 sm:p-6" @submit.prevent="save">
+      <h2 class="font-display text-[1.25rem] leading-tight">{{ form.id ? 'Izmena recenzije' : 'Nova recenzija' }}</h2>
+
+      <div class="mt-5 grid gap-4 sm:grid-cols-2">
         <label class="block">
-          <span class="label text-forest/65">Ime kupca</span>
-          <input v-model="form.name" type="text" required maxlength="120" class="field mt-2 w-full" />
-          <span v-if="errors.name" class="mt-1 block text-xs text-clay-600">{{ errors.name[0] }}</span>
+          <span class="label text-forest/55">Ime kupca</span>
+          <input v-model="form.name" type="text" required maxlength="120" class="field mt-1.5 w-full" />
+          <span v-if="errors.name" class="mt-1 block text-xs text-clay-700">{{ errors.name[0] }}</span>
         </label>
 
         <label class="block">
-          <span class="label text-forest/65">Proizvod</span>
-          <select v-model="form.product_id" class="field field-select mt-2 w-full">
+          <span class="label text-forest/55">Proizvod</span>
+          <select v-model="form.product_id" class="field field-select mt-1.5 w-full">
             <option :value="null">— bez proizvoda —</option>
             <option v-for="product in products" :key="product.id" :value="product.id">{{ product.name }}</option>
           </select>
         </label>
 
         <label class="block sm:col-span-2">
-          <span class="label text-forest/65">Tekst recenzije</span>
-          <textarea v-model="form.body" required rows="4" maxlength="2000" class="field mt-2 w-full resize-y"></textarea>
-          <span v-if="errors.body" class="mt-1 block text-xs text-clay-600">{{ errors.body[0] }}</span>
+          <span class="label text-forest/55">Tekst recenzije</span>
+          <textarea v-model="form.body" required rows="4" maxlength="2000" class="field mt-1.5 w-full resize-y"></textarea>
+          <span v-if="errors.body" class="mt-1 block text-xs text-clay-700">{{ errors.body[0] }}</span>
         </label>
 
-        <label class="block">
-          <span class="label text-forest/65">Ocena</span>
-          <select v-model.number="form.rating" class="field field-select mt-2 w-full">
-            <option v-for="n in 5" :key="n" :value="6 - n">{{ '★'.repeat(6 - n) }} ({{ 6 - n }})</option>
-          </select>
-        </label>
+        <fieldset>
+          <span class="label text-forest/55">Ocena</span>
+          <div class="mt-1.5 flex gap-1">
+            <button
+              v-for="n in 5"
+              :key="n"
+              type="button"
+              class="grid h-10 w-10 place-items-center rounded-lg transition-colors"
+              :class="n <= form.rating ? 'bg-clay-100 text-clay-600' : 'bg-cream text-forest/25 hover:bg-sand'"
+              :aria-label="`${n} od 5`"
+              @click="form.rating = n"
+            >
+              <svg viewBox="0 0 20 20" class="h-5 w-5" fill="currentColor" aria-hidden="true"><path d="M10 1.6l2.5 5.2 5.7.8-4.1 4 1 5.7-5.1-2.7-5.1 2.7 1-5.7-4.1-4 5.7-.8z" /></svg>
+            </button>
+          </div>
+        </fieldset>
 
         <label class="block">
-          <span class="label text-forest/65">Naziv bez proizvoda (opciono)</span>
-          <input v-model="form.product_label" type="text" maxlength="120" placeholder="npr. Nega tela" class="field mt-2 w-full" />
-          <span class="mt-1 block text-xs text-forest/50">Prikazuje se samo kad recenzija nije vezana za proizvod.</span>
+          <span class="label text-forest/55">Naziv bez proizvoda</span>
+          <input v-model="form.product_label" type="text" maxlength="120" placeholder="npr. Nega tela" class="field mt-1.5 w-full" />
+          <span class="mt-1 block text-[0.8125rem] text-forest/45">Prikazuje se samo kad recenzija nije vezana za proizvod.</span>
         </label>
       </div>
 
       <label class="mt-5 flex w-fit cursor-pointer items-center gap-2.5">
         <input v-model="form.published" type="checkbox" class="h-4 w-4 accent-clay-600" />
-        <span class="text-sm font-semibold">Objavljena (vidi se na sajtu)</span>
+        <span class="text-[0.875rem] font-semibold">Objavljena — vidi se na sajtu</span>
       </label>
 
-      <p v-if="errors.general" class="mt-3 text-sm text-clay-600">{{ errors.general[0] }}</p>
+      <p v-if="errors.general" class="mt-3 text-sm font-semibold text-clay-700">{{ errors.general[0] }}</p>
 
       <div class="mt-5 flex flex-wrap gap-2">
         <button type="submit" class="btn btn-accent" :disabled="saving">
@@ -224,35 +239,31 @@ onMounted(() => {
       </div>
     </form>
 
-    <!-- The list -->
-    <p v-if="loading" class="label text-forest/50">Učitavam…</p>
+    <p v-if="loading" class="py-16 text-center text-sm text-forest/65">Učitavanje…</p>
 
-    <p v-else-if="!reviews.length" class="rounded-2xl bg-sand p-6 text-sm text-forest/65">
+    <p v-else-if="!reviews.length" class="panel px-6 py-16 text-center text-sm text-forest/60">
       Još nema nijedne recenzije. Dodajte prvu.
     </p>
 
-    <ul v-else class="space-y-3">
-      <li
-        v-for="review in reviews"
-        :key="review.id"
-        class="rounded-[1.25rem] p-5 transition-colors"
-        :class="review.published ? 'bg-cream' : 'bg-sand'"
-      >
+    <!-- What has been written -->
+    <ul v-else class="panel divide-y divide-forest/8 overflow-hidden">
+      <li v-for="review in reviews" :key="review.id" class="p-4 sm:p-5" :class="review.published ? '' : 'bg-cream'">
         <div class="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
           <div class="min-w-0 flex-1">
             <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
-              <span class="font-semibold">{{ review.name }}</span>
-              <span class="text-sm tracking-[0.15em] text-clay-500">{{ '★'.repeat(review.rating) }}</span>
-              <span v-if="!review.published" class="chip">Nije objavljena</span>
-              <span v-if="review.source" class="label text-forest/40">{{ review.source }}</span>
+              <span class="text-[0.9375rem] font-bold">{{ review.name }}</span>
+              <span class="flex gap-0.5" :aria-label="`${review.rating} od 5`">
+                <svg v-for="n in review.rating" :key="n" viewBox="0 0 20 20" class="h-3.5 w-3.5 text-clay-400" fill="currentColor" aria-hidden="true"><path d="M10 1.6l2.5 5.2 5.7.8-4.1 4 1 5.7-5.1-2.7-5.1 2.7 1-5.7-4.1-4 5.7-.8z" /></svg>
+              </span>
+              <span v-if="!review.published" class="delta delta-flat">Nije objavljena</span>
             </div>
 
-            <p class="mt-2 max-w-3xl text-sm leading-relaxed text-forest/75">{{ review.body }}</p>
+            <p class="mt-2 max-w-3xl text-[0.9375rem] leading-relaxed text-forest/75">{{ review.body }}</p>
 
             <div class="mt-3 flex flex-wrap items-center gap-2">
-              <span class="label text-forest/50">Proizvod</span>
+              <span class="label text-forest/45">Proizvod</span>
               <select
-                class="field field-select field-pill max-w-[22rem]"
+                class="field field-select field-pill max-w-[22rem] text-[0.875rem]"
                 :value="review.product_id ?? ''"
                 @change="attach(review, $event.target.value ? Number($event.target.value) : null)"
               >
@@ -262,12 +273,26 @@ onMounted(() => {
             </div>
           </div>
 
-          <div class="flex shrink-0 flex-wrap items-center gap-2">
-            <button type="button" class="btn" @click="toggle(review)">
-              {{ review.published ? 'Skloni sa sajta' : 'Objavi' }}
+          <div class="flex shrink-0 items-center gap-2">
+            <button
+              type="button"
+              class="rounded-full px-3.5 py-1.5 text-[0.75rem] font-bold transition-colors"
+              :class="review.published ? 'bg-sage text-sage-deep hover:bg-sage-deep hover:text-white' : 'bg-sand text-forest/55 hover:bg-forest hover:text-white'"
+              @click="toggle(review)"
+            >{{ review.published ? 'Objavljena' : 'Objavi' }}</button>
+
+            <button type="button" class="rounded-full border border-forest/12 px-3.5 py-1.5 text-[0.75rem] font-bold transition-colors hover:bg-forest hover:text-white" @click="edit(review)">
+              Izmeni
             </button>
-            <button type="button" class="btn" @click="edit(review)">Izmeni</button>
-            <button type="button" class="label text-clay-600 transition-colors hover:text-clay-700" @click="remove(review)">Obriši</button>
+
+            <button
+              type="button"
+              class="grid h-8 w-8 place-items-center rounded-full text-forest/35 transition-colors hover:bg-clay-100 hover:text-clay-700"
+              aria-label="Obriši recenziju"
+              @click="remove(review)"
+            >
+              <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 11v6M15 11v6M6 7l1 12.5a2 2 0 0 0 2 1.5h6a2 2 0 0 0 2-1.5L18 7M9.5 7V5.5a1.5 1.5 0 0 1 1.5-1.5h2a1.5 1.5 0 0 1 1.5 1.5V7" /></svg>
+            </button>
           </div>
         </div>
       </li>
