@@ -1,5 +1,4 @@
 <script setup>
-import LabProof from '@/components/home/LabProof.vue'
 import HelpLinks from '@/components/home/HelpLinks.vue'
 import Newsletter from '@/components/home/Newsletter.vue'
 import Reviews from '@/components/home/Reviews.vue'
@@ -52,7 +51,6 @@ onMounted(() => {
     <ShopByConcern />
     <BestSellers />
     <SetAnatomy />
-    <LabProof />
     <Promise />
     <Reviews />
     <HelpLinks />
