@@ -191,7 +191,7 @@ onBeforeUnmount(() => {
       </RouterLink>
 
       <!-- Desktop: the search field, a real one, in the middle -->
-      <form class="relative hidden w-full max-w-[26rem] lg:block xl:max-w-[30rem]" role="search" @submit.prevent="submit">
+      <form class="relative hidden w-full max-w-[26rem] lg:block xl:max-w-[32rem]" role="search" @submit.prevent="submit">
         <svg viewBox="0 0 24 24" class="pointer-events-none absolute left-4 top-1/2 h-[1.1rem] w-[1.1rem] -translate-y-1/2 text-ink/45" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" stroke-linecap="round" /></svg>
         <input
           v-model="search.term.value"
@@ -203,20 +203,6 @@ onBeforeUnmount(() => {
           @keydown="onKeys"
         />
 
-        <Transition enter-from-class="opacity-0 -translate-y-1" enter-active-class="transition duration-200" leave-to-class="opacity-0 -translate-y-1" leave-active-class="transition duration-150">
-          <div v-if="showResults" class="absolute left-0 right-0 top-[calc(100%+0.625rem)] overflow-hidden rounded-2xl border border-blush-100 bg-paper shadow-[0_24px_60px_-20px_rgba(142,59,69,0.3)]">
-            <SearchResults
-              :groups="search.groups.value"
-              :flat="search.flat.value"
-              :loading="search.loading.value"
-              :empty="search.empty.value"
-              :term="search.term.value"
-              :highlighted="search.highlighted.value"
-              :destination="search.destination"
-              @choose="close"
-            />
-          </div>
-        </Transition>
       </form>
 
       <!-- Right: search (phone), account, basket -->
@@ -272,6 +258,30 @@ onBeforeUnmount(() => {
     </nav>
 
     <div class="hidden h-px w-full bg-gradient-to-r from-blush-100 via-peach to-blush-100 lg:block" aria-hidden="true" />
+
+    <!-- Desktop: what the search found. A child of the header rather than of
+         the field, so it is the width of the page, opens below the shelves,
+         and is painted after them instead of under them. -->
+    <Transition enter-from-class="opacity-0 -translate-y-2" enter-active-class="transition duration-200" leave-to-class="opacity-0 -translate-y-2" leave-active-class="transition duration-150">
+      <div
+        v-if="showResults"
+        class="absolute inset-x-0 top-full z-50 hidden max-h-[min(72vh,34rem)] overflow-y-auto overscroll-contain border-b border-blush-200 bg-paper shadow-[0_30px_60px_-30px_rgba(142,59,69,0.45)] lg:block"
+      >
+        <div class="shell py-6">
+          <SearchResults
+            wide
+            :groups="search.groups.value"
+            :flat="search.flat.value"
+            :loading="search.loading.value"
+            :empty="search.empty.value"
+            :term="search.term.value"
+            :highlighted="search.highlighted.value"
+            :destination="search.destination"
+            @choose="close"
+          />
+        </div>
+      </div>
+    </Transition>
     <div class="h-px w-full bg-peach lg:hidden" aria-hidden="true" />
 
     <!-- Phone: search panel -->
@@ -293,7 +303,7 @@ onBeforeUnmount(() => {
           </form>
         </div>
 
-        <div v-if="showResults" class="border-t border-blush-100">
+        <div v-if="showResults" class="max-h-[70vh] overflow-y-auto overscroll-contain border-t border-blush-100 px-3 pb-4 pt-2">
             <SearchResults
             :groups="search.groups.value"
             :flat="search.flat.value"

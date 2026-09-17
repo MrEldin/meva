@@ -2,10 +2,8 @@
 import SiteFooter from '@/components/layout/SiteFooter.vue'
 import SiteHeader from '@/components/layout/SiteHeader.vue'
 import ConsentBar from '@/components/ui/ConsentBar.vue'
-import Cursor from '@/components/ui/Cursor.vue'
-import { initSmoothScroll, stopSmoothScroll } from '@/lib/scroll'
 import { useAuthStore } from '@/stores/auth'
-import { computed, onMounted, watch } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
@@ -15,22 +13,21 @@ const auth = useAuthStore()
 const bare = computed(() => route.meta.bare === true)
 
 /*
- * The admin panel gets the plain browser: the native pointer and native
- * scrolling. A custom cursor there is one more thing between a decision and
- * the click that carries it out, and inertial scrolling swallows the wheel
- * inside dialogs and long tables.
+ * The browser scrolls, and the browser draws the pointer.
+ *
+ * Inertial scrolling and a drawn cursor both put something between the
+ * visitor and the page. The weighted wheel made every panel that scrolls
+ * inside itself -- the search drop-down, most of all -- fight the page for
+ * the wheel, and on a phone it could leave the last stretch of the page
+ * unreachable. Both are gone.
  */
-watch(bare, (isAdmin) => (isAdmin ? stopSmoothScroll() : initSmoothScroll()))
-
 onMounted(() => {
-  if (!bare.value) initSmoothScroll()
   // A reloaded tab holds a token but knows nothing about whose it is.
   if (auth.signedIn && !auth.user) auth.fetchUser()
 })
 </script>
 
 <template>
-  <Cursor v-if="!bare" />
   <div class="min-h-screen bg-cream text-forest">
     <SiteHeader v-if="!bare" />
 
