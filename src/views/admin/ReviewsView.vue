@@ -36,7 +36,7 @@ async function load() {
   try {
     const [list, catalogue] = await Promise.all([
       client.get('/admin/reviews', { params: { per_page: 200 } }),
-      client.get('/admin/reviews/proizvodi'),
+      client.get('/admin/reviews/products'),
     ])
 
     reviews.value = list.data.data

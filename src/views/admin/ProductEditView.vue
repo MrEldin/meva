@@ -80,7 +80,7 @@ async function upload(event) {
   body.append('image', file)
 
   try {
-    const { data } = await client.post(`/admin/products/${route.params.id}/slika`, body, {
+    const { data } = await client.post(`/admin/products/${route.params.id}/image`, body, {
       headers: { 'Content-Type': 'multipart/form-data' },
     })
     image.value = data.data.image
