@@ -4,8 +4,8 @@ import SectionHead from '@/components/home/SectionHead.vue'
 /** The three things people check before they order, and where they are. */
 const LINKS = [
   { to: 'faq', title: 'Česta pitanja', text: 'Koliko traje pakovanje, kada se vide rezultati, ima li sulfata.', icon: 'question' },
-  { to: 'delivery', title: 'Dostava', text: 'Besplatno u celoj Srbiji, bez minimalnog iznosa. Plaćate kuriru.', icon: 'van' },
-  { to: 'returns', title: 'Povrat i reklamacije', text: '14 dana za odustajanje. Greška sa naše strane — o našem trošku.', icon: 'shield' },
+  { to: 'delivery', title: 'Dostava', text: 'Kurirom u celoj Srbiji. Plaćate kuriru pri preuzimanju.', icon: 'van' },
+  { to: 'returns', title: 'Povrat i reklamacije', text: '14 dana za odustajanje. Naša greška — o našem trošku, zamena — o vašem.', icon: 'shield' },
 ]
 </script>
 

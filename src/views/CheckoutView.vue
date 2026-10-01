@@ -2,12 +2,16 @@
 import { track } from '@/lib/tracking'
 import client from '@/api/client'
 import { money } from '@/lib/money'
+import { useAuthStore } from '@/stores/auth'
 import { useCartStore } from '@/stores/cart'
-import { reactive, ref } from 'vue'
+import { useLoyaltyStore } from '@/stores/loyalty'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
+const auth = useAuthStore()
 const cart = useCartStore()
+const loyalty = useLoyaltyStore()
 
 const form = reactive({
   first_name: '',
@@ -23,6 +27,59 @@ const form = reactive({
 const errors = ref({})
 const submitting = ref(false)
 const failure = ref(null)
+
+/*
+ * A Meva Klub coupon.
+ *
+ * Checked with the server before the order goes, so the summary can show the
+ * discount and the new total; the server checks it again when the order is
+ * placed, and that answer is the one that counts.
+ */
+const couponCode = ref('')
+const coupon = ref(null)
+const checkingCoupon = ref(false)
+
+const discount = computed(() => Math.min(coupon.value?.value ?? 0, cart.subtotal))
+const total = computed(() => cart.subtotal - discount.value)
+
+// 1 point per 100 RSD, times the member's tier once we know it. Only an
+// estimate: the points themselves are counted when the parcel is delivered.
+const pointsEstimate = computed(() => Math.floor(Math.floor(total.value / 10000) * (loyalty.tier?.multiplier ?? 1)))
+
+async function applyCoupon() {
+  if (checkingCoupon.value || !couponCode.value.trim()) return
+
+  checkingCoupon.value = true
+  errors.value = { ...errors.value, coupon: null }
+
+  try {
+    coupon.value = await loyalty.checkCoupon(couponCode.value)
+    couponCode.value = coupon.value.code
+  } catch (problem) {
+    coupon.value = null
+    errors.value = { ...errors.value, coupon: problem.message }
+  } finally {
+    checkingCoupon.value = false
+  }
+}
+
+/** The member's own coupons that can still be used, newest first. */
+const activeCoupons = computed(() => loyalty.coupons.filter((c) => c.status === 'active'))
+
+function useCoupon(code) {
+  couponCode.value = code
+  applyCoupon()
+}
+
+function removeCoupon() {
+  coupon.value = null
+  couponCode.value = ''
+  errors.value = { ...errors.value, coupon: null }
+}
+
+onMounted(() => {
+  if (auth.signedIn && !loyalty.loaded) loyalty.load()
+})
 
 const fields = [
   { key: 'first_name', label: 'Ime', type: 'text', required: true, autocomplete: 'given-name', half: true },
@@ -47,11 +104,16 @@ async function submit() {
     const { data } = await client.post('/shop/orders', {
       lines: cart.lines.map((line) => ({ sku: line.sku, quantity: line.quantity })),
       customer: { ...form },
+      ...(coupon.value ? { coupon: coupon.value.code } : {}),
     })
 
     cart.clear()
     track.purchase(data.data.reference, cart.lines, data.data.total ?? cart.subtotal)
-    router.push({ name: 'thankyou', params: { reference: data.data.reference } })
+    router.push({
+      name: 'thankyou',
+      params: { reference: data.data.reference },
+      query: data.data.points_estimate > 0 ? { points: data.data.points_estimate } : {},
+    })
   } catch (error) {
     const response = error.response
 
@@ -61,6 +123,9 @@ async function submit() {
       errors.value = Object.fromEntries(
         Object.entries(bag).map(([key, messages]) => [key.replace('customer.', ''), messages[0]]),
       )
+
+      // A coupon the server turned down no longer takes anything off.
+      if (errors.value.coupon) coupon.value = null
     } else {
       failure.value = 'Porudžbina nije poslata. Pokušajte ponovo za koji trenutak.'
     }
@@ -140,13 +205,83 @@ async function submit() {
 
           <div class="mt-6 flex justify-between border-t border-mist-200 pt-4 text-sm font-light text-mist-600">
             <span>Dostava</span>
-            <span class="text-clay-600">Besplatno</span>
+            <span class="text-mist-500">Plaća se kuriru</span>
+          </div>
+
+          <div v-if="coupon" class="mt-4 flex justify-between gap-4 text-sm font-light text-blush-600">
+            <span class="min-w-0 truncate">Kupon <span class="font-mono">{{ coupon.code }}</span></span>
+            <span class="shrink-0 tabular-nums">−{{ money(discount) }}</span>
           </div>
 
           <div class="mt-4 flex items-baseline justify-between border-t border-mist-200 pt-5">
             <span class="eyebrow text-ink">Ukupno</span>
-            <span class="font-display text-2xl tabular-nums text-ink">{{ money(cart.subtotal) }}</span>
+            <span class="text-right">
+              <span v-if="coupon" class="mr-2 text-sm font-light tabular-nums text-mist-400 line-through">{{ money(cart.subtotal) }}</span>
+              <span class="font-display text-2xl tabular-nums text-ink">{{ money(total) }}</span>
+            </span>
           </div>
+
+          <!-- Meva Klub: a coupon for members, an invitation for everyone else. -->
+          <div v-if="auth.signedIn" class="mt-6 border-t border-mist-200 pt-5">
+            <label for="coupon" class="eyebrow text-mist-500">Kupon</label>
+            <div class="mt-2 flex gap-2">
+              <input
+                id="coupon"
+                v-model="couponCode"
+                type="text"
+                placeholder="MEVA-XXXX-XXXX"
+                autocomplete="off"
+                :readonly="Boolean(coupon)"
+                :aria-invalid="Boolean(errors.coupon)"
+                class="min-w-0 flex-1 border bg-paper px-3 py-2.5 font-mono text-sm uppercase tracking-wider text-ink focus:outline-none"
+                :class="errors.coupon ? 'border-clay-500' : 'border-mist-200 focus:border-ink'"
+                @keydown.enter.prevent="applyCoupon"
+              />
+              <button
+                v-if="coupon"
+                type="button"
+                class="eyebrow shrink-0 border border-mist-300 px-4 text-mist-600 transition-colors hover:border-ink hover:text-ink"
+                @click="removeCoupon"
+              >Ukloni</button>
+              <button
+                v-else
+                type="button"
+                :disabled="checkingCoupon || !couponCode.trim()"
+                class="eyebrow shrink-0 bg-ink px-4 text-paper transition-colors hover:bg-blush-600 disabled:opacity-45"
+                @click="applyCoupon"
+              >{{ checkingCoupon ? '…' : 'Primeni' }}</button>
+            </div>
+            <span v-if="errors.coupon" class="mt-1.5 block text-xs text-clay-600">{{ errors.coupon }}</span>
+            <span v-else-if="coupon" class="mt-1.5 block text-xs text-sage-deep">Kupon je primenjen — {{ coupon.value_formatted }} popusta.</span>
+            <template v-else>
+              <div v-if="activeCoupons.length" class="mt-2.5">
+                <p class="text-[0.6875rem] font-semibold uppercase tracking-wider text-mist-400">Vaši kuponi</p>
+                <ul class="mt-1.5 flex flex-wrap gap-1.5">
+                  <li v-for="c in activeCoupons" :key="c.code">
+                    <button
+                      type="button"
+                      :disabled="checkingCoupon"
+                      class="inline-flex items-baseline gap-2 rounded-full border border-blush-200 bg-paper px-3 py-1.5 text-xs transition-colors hover:border-blush-500 hover:bg-blush-50"
+                      @click="useCoupon(c.code)"
+                    >
+                      <span class="font-mono tracking-wider text-ink">{{ c.code }}</span>
+                      <span class="font-bold text-blush-600">{{ c.value_formatted }}</span>
+                    </button>
+                  </li>
+                </ul>
+              </div>
+              <RouterLink v-else :to="{ name: 'loyalty' }" class="mt-1.5 block text-xs font-light text-mist-400 hover:text-blush-600">Vaši kuponi su u Meva Klubu →</RouterLink>
+            </template>
+
+            <p v-if="pointsEstimate > 0" class="mt-4 rounded-full bg-blush-50 px-4 py-2 text-center text-xs text-blush-600">
+              Za ovu porudžbinu dobijate ~{{ pointsEstimate }} poena
+            </p>
+          </div>
+
+          <p v-else class="mt-6 border-t border-mist-200 pt-5 text-xs font-light leading-relaxed text-mist-500">
+            <RouterLink :to="{ name: 'login', query: { redirect: '/checkout' } }" class="text-blush-600 underline-offset-4 hover:underline">Prijavite se</RouterLink>
+            i skupljajte poene — 1 poen na svakih 100 RSD.
+          </p>
 
           <p v-if="failure" class="mt-5 text-sm text-clay-600">{{ failure }}</p>
 

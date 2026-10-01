@@ -1,5 +1,5 @@
 <script setup>
-import logoBlack from '@/assets/brand/logo-black.png'
+import BrandLogo from '@/components/layout/BrandLogo.vue'
 import { setMeta } from '@/lib/meta'
 import { useAuthStore } from '@/stores/auth'
 import { onMounted, ref } from 'vue'
@@ -44,7 +44,7 @@ async function submit() {
 
     <div class="shell relative">
       <div class="mx-auto max-w-sm">
-        <img :src="logoBlack" alt="Meva Cosmetics" class="mx-auto h-9 w-auto" />
+        <BrandLogo class="mx-auto h-9 text-ink" />
 
         <h1 class="mt-10 text-center font-display text-3xl">Prijava</h1>
         <p class="mt-3 text-center text-sm text-forest/60">

@@ -8,15 +8,40 @@ import { onMounted } from 'vue'
  * Two different things, told apart on purpose.
  *
  * Changing your mind is a withdrawal: fourteen days, no reason owed, the
- * parcel goes back at the buyer's cost and unopened. Something wrong with
- * the order is a complaint: nothing is paid by the buyer at all. People
- * arrive here worried and conflate the two, so the page separates them
- * before it explains either.
+ * parcel goes back at the buyer's cost and unopened. Wanting a different
+ * product is an exchange: welcome, on the same terms, with the postage both
+ * ways paid by the buyer. Something wrong with the order is a complaint:
+ * nothing is paid by the buyer at all. People arrive here worried and
+ * conflate the three, so the page separates them before it explains any.
+ *
+ * The client asked for two things said plainly but kindly: an exchange is
+ * never at the shop's cost, and a product that has been opened and used has
+ * no way back -- it cannot be sold to anyone else.
  */
 const SHORT = [
   { title: '14 dana', text: 'Toliko imate da odustanete od kupovine, bez objašnjenja.', icon: 'clock' },
   { title: 'Greška je naša', text: 'Ako je stiglo oštećeno ili pogrešno, šaljemo novo — o našem trošku.', icon: 'shield' },
+  { title: 'Zamena', text: 'Neotvoren proizvod menjamo za drugi. Poštarinu u oba smera plaća kupac.', icon: 'swap' },
   { title: 'Povraćaj u 14 dana', text: 'Novac vraćamo na račun, u roku od 14 dana od prijema robe.', icon: 'cash' },
+]
+
+/**
+ * The conditions of sale. The client asked that these stand on the shop's
+ * side: what the law grants the buyer is stated once and exactly, and
+ * everything the law leaves to the seller -- opened goods, unfounded claims,
+ * refused parcels, individual reactions to a cosmetic -- is settled in the
+ * shop's favour, in plain words.
+ */
+const TERMS = [
+  ['Kozmetika, ne lek', 'Naši preparati su kozmetički proizvodi i ne zamenjuju lekarsku terapiju. Pre prve upotrebe nanesite malo preparata na unutrašnju stranu podlaktice i sačekajte 24 sata. Za reakciju na sastojak naveden na etiketi ne odgovaramo.'],
+  ['Otvoren proizvod se ne vraća i ne menja', 'Iz higijenskih razloga ne primamo nazad otvorenu, načetu ili korišćenu kozmetiku, ni za povrat ni za zamenu. Jednom otvoren preparat ne može da ide nikom drugom, pa vraćanje nema smisla. Izuzetak je osnovana reklamacija na sam proizvod.'],
+  ['Odustajanje ide o trošku kupca', 'Kod odustajanja u roku od 14 dana kupac plaća vraćanje paketa. Novac vraćamo tek kad proizvod stigne kod nas, neotvoren i u originalnom pakovanju.'],
+  ['Zamena ide o trošku kupca', 'Ako želite drugi proizvod umesto poručenog, rado ćemo ga zameniti u roku od 14 dana, dok je neotvoren. Troškove slanja u oba smera, nazad ka nama i ponovo ka vama, snosi kupac; razliku u ceni doplaćujete ili vam je vraćamo.'],
+  ['Neosnovana reklamacija', 'Ako se reklamacija pokaže neosnovanom, proizvod vraćamo kupcu, a troškove slanja u oba smera snosi kupac.'],
+  ['Nepreuzet paket', 'Paket koji kupac ne preuzme vraća se nama o trošku kupca. Zadržavamo pravo da narednu porudžbinu tog kupca pošaljemo tek posle uplate unapred.'],
+  ['Cene i greške', 'Cene su u dinarima i važe u trenutku poručivanja. Ako je cena na sajtu očigledno pogrešna, porudžbinu možemo otkazati i o tome vas obaveštavamo pre slanja.'],
+  ['Rok isporuke', 'Rok zavisi od kurirske službe; kašnjenje kurira nije osnov za reklamaciju ni za naknadu.'],
+  ['Slike i sadržaj', 'Fotografije su informativne; boja i pakovanje mogu neznatno odstupati. Sastav i uputstvo koji važe su oni na etiketi proizvoda.'],
 ]
 
 const CLAIM = [
@@ -26,8 +51,8 @@ const CLAIM = [
 ]
 
 onMounted(() => setMeta({
-  title: 'Povrat i reklamacije',
-  description: 'Kako vratiti proizvod, rok za odustajanje i šta da radite ako nešto nije u redu sa porudžbinom.',
+  title: 'Povrat, reklamacije i uslovi kupovine',
+  description: 'Uslovi kupovine, rok za odustajanje, šta se može vratiti i šta da radite ako nešto nije u redu sa porudžbinom.',
 }))
 </script>
 
@@ -36,14 +61,15 @@ onMounted(() => setMeta({
     <PageHead
       title="Povrat i reklamacije"
       note="Ako nešto nije kako treba, javite nam i rešićemo. Ovde piše tačno kako, i ko šta plaća."
-      :facts="['14 dana za odustajanje', 'Zamena o našem trošku', 'Odgovor u 8 dana']"
+      :facts="['14 dana za odustajanje', 'Naša greška — o našem trošku', 'Odgovor u 8 dana']"
     />
 
     <div class="shell max-w-4xl py-10 lg:py-16">
-      <ul class="grid gap-3 sm:grid-cols-3 sm:gap-4">
+      <ul class="grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
         <li v-for="item in SHORT" :key="item.title" class="rounded-[1.5rem] bg-blush-50 p-5 sm:p-6">
           <span class="grid h-11 w-11 place-items-center rounded-full bg-paper text-blush-700" aria-hidden="true">
             <svg v-if="item.icon === 'clock'" viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 7v5.3l3.4 2" /></svg>
+            <svg v-else-if="item.icon === 'swap'" viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13l-3-3" /><path d="M20 16H7l3 3" /></svg>
             <svg v-else-if="item.icon === 'shield'" viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2 19 6v6c0 4.2-2.9 7.5-7 8.8-4.1-1.3-7-4.6-7-8.8V6z" /><path d="m9 12 2.2 2.2L15.5 10" /></svg>
             <svg v-else viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="12" rx="2.5" /><circle cx="12" cy="12" r="2.6" /></svg>
           </span>
@@ -52,8 +78,8 @@ onMounted(() => setMeta({
         </li>
       </ul>
 
-      <!-- The two cases, side by side, because people mix them up -->
-      <div class="mt-12 grid gap-4 lg:grid-cols-2">
+      <!-- The three cases, side by side, because people mix them up -->
+      <div class="mt-12 grid gap-4 lg:grid-cols-3">
         <section class="rounded-[1.5rem] bg-paper p-6 ring-1 ring-blush-100 sm:p-7">
           <p class="kicker text-blush-600">Predomislili ste se</p>
           <h2 class="mt-2 font-display text-[1.5rem] leading-tight text-ink">Odustajanje od kupovine</h2>
@@ -65,6 +91,20 @@ onMounted(() => setMeta({
             <li class="flex gap-2.5"><span class="mt-[0.4375rem] h-1.5 w-1.5 shrink-0 rounded-full bg-blush-400" />Proizvod treba da bude neotvoren i u originalnom pakovanju.</li>
             <li class="flex gap-2.5"><span class="mt-[0.4375rem] h-1.5 w-1.5 shrink-0 rounded-full bg-blush-400" />Otvorenu kozmetiku ne možemo primiti nazad iz higijenskih razloga.</li>
             <li class="flex gap-2.5"><span class="mt-[0.4375rem] h-1.5 w-1.5 shrink-0 rounded-full bg-blush-400" />Troškove vraćanja u ovom slučaju snosi kupac.</li>
+          </ul>
+        </section>
+
+        <section class="rounded-[1.5rem] bg-paper p-6 ring-1 ring-blush-100 sm:p-7">
+          <p class="kicker text-blush-600">Želite drugi proizvod</p>
+          <h2 class="mt-2 font-display text-[1.5rem] leading-tight text-ink">Zamena</h2>
+          <p class="mt-3 text-[0.9375rem] leading-relaxed text-ink/70">
+            Ako ste poručili jedno, a shvatili da vam više odgovara drugo, rado ćemo zameniti. Javite nam se
+            u roku od 14 dana sa brojem porudžbine i recite šta biste umesto toga.
+          </p>
+          <ul class="mt-4 space-y-2.5 text-[0.9375rem] leading-relaxed text-ink/70">
+            <li class="flex gap-2.5"><span class="mt-[0.4375rem] h-1.5 w-1.5 shrink-0 rounded-full bg-blush-400" />Menjamo samo neotvoren proizvod u originalnom pakovanju.</li>
+            <li class="flex gap-2.5"><span class="mt-[0.4375rem] h-1.5 w-1.5 shrink-0 rounded-full bg-blush-400" />Otvoren i korišćen preparat ne može da ide nikom drugom, pa ga, nažalost, ne možemo ni zameniti ni primiti nazad.</li>
+            <li class="flex gap-2.5"><span class="mt-[0.4375rem] h-1.5 w-1.5 shrink-0 rounded-full bg-blush-400" />Poštarinu u oba smera plaća kupac, jer zamena nije naša greška. Razliku u ceni doplaćujete ili vam je vraćamo.</li>
           </ul>
         </section>
 
@@ -83,6 +123,22 @@ onMounted(() => setMeta({
           </ol>
         </section>
       </div>
+
+      <!-- The conditions of sale -->
+      <h2 class="mt-12 font-display text-[1.5rem] leading-tight text-ink sm:text-[1.75rem]">Uslovi kupovine</h2>
+      <p class="mt-2 text-[0.9375rem] leading-relaxed text-ink/70">Poručivanjem na ovom sajtu prihvatate sledeće uslove. Kratko i bez sitnih slova.</p>
+
+      <dl class="mt-5 overflow-hidden rounded-[1.5rem] ring-1 ring-blush-100">
+        <div
+          v-for="([term, text], i) in TERMS"
+          :key="term"
+          class="grid gap-1 px-5 py-5 sm:grid-cols-[13rem_1fr] sm:gap-6 sm:px-6"
+          :class="i % 2 ? 'bg-paper' : 'bg-blush-50/50'"
+        >
+          <dt class="font-display text-[1.0625rem] text-ink">{{ term }}</dt>
+          <dd class="text-[0.9375rem] leading-relaxed text-ink/70">{{ text }}</dd>
+        </div>
+      </dl>
 
       <section class="mt-4 rounded-[1.5rem] bg-paper p-6 ring-1 ring-blush-100 sm:p-7">
         <h2 class="font-display text-[1.375rem] leading-tight text-ink">Vraćanje novca</h2>

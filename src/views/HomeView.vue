@@ -1,5 +1,6 @@
 <script setup>
 import HelpLinks from '@/components/home/HelpLinks.vue'
+import HeritageStrip from '@/components/home/HeritageStrip.vue'
 import Newsletter from '@/components/home/Newsletter.vue'
 import Reviews from '@/components/home/Reviews.vue'
 import ShopHero from '@/components/home/ShopHero.vue'
@@ -25,7 +26,7 @@ const catalog = useCatalogStore()
 onMounted(() => {
   catalog.load()
   setMeta({
-    description: 'Ručno rađena prirodna kozmetika iz Novog Pazara od 2010. Preparati za seboreju, psorijazu, ekcem, akne i negu kose. Besplatna dostava, plaćanje pouzećem.',
+    description: 'Ručno rađena prirodna kozmetika iz Novog Pazara od 2010. Preparati za seboreju, psorijazu, ekcem, akne i negu kose. Plaćanje pouzećem.',
     schema: {
       '@context': 'https://schema.org',
       '@type': 'Store',
@@ -48,6 +49,7 @@ onMounted(() => {
 <template>
   <div class="bg-paper">
     <ShopHero />
+    <HeritageStrip />
     <ShopByConcern />
     <BestSellers />
     <SetAnatomy />

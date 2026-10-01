@@ -13,7 +13,7 @@ const props = defineProps({
 
 const PAGES = [
   { name: 'faq', title: 'Česta pitanja', text: 'Koliko traje pakovanje, kada se vide rezultati.' },
-  { name: 'delivery', title: 'Dostava', text: 'Besplatno u celoj Srbiji, plaćate kuriru.' },
+  { name: 'delivery', title: 'Dostava', text: 'Kurirom u celoj Srbiji, plaćate kuriru.' },
   { name: 'returns', title: 'Povrat i reklamacije', text: '14 dana za odustajanje, bez objašnjenja.' },
 ]
 

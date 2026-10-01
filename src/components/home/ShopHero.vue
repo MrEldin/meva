@@ -2,21 +2,25 @@
 import heroMp4 from '@/assets/video/hero.mp4'
 import heroSmallMp4 from '@/assets/video/hero-small.mp4'
 import heroWebm from '@/assets/video/hero.webm'
-import heroPoster from '@/assets/video/hero-poster.webp'
+import heroPosterWide from '@/assets/video/hero-poster.webp'
+import heroPosterSmall from '@/assets/video/hero-poster-small.webp'
+import { FOUNDED, yearsLabel } from '@/lib/heritage'
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 
 /**
- * The opening: a thirty-second film on a CSS ground.
+ * The opening: a thirty-second film with the words laid over it.
  *
- * The ground is one CSS colour, and it is the colour Eldin read off the film
- * on his own screen -- #f8c1ba -- not the colour on the brief, not the colour
- * ffmpeg decodes, and not the colour a headless browser paints; a browser
- * runs video through a different colour path from CSS, and the number that
- * matters is the one the customer's Mac or iPhone actually shows. The film's
- * left, right and bottom edges dissolve into the ground; the top edge is
- * solid and flush with the header, because the hand enters from above.
+ * The ground is one CSS colour, #f8c1ba, and the film is not shot on it any
+ * more -- it is a stone shelf in daylight. So the film never meets the pink
+ * along an edge: it is masked, and the pink shows through where the mask
+ * thins. On a desktop the film fills the hero from the right and dissolves
+ * leftwards under the words. Its right edge is the container's -- it ends
+ * where the navigation above and the strip below end -- and dissolves too,
+ * on an eased ramp: a straight one leaves a line where it starts and stops. On a
+ * phone the film is its own crop (the products, not the empty wall), sits
+ * above the words, and dissolves downwards into them.
  */
-const PROMISES = ['Besplatna dostava', 'Plaćanje pouzećem', 'Bez registracije']
+const PROMISES = ['Plaćanje pouzećem', 'Bez registracije', 'Kurir vas zove pre isporuke']
 
 // Two seals, drawn as seals: text set round a circle, a mark in the middle.
 // Both are facts -- the laboratories that tested the range -- and a seal
@@ -42,6 +46,8 @@ const SEALS = [
 
 const video = ref(null)
 const reduced = ref(false)
+// A poster cannot carry a media query, and the phone's film is a different crop.
+const heroPoster = window.matchMedia('(min-width: 768px)').matches ? heroPosterWide : heroPosterSmall
 
 // iOS pauses autoplaying video when the tab is hidden and does not always
 // resume it; a nudge on return keeps the loop going.
@@ -58,42 +64,47 @@ onBeforeUnmount(() => document.removeEventListener('visibilitychange', resume))
 </script>
 
 <template>
-  <section class="bg-peach text-ink">
+  <section class="relative isolate overflow-hidden bg-peach text-ink">
+    <!-- The film. Above the words on a phone; behind them, from the right, on a desktop. -->
+    <div class="xl:absolute xl:inset-y-0 xl:left-1/2 xl:-z-10 xl:w-full xl:max-w-[90rem] xl:-translate-x-1/2">
+      <video
+        v-if="!reduced"
+        ref="video"
+        class="film block aspect-[5/4] w-full object-cover md:aspect-[2/1] xl:absolute xl:inset-y-0 xl:right-16 xl:aspect-auto xl:h-full xl:w-[68%]"
+        autoplay
+        muted
+        loop
+        playsinline
+        preload="metadata"
+        :poster="heroPoster"
+        aria-label="Ruka spušta Meva preparate na kamenu policu"
+      >
+        <source :src="heroWebm" type="video/webm" media="(min-width: 768px)" />
+        <source :src="heroMp4" type="video/mp4" media="(min-width: 768px)" />
+        <source :src="heroSmallMp4" type="video/mp4" />
+      </video>
+      <img
+        v-else
+        :src="heroPoster"
+        alt="Meva preparati na kamenoj polici"
+        class="film block aspect-[5/4] w-full object-cover md:aspect-[2/1] xl:absolute xl:inset-y-0 xl:right-16 xl:aspect-auto xl:h-full xl:w-[68%]"
+      />
+    </div>
 
-    <div class="shell grid items-center gap-0 pb-10 pt-0 lg:grid-cols-[minmax(0,40%)_minmax(0,60%)] lg:gap-8 lg:pb-0">
-      <!-- The film. First on a phone, right on a desktop and out to the page's edge; whole, never cropped. -->
-      <div class="order-1 -mx-5 self-start sm:mx-0 lg:order-2 lg:-mr-10 xl:-mr-16">
-        <video
-          v-if="!reduced"
-          ref="video"
-          class="feather block aspect-[1800/1100] w-full object-contain"
-          autoplay
-          muted
-          loop
-          playsinline
-          preload="metadata"
-          :poster="heroPoster"
-          aria-label="Ruka spušta Meva preparate na kamen"
-        >
-          <source :src="heroWebm" type="video/webm" media="(min-width: 768px)" />
-          <source :src="heroMp4" type="video/mp4" media="(min-width: 768px)" />
-          <source :src="heroSmallMp4" type="video/mp4" />
-        </video>
-        <img v-else :src="heroPoster" alt="Meva preparati na kamenu" class="feather block aspect-[1800/1100] w-full object-contain" />
-      </div>
-
+    <div class="shell pb-10 xl:pb-0">
       <!-- The words. -->
-      <div class="order-2 pt-5 lg:order-1 lg:py-10">
-        <p class="text-[0.75rem] font-bold uppercase tracking-[0.18em] text-ink/60">Prirodna kozmetika · Novi Pazar</p>
+      <div class="-mt-3 md:-mt-8 xl:mt-0 xl:w-[44%] xl:py-14">
+        <p class="text-[0.6875rem] font-bold uppercase tracking-[0.2em] text-ink/70 sm:text-[0.75rem]">
+          Prirodna kozmetika <span aria-hidden="true">•</span> Novi Pazar <span aria-hidden="true">•</span> Od {{ FOUNDED }}.
+        </p>
 
-        <h1 class="mt-3 font-display text-[2.375rem] font-semibold leading-[1.05] sm:text-[3rem] lg:text-[3.625rem]" style="text-wrap: balance">
-          Koža koja se <em class="not-italic text-blush-700">konačno</em> smirila.
+        <h1 class="mt-3 font-display lining-nums text-[2.375rem] font-semibold leading-[1.02] tracking-[-0.01em] sm:text-[3.25rem] xl:text-[4rem]">
+          Više od {{ yearsLabel() }}
+          <span class="block text-blush-700">poverenja.</span>
         </h1>
 
-        <p class="mt-2.5 font-script text-[1.5rem] leading-none text-blush-700/85 sm:text-[1.75rem]">Priroda brine o tebi, svakog dana</p>
-
-        <p class="mt-4 max-w-[27rem] text-[1rem] leading-relaxed text-ink/80 sm:text-[1.0625rem]">
-          Ručno rađeni preparati u malim serijama, sa sastavom koji možete pročitati i razumeti.
+        <p class="mt-4 max-w-[29rem] text-[1rem] leading-relaxed text-ink/80 sm:text-[1.0625rem]">
+          Prirodna kozmetika, pažljivo razvijena i proverena kroz generacije. Isti cilj od početka — zdrava i negovana koža.
         </p>
 
         <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -156,3 +167,41 @@ onBeforeUnmount(() => document.removeEventListener('visibilitychange', resume))
     </div>
   </section>
 </template>
+
+<style scoped>
+/* The mask is the pink shadow: where it thins, the section's ground shows through. */
+.film {
+  -webkit-mask-image: linear-gradient(to bottom, #000 82%, transparent);
+  mask-image: linear-gradient(to bottom, #000 82%, transparent);
+}
+
+@media (min-width: 1280px) {
+  .film {
+    --left: linear-gradient(
+      to right,
+      transparent,
+      rgba(0, 0, 0, 0.05) 4%,
+      rgba(0, 0, 0, 0.18) 9%,
+      rgba(0, 0, 0, 0.42) 15%,
+      rgba(0, 0, 0, 0.7) 21%,
+      rgba(0, 0, 0, 0.9) 26%,
+      #000 31%
+    );
+    --right: linear-gradient(
+      to left,
+      transparent,
+      rgba(0, 0, 0, 0.04) 1.5%,
+      rgba(0, 0, 0, 0.16) 3.5%,
+      rgba(0, 0, 0, 0.4) 6%,
+      rgba(0, 0, 0, 0.68) 8.5%,
+      rgba(0, 0, 0, 0.9) 11%,
+      #000 14%
+    );
+    object-position: 80% 50%;
+    -webkit-mask-image: var(--left), var(--right);
+    -webkit-mask-composite: source-in;
+    mask-image: var(--left), var(--right);
+    mask-composite: intersect;
+  }
+}
+</style>

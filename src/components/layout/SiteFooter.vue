@@ -1,5 +1,5 @@
 <script setup>
-import logoBlack from '@/assets/brand/logo-black.png'
+import BrandLogo from '@/components/layout/BrandLogo.vue'
 
 const SHOP = [
   { label: 'Svi proizvodi', to: { name: 'catalog' } },
@@ -28,7 +28,7 @@ const year = new Date().getFullYear()
     <div class="shell py-12 lg:py-16">
       <div class="grid gap-10 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
         <div>
-          <img :src="logoBlack" alt="Meva Cosmetics" class="h-9 w-auto" />
+          <BrandLogo class="h-9 text-ink" />
           <p class="mt-4 max-w-xs text-[0.9375rem] leading-relaxed text-mist-600">
             Ručno rađena prirodna kozmetika iz Novog Pazara, od 2010. Ispitano u Institutu za javno zdravlje Vojvodine.
           </p>

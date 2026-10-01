@@ -10,7 +10,23 @@ import { onMounted, ref } from 'vue'
  * Written from what customers ask on the phone and in messages, not from a
  * template, which is why there is nothing here about shipping to Australia.
  */
+const SCALP_USE = `Ulje se nanosi na suvo teme glave i drži što duže — možete tako i prespavati. Zatim se ispira šamponom, koji takođe utrljavate 3 do 5 minuta. Ulje možete nanositi i na obrve i trepavice, svaki dan po kap ili dve, i takođe držati što duže.
+
+Ulje i šampon hidriraju kožu glave, pospešuju cirkulaciju i brži rast dlake, sklanjaju naslage i čiste teme glave.
+
+Ulje: jednom nedeljno. Ako set sadrži dva ulja, jedno nanosite sredinom nedelje, drugo vikendom.
+Losion: svako veče ili svako drugo veče, na suvo teme glave, bez ispiranja.
+Čaj: jednom ili dva puta dnevno po 200 ml.`
+
 const GROUPS = [
+  {
+    title: 'Način upotrebe',
+    items: [
+      ['Kako se koristi set za seboreju kože glave?', SCALP_USE],
+      ['Kako se koristi set za psorijazu kože glave?', `${SCALP_USE}
+Krema: preko ulja naneti kremu u tanjem sloju, držati tako nekoliko sati i isprati.`],
+    ],
+  },
   {
     title: 'O preparatima',
     items: [
@@ -28,6 +44,7 @@ const GROUPS = [
       ['Moram li da otvorim nalog?', 'Ne. Možete poručiti kao gost, potrebni su samo ime, adresa i telefon. Nalog služi ako želite da vidite ranije porudžbine i da ne kucate adresu svaki put.'],
       ['Kako znam da je porudžbina primljena?', 'Odmah posle poručivanja dobijete broj porudžbine na ekranu i na mejl. Taj broj možete uneti na stranici „Praćenje porudžbine" u svakom trenutku.'],
       ['Mogu li da promenim ili otkažem porudžbinu?', 'Dok paket nije predat kuriru, možete. Pozovite nas ili pišite što pre, sa brojem porudžbine.'],
+      ['Mogu li da zamenim proizvod za drugi?', 'Možete, u roku od 14 dana, dok je neotvoren i u originalnom pakovanju. Poštarinu u oba smera plaća kupac, a razliku u ceni doplaćujete ili vam je vraćamo. Otvoren i korišćen preparat ne može da ide nikom drugom, pa ga ne možemo ni zameniti ni primiti nazad. Ako je greška naša, to je reklamacija i sve plaćamo mi.'],
       ['Da li izdajete račun?', 'Da, račun ide u paketu. Ako vam treba račun na firmu, napišite podatke u napomeni pri poručivanju.'],
     ],
   },
@@ -43,7 +60,7 @@ function toggle(key) {
 onMounted(() => {
   setMeta({
     title: 'Česta pitanja',
-    description: 'Odgovori na pitanja o preparatima Meva Kozmetike, poručivanju, dostavi i upotrebi.',
+    description: 'Kako se koriste setovi za seboreju i psorijazu kože glave, i odgovori na pitanja o preparatima i poručivanju.',
     schema: {
       '@context': 'https://schema.org',
       '@type': 'FAQPage',
@@ -69,7 +86,8 @@ onMounted(() => {
       <section v-for="(group, gi) in GROUPS" :key="group.title" class="mb-10 last:mb-0">
         <div class="flex items-center gap-3">
           <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-blush-50 text-blush-700" aria-hidden="true">
-            <svg v-if="gi === 0" viewBox="0 0 24 24" class="h-[1.125rem] w-[1.125rem]" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6v3.5l3 4.5v8a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-8l3-4.5z" /><path d="M6.5 14h11" /></svg>
+            <svg v-if="gi === 1" viewBox="0 0 24 24" class="h-[1.125rem] w-[1.125rem]" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6v3.5l3 4.5v8a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-8l3-4.5z" /><path d="M6.5 14h11" /></svg>
+            <svg v-else-if="gi === 0" viewBox="0 0 24 24" class="h-[1.125rem] w-[1.125rem]" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c-3 3-5 5.5-5 9a5 5 0 0 0 10 0c0-3.5-2-6-5-9z" /><path d="M12 21v-6" /></svg>
             <svg v-else viewBox="0 0 24 24" class="h-[1.125rem] w-[1.125rem]" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16l-1.3 12.2a2 2 0 0 1-2 1.8H7.3a2 2 0 0 1-2-1.8Z" /><path d="M8.5 7V5.8a3.5 3.5 0 0 1 7 0V7" /></svg>
           </span>
           <h2 class="font-display text-[1.375rem] leading-tight text-ink sm:text-[1.5rem]">{{ group.title }}</h2>
@@ -97,7 +115,7 @@ onMounted(() => {
               </span>
             </button>
 
-            <p v-if="open.has(`${gi}-${ii}`)" class="px-5 pb-5 pr-14 text-[0.9375rem] leading-relaxed text-ink/70">{{ item[1] }}</p>
+            <p v-if="open.has(`${gi}-${ii}`)" class="whitespace-pre-line px-5 pb-5 pr-14 text-[0.9375rem] leading-relaxed text-ink/70">{{ item[1] }}</p>
           </li>
         </ul>
       </section>

@@ -22,6 +22,12 @@ const routes = [
     component: () => import('@/views/account/AccountView.vue'),
     meta: { requiresAuth: true },
   },
+  {
+    path: '/account/loyalty',
+    name: 'loyalty',
+    component: () => import('@/views/account/LoyaltyView.vue'),
+    meta: { requiresAuth: true },
+  },
 
   // The back office. Every child names the permission it needs, so someone who
   // may only read the numbers never sees a link they cannot open.

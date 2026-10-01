@@ -5,11 +5,12 @@ import { setMeta } from '@/lib/meta'
 import { onMounted } from 'vue'
 
 /**
- * How a parcel gets here, and what it costs -- which is nothing.
+ * How a parcel gets here, and what it costs: the courier's own tariff, paid
+ * to the courier with the order. The client asked for it said plainly that
+ * delivery is not free.
  *
  * The archive of orders placed through the website -- 5,479 of them -- shows
- * no delivery charge on any but the first day's setup test, every one paid to
- * the courier, and 88 going abroad. The total on this page is larger than
+ * every one paid to the courier, and 88 going abroad. The total on this page is larger than
  * that archive because the shop has sold since 2010 through more than the
  * website; the figure is Eldin's. The one thing neither records is how long
  * delivery takes, so this page does not say.
@@ -22,7 +23,7 @@ const STEPS = [
 ]
 
 const FACTS = [
-  ['Cena dostave', 'Besplatna — za svaku porudžbinu, u celoj Srbiji, bez minimalnog iznosa.'],
+  ['Cena dostave', 'Po cenovniku kurirske službe, zavisi od težine paketa i mesta isporuke. Plaća se kuriru zajedno sa porudžbinom, pri preuzimanju.'],
   ['Plaćanje', 'Pouzećem, kuriru, kad paket stigne. Ne tražimo ništa unapred i ne čuvamo podatke o kartici.'],
   ['Rok isporuke', 'Zavisi od kurirske službe i vašeg mesta. Kurir vas pozove pre isporuke.'],
   ['Inostranstvo', 'Šaljemo i u Crnu Goru, Bosnu i Hercegovinu i zemlje EU — odatle nam redovno poručuju. Pišite nam pre porudžbine da dogovorimo dostavu.'],
@@ -30,7 +31,7 @@ const FACTS = [
 
 onMounted(() => setMeta({
   title: 'Dostava',
-  description: 'Besplatna dostava u celoj Srbiji, bez minimalnog iznosa; plaćanje pouzećem kuriru.',
+  description: 'Dostava kurirskom službom u celoj Srbiji; plaćanje pouzećem kuriru pri preuzimanju.',
 }))
 </script>
 
@@ -38,16 +39,16 @@ onMounted(() => setMeta({
   <div class="bg-paper">
     <PageHead
       title="Dostava"
-      note="Besplatna u celoj Srbiji, bez minimalnog iznosa. Plaćate kuriru kad paket stigne na vrata."
-      :facts="['Besplatno u celoj Srbiji', 'Plaćanje pouzećem', 'Bez minimalnog iznosa']"
+      note="Kurirskom službom u celoj Srbiji. Proizvode i dostavu plaćate kuriru kad paket stigne na vrata."
+      :facts="['Cela Srbija', 'Plaćanje pouzećem', 'Kurir vas zove pre isporuke']"
     />
 
     <div class="shell max-w-4xl py-10 lg:py-16">
       <!-- What the archive says, in one line -->
       <div class="grid gap-3 sm:grid-cols-3 sm:gap-4">
         <div class="rounded-[1.25rem] bg-blush-50 p-5 text-center">
-          <p class="font-display text-[2rem] leading-none text-blush-700">0 RSD</p>
-          <p class="mt-2 text-[0.8125rem] font-semibold text-ink/65">dostava, bez obzira na iznos</p>
+          <p class="font-display text-[2rem] leading-none text-blush-700">Pouzećem</p>
+          <p class="mt-2 text-[0.8125rem] font-semibold text-ink/65">sve plaćate kuriru, ništa unapred</p>
         </div>
         <div class="rounded-[1.25rem] bg-blush-50 p-5 text-center">
           <p class="font-display text-[2rem] leading-none text-blush-700">90.000+</p>

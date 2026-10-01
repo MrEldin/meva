@@ -27,6 +27,7 @@ const VIEWS = [
   { key: 'what', label: 'Šta se prodaje', note: 'Šta ide uz šta, i koja kampanja donosi novac.' },
   { key: 'tools', label: 'Alati', note: 'Linkovi za kampanje, isplativost reklame i katalog feed.' },
   { key: 'list', label: 'Newsletter', note: 'Ko je ostavio adresu i odakle.' },
+  { key: 'club', label: 'Meva Klub', note: 'Poeni, kuponi i koliko je popusta dato kroz program lojalnosti.' },
 ]
 
 const view = ref('people')
@@ -56,6 +57,38 @@ const summaryTiles = computed(() => {
   ]
 })
 const note = computed(() => LISTS.find((l) => l.key === tab.value)?.note)
+
+/*
+ * Meva Klub, from the shop's side.
+ *
+ * Fetched on its own so a slow or missing loyalty endpoint never holds up
+ * the rest of the page.
+ */
+const club = ref(null)
+const clubFailed = ref(false)
+
+const clubTiles = computed(() => {
+  const c = club.value
+
+  if (!c) return []
+
+  return [
+    { label: 'Članova', value: number(c.members), hint: 'sa bar jednim poenom' },
+    { label: 'Poena u opticaju', value: number(c.points_outstanding), hint: `${number(c.points_issued)} dodeljeno ukupno` },
+    { label: 'Poena zamenjeno', value: number(c.points_redeemed), hint: 'za kupone' },
+    { label: 'Kuponi', value: `${number(c.coupons_active)} / ${number(c.coupons_used)}`, hint: 'aktivni / iskorišćeni' },
+    { label: 'Dato popusta', value: c.discount_given_formatted ?? money(c.discount_given), hint: 'kroz iskorišćene kupone' },
+  ]
+})
+
+async function loadClub() {
+  try {
+    const { data } = await client.get('/admin/loyalty')
+    club.value = data.data
+  } catch {
+    clubFailed.value = true
+  }
+}
 
 // A phone number a person can be reached on, in the two ways this shop's
 // customers actually use.
@@ -108,6 +141,8 @@ async function download(path, name) {
 
 onMounted(async () => {
   setMeta({ title: 'Marketing' })
+
+  loadClub()
 
   try {
     const [campaignData, subscriberData, insightData] = await Promise.all([
@@ -345,6 +380,43 @@ onMounted(async () => {
         </ul>
 
         <p v-else class="px-6 py-14 text-center text-sm text-forest/60">Još nema nijedne prijave.</p>
+      </section>
+
+      <!-- ── Meva Klub ──────────────────────────────────────────────────── -->
+      <section v-else-if="view === 'club'" class="mt-4">
+        <p v-if="clubFailed" class="panel px-6 py-14 text-center text-sm text-forest/60">Podaci o Meva Klubu trenutno nisu dostupni.</p>
+        <p v-else-if="!club" class="py-16 text-center text-sm text-forest/65">Učitavanje…</p>
+
+        <template v-else>
+          <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+            <div v-for="tile in clubTiles" :key="tile.label" class="stat-tile">
+              <p class="label text-forest/50">{{ tile.label }}</p>
+              <p class="mt-2 font-display text-[1.75rem] leading-none tabular-nums">{{ tile.value }}</p>
+              <p class="mt-2 text-[0.8125rem] text-forest/50">{{ tile.hint }}</p>
+            </div>
+          </div>
+
+          <section class="panel mt-3 overflow-hidden">
+            <div class="border-b border-forest/8 p-4 sm:p-5">
+              <h2 class="font-display text-[1.25rem] leading-tight">Najviše poena</h2>
+              <p class="mt-0.5 text-[0.8125rem] text-forest/50">Deset članova sa najvećim stanjem — dobri kandidati za zahvalnicu.</p>
+            </div>
+
+            <ol v-if="club.top?.length" class="divide-y divide-forest/8">
+              <li v-for="(member, index) in club.top.slice(0, 10)" :key="member.email" class="flex items-center gap-4 px-4 py-3 sm:px-5">
+                <span class="w-5 shrink-0 text-right text-[0.8125rem] font-bold tabular-nums text-forest/35">{{ index + 1 }}</span>
+                <div class="min-w-0 flex-1">
+                  <p class="truncate text-[0.9375rem] font-bold">{{ member.name ?? member.email }}</p>
+                  <p class="truncate text-[0.8125rem] text-forest/50">{{ member.email }}</p>
+                </div>
+                <span class="shrink-0 rounded-full bg-clay-100 px-2.5 py-1 text-[0.75rem] font-semibold text-clay-700">{{ member.tier }}</span>
+                <span class="w-20 shrink-0 text-right text-[0.9375rem] font-bold tabular-nums">{{ number(member.points) }}</span>
+              </li>
+            </ol>
+
+            <p v-else class="px-6 py-14 text-center text-sm text-forest/60">Još niko nije sakupio poene.</p>
+          </section>
+        </template>
       </section>
     </template>
   </div>

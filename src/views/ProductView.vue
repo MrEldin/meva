@@ -43,6 +43,30 @@ watch(() => route.params.slug, (slug) => slug && load(slug), { immediate: true }
 const images = computed(() => product.value?.images?.data ?? product.value?.images ?? [])
 const setItems = computed(() => product.value?.set?.data ?? product.value?.set ?? [])
 
+/** What the parts of a set cost one by one, and what the set saves against that. */
+const partsTotal = computed(() => setItems.value.reduce((sum, item) => sum + (item.price?.amount ?? 0) * (item.quantity ?? 1), 0))
+const saving = computed(() => (product.value?.price ? Math.max(0, partsTotal.value - product.value.price.amount) : 0))
+const rsd = (amount) => `${new Intl.NumberFormat('sr-RS', { maximumFractionDigits: 0 }).format(amount)} RSD`
+
+/*
+ * HTML written on the desk is the shop's own text, but it is still tamed
+ * before it is put on the page: no scripts, no inline handlers, no
+ * javascript: links.
+ */
+function tame(html) {
+  const clean = String(html)
+    .replace(/<\s*(script|style|iframe|object|embed)[^>]*>[\s\S]*?<\s*\/\s*\1\s*>/gi, '')
+    .replace(/\son[a-z]+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, '')
+    .replace(/(href|src)\s*=\s*("|')\s*javascript:[^"']*\2/gi, '$1="#"')
+    .trim()
+  return clean.replace(/<[^>]+>|&nbsp;/g, '').trim() ? clean : ''
+}
+
+const description = computed(() => tame(product.value?.description?.data?.html ?? product.value?.description?.html ?? ''))
+
+const descriptionOpen = ref(false)
+const descriptionLong = computed(() => description.value.replace(/<[^>]+>/g, '').length > 260)
+
 const related = computed(() => {
   if (!product.value) return []
 
@@ -69,7 +93,7 @@ function describe() {
 
   setMeta({
     title: item.name,
-    description: `${summary.slice(0, 180)}${item.price ? ` · ${item.price.formatted} · besplatna dostava` : ''}`,
+    description: `${summary.slice(0, 180)}${item.price ? ` · ${item.price.formatted}` : ''}`,
     image: item.image,
     type: 'product',
     schema: {
@@ -94,25 +118,18 @@ function describe() {
 }
 
 /*
- * The old shop stored the whole label as one paragraph: a description, then
- * "Sastav:" and the ingredients, then "Način upotrebe:" and the directions.
- * Read as one block on a phone it is a wall that stands between the visitor
- * and the button, so it is cut back into its three parts here and the last
- * two fold away until they are wanted.
+ * The label's three parts come as three fields: the description, the
+ * ingredients and the directions. A set often has no ingredients of its
+ * own, and then there is simply no such section.
  */
-const parts = computed(() => {
-  const text = (product.value?.excerpt ?? '').replace(/\r/g, '').trim()
-  const grab = (label, next) => {
-    const m = text.match(new RegExp(label + ':\\s*([\\s\\S]*?)(?=' + (next ? next + ':' : '$') + ')', 'i'))
-    return m ? m[1].trim() : ''
-  }
-  const intro = text.split(/Sastav:/i)[0].trim()
-  const ingredients = grab('Sastav', 'Način upotrebe')
-    .split(/\n+|\s+-\s+/).map((x) => x.replace(/^-\s*/, '').trim()).filter(Boolean)
-  const usage = grab('Način upotrebe', null)
-
-  return { intro, ingredients, usage }
+const label = computed(() => {
+  const d = product.value?.description?.data ?? product.value?.description ?? {}
+  const groups = (Array.isArray(d.ingredients) ? d.ingredients : []).filter((g) => g.items?.length)
+  return { ingredients: groups, usage: tame(d.usage ?? '') }
 })
+
+/** The part the pointer is on, in the list or on the shelf, so both show it. */
+const hovered = ref(null)
 
 const open = ref({ ingredients: false, usage: false })
 
@@ -147,12 +164,12 @@ const shareText = computed(() =>
 
       <div class="grid gap-10 md:grid-cols-2 md:gap-16">
         <!-- Gallery. The cutout comes first from the API, so the page opens
-             with the product standing on light rather than sitting in a box;
+             with the product standing on its stage rather than sitting in a box;
              the studio photographs follow as thumbnails. -->
         <div>
           <div
-            class="relative aspect-square overflow-hidden rounded-[1.75rem]"
-            :class="images[activeImage]?.cutout ? 'disc tint-rose bg-paper ring-1 ring-blush-100' : 'bg-blush-50'"
+            class="relative aspect-square rounded-[1.75rem]"
+            :class="images[activeImage]?.cutout ? 'stage' : 'bg-blush-50'"
           >
             <img
               v-if="images[activeImage]"
@@ -160,7 +177,7 @@ const shareText = computed(() =>
               :alt="product.name"
               fetchpriority="high"
               class="h-full w-full"
-              :class="images[activeImage]?.cutout ? 'cutout object-contain p-[8%]' : 'object-cover'"
+              :class="images[activeImage]?.cutout ? 'cutout object-contain p-[4%]' : 'object-cover'"
             />
           </div>
 
@@ -193,18 +210,89 @@ const shareText = computed(() =>
             {{ product.price ? product.price.formatted : 'Cena na upit' }}
           </p>
 
-          <p v-if="parts.intro" class="mt-4 text-[0.9375rem] leading-relaxed text-mist-600">{{ parts.intro }}</p>
+          <p v-if="product.excerpt" class="mt-4 whitespace-pre-line text-[0.9375rem] leading-relaxed text-mist-600">{{ product.excerpt }}</p>
 
-          <!-- Set contents -->
-          <div v-if="setItems.length" class="mt-5 rounded-2xl bg-blush-50 p-4">
-            <p class="text-[0.8125rem] font-bold uppercase tracking-wider text-blush-500">Set sadrži</p>
-            <ul class="mt-2.5 space-y-2">
-              <li v-for="item in setItems" :key="item.id" class="flex justify-between gap-4 text-[0.9375rem] text-mist-600">
-                <span>{{ item.name }}</span>
-                <span class="tabular-nums text-mist-400">×{{ item.quantity }}</span>
-              </li>
-            </ul>
+          <!-- The full description, written on the desk; long ones start folded -->
+          <div v-if="description" class="mt-4">
+            <div class="relative">
+              <div
+                class="prose-meva text-[0.9375rem] leading-relaxed text-mist-600"
+                :class="descriptionLong && !descriptionOpen ? 'max-h-[6.5rem] overflow-hidden [mask-image:linear-gradient(to_bottom,black_60%,transparent_100%)] [-webkit-mask-image:linear-gradient(to_bottom,black_60%,transparent_100%)]' : ''"
+                v-html="description"
+              />
+            </div>
+            <button
+              v-if="descriptionLong"
+              type="button"
+              class="mt-1 text-[0.875rem] font-bold text-blush-700 underline underline-offset-4 hover:text-blush-600"
+              :aria-expanded="descriptionOpen"
+              @click="descriptionOpen = !descriptionOpen"
+            >{{ descriptionOpen ? 'Prikaži manje' : 'Prikaži ceo opis' }}</button>
           </div>
+
+
+          <!--
+            What is in the set. The parts stand together on one shelf, as they
+            do in the set's own photograph, each numbered; the numbers repeat
+            in the list beneath, so the picture and the words read as one.
+          -->
+          <section v-if="setItems.length" class="mt-6" aria-labelledby="set-contents">
+            <div class="flex items-baseline justify-between gap-3">
+              <h2 id="set-contents" class="text-[1.125rem] text-ink">U setu {{ setItems.length === 1 ? 'je 1 proizvod' : `${setItems.length < 5 ? 'su' : 'je'} ${setItems.length} proizvoda` }}</h2>
+              <span v-if="partsTotal" class="text-[0.8125rem] text-mist-500">pojedinačno {{ rsd(partsTotal) }}</span>
+            </div>
+
+            <div class="mt-3 overflow-x-auto rounded-[1.25rem] bg-gradient-to-b from-blush-50 via-blush-50 to-blush-100/70">
+              <ol class="flex min-w-max items-end justify-around gap-1 px-3 pb-3 pt-6">
+                <li
+                  v-for="(item, i) in setItems"
+                  :key="item.id"
+                  class="flex w-[4.75rem] flex-col items-center gap-2 transition-opacity duration-300 sm:w-[5.5rem]"
+                  :class="hovered !== null && hovered !== item.id ? 'opacity-45' : ''"
+                  @mouseenter="hovered = item.id"
+                  @mouseleave="hovered = null"
+                >
+                  <component
+                    :is="item.published && item.slug ? 'RouterLink' : 'span'"
+                    :to="item.published && item.slug ? { name: 'product', params: { slug: item.slug } } : undefined"
+                    class="flex h-24 items-end transition-transform duration-300 sm:h-28"
+                    :class="hovered === item.id ? '-translate-y-2' : ''"
+                    :aria-label="item.name"
+                  >
+                    <img v-if="item.image" :src="item.image" :alt="item.name" loading="lazy" class="max-h-full w-auto max-w-[4.5rem] object-contain drop-shadow-[0_12px_14px_rgba(142,59,69,0.22)] sm:max-w-[5.25rem]" />
+                  </component>
+                  <span
+                    class="grid h-5 w-5 place-items-center rounded-full text-[0.625rem] font-bold transition-colors duration-300"
+                    :class="hovered === item.id ? 'bg-blush-600 text-paper' : 'bg-ink text-paper'"
+                  >{{ i + 1 }}</span>
+                </li>
+              </ol>
+            </div>
+
+            <ol class="mt-2 divide-y divide-blush-100">
+              <li
+                v-for="(item, i) in setItems"
+                :key="item.id"
+                class="-mx-2 flex items-baseline gap-3 rounded-lg px-2 py-2.5 transition-colors duration-200"
+                :class="hovered === item.id ? 'bg-blush-50' : ''"
+                @mouseenter="hovered = item.id"
+                @mouseleave="hovered = null"
+              >
+                <span class="w-5 shrink-0 text-[0.75rem] font-bold tabular-nums transition-colors" :class="hovered === item.id ? 'text-blush-600' : 'text-mist-400'">{{ i + 1 }}</span>
+                <component
+                  :is="item.published && item.slug ? 'RouterLink' : 'span'"
+                  :to="item.published && item.slug ? { name: 'product', params: { slug: item.slug } } : undefined"
+                  class="min-w-0 flex-1 text-[0.9375rem] leading-snug text-ink"
+                  :class="item.published && item.slug ? 'hover:text-blush-700' : ''"
+                ><span v-if="item.quantity > 1" class="font-bold">{{ item.quantity }} × </span>{{ item.name }}</component>
+                <span v-if="item.price" class="shrink-0 text-[0.9375rem] tabular-nums text-mist-500">{{ item.price.formatted }}</span>
+              </li>
+            </ol>
+
+            <p v-if="saving > 0" class="mt-3 rounded-xl bg-blush-50 px-4 py-2.5 text-[0.875rem] text-mist-600">
+              <span class="font-bold text-blush-700">U setu štedite {{ rsd(saving) }}</span> u odnosu na kupovinu svakog posebno.
+            </p>
+          </section>
 
           <!-- Buy: right under the price, before anything else -->
           <div v-if="product.price" class="mt-6 flex gap-3">
@@ -225,29 +313,41 @@ const shareText = computed(() =>
           </div>
 
           <ul class="mt-5 grid gap-2 text-[0.875rem] text-mist-600">
-            <li v-for="line in ['Besplatna dostava u celoj Srbiji', 'Plaćanje pouzećem, kuriru pri preuzimanju', 'Kurir vas pozove pre isporuke']" :key="line" class="flex items-center gap-2">
+            <li v-for="line in ['Dostava kurirom u celoj Srbiji', 'Plaćanje pouzećem, kuriru pri preuzimanju', 'Kurir vas pozove pre isporuke']" :key="line" class="flex items-center gap-2">
               <svg viewBox="0 0 16 16" class="h-4 w-4 shrink-0 text-blush-500" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 8.5l3.2 3.2L13 5" stroke-linecap="round" stroke-linejoin="round" /></svg>
               {{ line }}
             </li>
           </ul>
 
-          <!-- The label's other two parts, folded until wanted -->
-          <div class="mt-6 divide-y divide-blush-100 border-y border-blush-100">
-            <div v-if="parts.ingredients.length">
+          <!-- The label's other two parts, folded until wanted; absent when the product has none -->
+          <div v-if="label.ingredients.length || label.usage" class="mt-6 divide-y divide-blush-100 border-y border-blush-100">
+            <div v-if="label.ingredients.length">
               <button type="button" class="flex w-full items-center justify-between py-4 text-left text-[0.9375rem] font-bold" :aria-expanded="open.ingredients" @click="open.ingredients = !open.ingredients">
                 Sastav
                 <span class="text-xl leading-none text-blush-500 transition-transform" :class="open.ingredients && 'rotate-45'">+</span>
               </button>
-              <ul v-if="open.ingredients" class="flex flex-wrap gap-2 pb-5">
-                <li v-for="item in parts.ingredients" :key="item" class="rounded-full bg-blush-50 px-3 py-1.5 text-[0.8125rem] text-mist-600">{{ item }}</li>
-              </ul>
+              <div v-if="open.ingredients" class="space-y-5 pb-5">
+                <div v-for="(group, gi) in label.ingredients" :key="gi">
+                  <p v-if="group.title" class="mb-2 text-[0.8125rem] font-bold text-ink">{{ group.title }}</p>
+                  <ul class="flex flex-wrap gap-2">
+                    <li
+                      v-for="(item, i) in group.items"
+                      :key="i"
+                      class="inline-flex max-w-full flex-col rounded-2xl bg-gradient-to-br from-blush-100 to-blush-50 px-3.5 py-2 ring-1 ring-inset ring-blush-200/60 transition-colors hover:from-blush-200 hover:to-blush-100"
+                    >
+                      <span class="text-[0.875rem] font-semibold leading-snug text-ink">{{ item.name || item.inci }}</span>
+                      <span v-if="item.name && item.inci" class="mt-0.5 text-[0.6875rem] uppercase tracking-wide text-blush-700/70">{{ item.inci }}</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
             </div>
-            <div v-if="parts.usage">
+            <div v-if="label.usage">
               <button type="button" class="flex w-full items-center justify-between py-4 text-left text-[0.9375rem] font-bold" :aria-expanded="open.usage" @click="open.usage = !open.usage">
                 Način upotrebe
                 <span class="text-xl leading-none text-blush-500 transition-transform" :class="open.usage && 'rotate-45'">+</span>
               </button>
-              <p v-if="open.usage" class="pb-5 text-[0.9375rem] leading-relaxed text-mist-600">{{ parts.usage }}</p>
+              <div v-if="open.usage" class="prose-meva pb-5 text-[0.9375rem] leading-relaxed text-mist-600" v-html="label.usage" />
             </div>
           </div>
 
@@ -269,7 +369,7 @@ const shareText = computed(() =>
       <section v-if="related.length" class="mt-20 md:mt-28">
         <h2 class="font-display text-2xl text-ink md:text-3xl">Moglo bi vam se svideti</h2>
         <div class="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
-          <ProductCard v-for="(item, i) in related" :key="item.id" :product="item" :tint="i" />
+          <ProductCard v-for="(item, i) in related" :key="item.id" :product="item" />
         </div>
       </section>
     </template>
@@ -283,5 +383,7 @@ const shareText = computed(() =>
 .prose-meva ul { list-style: disc; padding-left: 1.25rem; margin-bottom: 1rem; }
 .prose-meva li { margin-bottom: 0.375rem; }
 .prose-meva strong { font-weight: 500; color: var(--color-ink); }
+.prose-meva h1, .prose-meva h2, .prose-meva h3, .prose-meva h4 { font-family: inherit; font-size: 0.9375rem; font-weight: 700; color: var(--color-ink); margin: 1rem 0 0.375rem; }
+.prose-meva h3 strong { font-weight: 700; }
 .prose-meva img { display: none; }
 </style>

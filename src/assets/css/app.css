@@ -713,39 +713,53 @@
 }
 
 /* ── Cutouts ────────────────────────────────────────────────────────────────
-   Every product has been photographed and lifted off its background, so it
-   can stand on a tinted disc or in open white rather than sit in a
-   photographed box. The disc fades out before its edge, so nothing draws a
-   circle the eye has to read; the shadow is cast by the bottle's own
-   silhouette, which is what a cutout makes possible. */
+   Every product has been photographed and lifted off its background, and
+   the point of that is that nothing has to box it in. So it stands as a
+   bottle stands in a shop: on a counter, in front of a wall. Two planes in
+   the brand's pink, the wall a shade deeper than the counter, meeting in
+   one crisp line the product's base sits on; above the wall the product
+   rises into the open white of the page. Nothing is drawn on or round the
+   product itself. */
 @layer utilities {
-  .disc::before {
+  .stage { overflow: visible; }
+
+  /* The wall. */
+  .stage::before {
     content: "";
     position: absolute;
-    inset: 4%;
-    border-radius: 9999px;
-    background: radial-gradient(circle at 50% 44%, var(--disc-hi) 0%, var(--disc-lo) 62%, transparent 72%);
-    transition: transform 0.6s var(--ease-silk);
+    left: 0;
+    right: 0;
+    top: 44%;
+    bottom: 13%;
+    border-radius: 0.875rem 0.875rem 0 0;
+    background: #f8e0da;
+    pointer-events: none;
   }
 
-  .disc > * { position: relative; }
-  .group:hover .disc::before { transform: scale(1.06); }
-
-  .tint-rose { --disc-hi: #fef6f4; --disc-lo: #f8c9c2; }
-  .tint-peach { --disc-hi: #fef5f0; --disc-lo: #f8cfc0; }
-  .tint-sand { --disc-hi: #fdf8f1; --disc-lo: #f0e2d2; }
-  .tint-pearl { --disc-hi: #f8f7f8; --disc-lo: #e9e4e6; }
-
-  .cutout {
-    filter: drop-shadow(0 16px 18px rgba(142, 59, 69, 0.16)) drop-shadow(0 2px 4px rgba(142, 59, 69, 0.08));
-    transition: transform 0.6s var(--ease-silk);
+  /* The counter, and the edge where it meets the wall. */
+  .stage::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 13%;
+    border-radius: 0 0 0.875rem 0.875rem;
+    background: #fdf1ee;
+    box-shadow: inset 0 1px 0 rgba(142, 59, 69, 0.18);
+    pointer-events: none;
   }
 
-  .group:hover .cutout { transform: translateY(-6px) scale(1.03); }
+  /* The product, in front of both. */
+  .stage > * { position: relative; z-index: 1; }
+
+  /* Whatever its shape, the product stands on the counter: it is set to the bottom of its frame, not its middle. */
+  .cutout { object-position: 50% 100%; transition: transform 0.6s var(--ease-silk); }
+  .group:hover .cutout { transform: translateY(-4px); }
 
   @media (prefers-reduced-motion: reduce) {
-    .disc::before, .cutout { transition: none; }
-    .group:hover .disc::before, .group:hover .cutout { transform: none; }
+    .cutout { transition: none; }
+    .group:hover .cutout { transform: none; }
   }
 }
 

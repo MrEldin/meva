@@ -1,5 +1,5 @@
 <script setup>
-import logoBlack from '@/assets/brand/logo-black.png'
+import BrandLogo from '@/components/layout/BrandLogo.vue'
 import { useAuthStore } from '@/stores/auth'
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -86,7 +86,7 @@ function signOut() {
     <aside class="desk-rail lg:sticky lg:top-0 lg:flex lg:h-screen lg:w-[16.75rem] lg:shrink-0 lg:flex-col">
       <div class="flex items-center justify-between gap-4 px-5 py-4 lg:px-5 lg:pb-3 lg:pt-6">
         <RouterLink :to="{ name: 'admin.overview' }" class="flex min-w-0 items-center gap-3">
-          <img :src="logoBlack" alt="Meva" class="h-9 w-auto" />
+          <BrandLogo label="Meva" class="h-9 text-ink" />
           <span class="mt-1 rounded-full bg-clay-100 px-2 py-0.5 text-[0.625rem] font-bold uppercase tracking-[0.12em] text-clay-700">Admin</span>
         </RouterLink>
         <button

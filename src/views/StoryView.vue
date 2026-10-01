@@ -30,7 +30,7 @@ onMounted(() => {
     <section class="shell py-14 text-center lg:py-20">
       <h2 class="text-2xl sm:text-3xl">Sve što ste videli, možete poručiti</h2>
       <p class="mx-auto mt-3 max-w-lg text-base leading-relaxed text-mist-600">
-        Besplatna dostava u celoj Srbiji, plaćate kuriru kad paket stigne.
+        Dostava kurirom u celoj Srbiji, plaćate kuriru kad paket stigne.
       </p>
       <RouterLink
         :to="{ name: 'catalog' }"

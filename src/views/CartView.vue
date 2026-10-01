@@ -62,7 +62,7 @@ const cart = useCartStore()
             </div>
             <div class="flex justify-between text-mist-600">
               <dt>Dostava</dt>
-              <dd class="text-clay-600">Besplatno</dd>
+              <dd class="text-mist-500">Plaća se kuriru</dd>
             </div>
           </dl>
 

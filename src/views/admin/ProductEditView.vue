@@ -1,5 +1,7 @@
 <script setup>
 import ImageManager from '@/components/admin/editor/ImageManager.vue'
+import SetComposer from '@/components/admin/editor/SetComposer.vue'
+import IngredientsEditor from '@/components/admin/editor/IngredientsEditor.vue'
 import PageHeader from '@/components/admin/PageHeader.vue'
 import RichText from '@/components/admin/editor/RichText.vue'
 import client from '@/api/client'
@@ -33,6 +35,71 @@ const editingSlug = ref(false)
 
 const dirty = computed(() => JSON.stringify(form.value) !== JSON.stringify(original.value))
 
+/**
+ * The set side of the editor.
+ *
+ * A new set arrives from the product list with its parts in the address
+ * (?set=1,2,3) and is made in one call, parts and all. An existing set keeps
+ * its parts here and saves them separately from its own fields; a plain
+ * product can be given parts and become a set, and a set can be taken apart.
+ */
+/** Every shelf, and the ones this product sits on. The storefront filters by these. */
+const categories = ref([])
+
+const isSet = ref(false)
+const items = ref([])
+const originalItems = ref([])
+const composing = ref(false)
+const savingItems = ref(false)
+const itemsError = ref('')
+
+const assembling = computed(() => creating.value && Boolean(route.query.set))
+const itemsDirty = computed(() => JSON.stringify(items.value) !== JSON.stringify(originalItems.value))
+const partsTotal = computed(() => items.value.reduce((sum, item) => sum + (item.price ?? 0) * item.quantity, 0))
+const money = (dinars) => `${new Intl.NumberFormat('sr-RS', { maximumFractionDigits: 0 }).format(dinars)} RSD`
+
+function toggleCategory(id) {
+  const i = form.value.categories.indexOf(id)
+  if (i === -1) form.value.categories.push(id)
+  else form.value.categories.splice(i, 1)
+}
+
+const asItems = (list) => list.map((item) => ({ product_id: item.id, quantity: item.quantity }))
+
+async function loadItems(id) {
+  const { data } = await client.get(`/admin/products/${id}/set`)
+  items.value = data.data
+  originalItems.value = JSON.parse(JSON.stringify(items.value))
+}
+
+async function saveItems() {
+  if (savingItems.value) return
+  savingItems.value = true
+  itemsError.value = ''
+
+  try {
+    const { data } = await client.put(`/admin/products/${route.params.id}/set`, { items: asItems(items.value) })
+    items.value = data.data
+    originalItems.value = JSON.parse(JSON.stringify(items.value))
+    isSet.value = true
+    composing.value = false
+  } catch (error) {
+    itemsError.value = error.response?.data?.errors?.items?.[0] ?? error.response?.data?.message ?? 'Nije sačuvano.'
+  } finally {
+    savingItems.value = false
+  }
+}
+
+async function dissolve() {
+  if (!window.confirm('Razložiti set? Proizvod ostaje, sa istim imenom, cenom i slikama, ali više nije set i ne prikazuje delove.')) return
+
+  await client.delete(`/admin/products/${route.params.id}/set`)
+  isSet.value = false
+  items.value = []
+  originalItems.value = []
+  composing.value = false
+}
+
 const slugify = (value) =>
   (value ?? '')
     .toLowerCase()
@@ -44,10 +111,29 @@ async function load() {
   loading.value = true
   editingSlug.value = false
 
+  if (!categories.value.length) {
+    const { data } = await client.get('/admin/products/categories')
+    categories.value = data.data.filter((c) => c.slug !== 'uncategorized')
+  }
+
   if (creating.value) {
-    form.value = { name: '', slug: '', short_description: '', description: '', price: 0, status: 'draft' }
-    original.value = { ...form.value }
-    setMeta({ title: 'Novi proizvod' })
+    form.value = { name: '', slug: '', short_description: '', description: '', ingredients: [], usage: '', price: 0, status: 'draft', categories: [] }
+
+    // Arriving from the list with parts ticked: fetch them, and start the
+    // price at what they cost together, which the desk then lowers.
+    if (assembling.value) {
+      const ids = String(route.query.set).split(',').map(Number).filter(Boolean)
+      const parts = await Promise.all(ids.map((id) => client.get(`/admin/products/${id}`).then(({ data }) => data.data)))
+      items.value = parts.filter((p) => !p.is_set).map((p) => ({ id: p.id, name: p.name, price: p.price, image: p.image, quantity: 1 }))
+      form.value.price = partsTotal.value
+      composing.value = true
+      // A set sits on Setovi whatever else is ticked; the API adds it too.
+      const sets = categories.value.find((c) => c.slug === 'setovi')
+      if (sets) form.value.categories = [sets.id]
+    }
+
+    original.value = JSON.parse(JSON.stringify(form.value))
+    setMeta({ title: assembling.value ? 'Novi set' : 'Novi proizvod' })
     loading.value = false
 
     return
@@ -61,10 +147,19 @@ async function load() {
     slug: product.slug ?? '',
     short_description: product.short_description ?? '',
     description: product.description ?? '',
+    ingredients: (product.ingredients ?? []).map((r) => ({ inci: r.inci ?? '', name: r.name ?? '' })),
+    usage: product.usage ?? '',
     price: product.price ?? 0,
     status: product.status,
+    categories: (product.categories ?? []).map((c) => c.id),
   }
-  original.value = { ...form.value }
+  original.value = JSON.parse(JSON.stringify(form.value))
+
+  isSet.value = Boolean(product.is_set)
+  items.value = []
+  originalItems.value = []
+  composing.value = false
+  if (isSet.value) await loadItems(product.id)
 
   setMeta({ title: product.name ?? 'Proizvod' })
   loading.value = false
@@ -83,14 +178,16 @@ async function save() {
 
   try {
     if (creating.value) {
-      const { data } = await client.post('/admin/products', form.value)
+      const { data } = assembling.value
+        ? await client.post('/admin/products/sets', { ...form.value, items: asItems(items.value) })
+        : await client.post('/admin/products', form.value)
       router.replace({ name: 'admin.product', params: { id: data.data.id } })
 
       return
     }
 
     await client.put(`/admin/products/${route.params.id}`, form.value)
-    original.value = { ...form.value }
+    original.value = JSON.parse(JSON.stringify(form.value))
     saved.value = true
     setTimeout(() => (saved.value = false), 2500)
   } catch (error) {
@@ -112,7 +209,7 @@ onMounted(load)
     <form v-else @submit.prevent="save">
       <PageHeader
         tone="products"
-        :eyebrow="creating ? 'Novi proizvod' : 'Izmena proizvoda'"
+        :eyebrow="creating ? (assembling ? 'Novi set' : 'Novi proizvod') : (isSet ? 'Izmena seta' : 'Izmena proizvoda')"
         :title="form.name || 'Bez naziva'"
         :back="{ name: 'admin.products' }"
         back-label="Svi proizvodi"
@@ -121,7 +218,7 @@ onMounted(load)
           <span v-if="saved" class="delta delta-up">Sačuvano</span>
           <span v-else-if="dirty && !creating" class="delta delta-flat">Ima nesačuvanih izmena</span>
           <button type="submit" class="btn btn-primary" :disabled="saving || (!dirty && !creating)">
-            {{ saving ? 'Čuvanje…' : (creating ? 'Napravi proizvod' : 'Sačuvaj') }}
+            {{ saving ? 'Čuvanje…' : (creating ? (assembling ? 'Napravi set' : 'Napravi proizvod') : 'Sačuvaj') }}
           </button>
         </template>
       </PageHeader>
@@ -134,7 +231,7 @@ onMounted(load)
 
             <label class="mt-4 block">
               <span class="label text-forest/55">Naziv</span>
-              <input v-model="form.name" type="text" class="field mt-1.5 w-full text-[1.0625rem]" placeholder="npr. Krema za seboreju — dan (50ml)" />
+              <input v-model="form.name" type="text" class="field mt-1.5 w-full text-[1.0625rem]" :placeholder="assembling || isSet ? 'npr. Set protiv flekica' : 'npr. Krema za seboreju — dan (50ml)'" />
               <span v-if="errors.name" class="mt-1 block text-xs text-clay-700">{{ errors.name[0] }}</span>
             </label>
 
@@ -167,10 +264,32 @@ onMounted(load)
 
           <section class="panel p-4 sm:p-5">
             <h2 class="font-display text-[1.25rem] leading-tight">Opis</h2>
-            <p class="mt-0.5 text-[0.8125rem] text-forest/50">Sastav, način upotrebe, sve što stoji na stranici proizvoda.</p>
+            <p class="mt-0.5 text-[0.8125rem] text-forest/50">Šta je proizvod i kome je namenjen. Sastav i način upotrebe idu u svoja polja ispod.</p>
 
             <div class="mt-3">
               <RichText v-model="form.description" />
+            </div>
+          </section>
+
+          <section class="panel p-4 sm:p-5">
+            <h2 class="font-display text-[1.25rem] leading-tight">Sastav</h2>
+            <p v-if="isSet || assembling" class="mt-0.5 text-[0.8125rem] text-forest/50">
+              Set nema svoj sastav: na stranici se prikazuje sastav svakog proizvoda iz seta, grupisano po proizvodu.
+            </p>
+            <template v-else>
+              <p class="mt-0.5 text-[0.8125rem] text-forest/50">Jedan red po sastojku, redosledom sa etikete. Prazno: sekcija se ne prikazuje.</p>
+              <div class="mt-3">
+                <IngredientsEditor v-model="form.ingredients" />
+              </div>
+            </template>
+          </section>
+
+          <section class="panel p-4 sm:p-5">
+            <h2 class="font-display text-[1.25rem] leading-tight">Način upotrebe</h2>
+            <p class="mt-0.5 text-[0.8125rem] text-forest/50">Na stranici stoji kao posebna sekcija „Način upotrebe". Prazno: sekcija se ne prikazuje.</p>
+
+            <div class="mt-3">
+              <RichText v-model="form.usage" />
             </div>
           </section>
         </div>
@@ -187,6 +306,9 @@ onMounted(load)
                 <span class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[0.8125rem] font-semibold text-forest/40">RSD</span>
               </span>
               <span v-if="errors.price" class="mt-1 block text-xs text-clay-700">{{ errors.price[0] }}</span>
+              <span v-if="(assembling || isSet) && items.length" class="mt-1.5 block text-[0.75rem] text-forest/50">
+                Delovi pojedinačno: {{ money(partsTotal) }}<template v-if="form.price < partsTotal"> · set je jeftiniji za {{ money(partsTotal - form.price) }}</template>
+              </span>
             </label>
 
             <fieldset class="mt-4">
@@ -217,9 +339,60 @@ onMounted(load)
             </RouterLink>
           </section>
 
+          <!-- Where it sits in the shop -->
+          <section class="panel p-4 sm:p-5">
+            <h2 class="font-display text-[1.25rem] leading-tight">Kategorije</h2>
+            <p class="mt-0.5 text-[0.8125rem] text-forest/50">Po ovome se filtrira u prodavnici. Može više odjednom.</p>
+            <div class="mt-3 flex flex-wrap gap-2">
+              <button
+                v-for="c in categories"
+                :key="c.id"
+                type="button"
+                class="rounded-full border px-3.5 py-1.5 text-[0.8125rem] font-semibold transition-colors"
+                :class="form.categories.includes(c.id) ? 'border-forest bg-forest text-cream' : 'border-forest/12 hover:bg-cream'"
+                @click="toggleCategory(c.id)"
+              >{{ c.name }}</button>
+            </div>
+            <p v-if="(isSet || assembling) && !form.categories.includes(categories.find((c) => c.slug === 'setovi')?.id)" class="mt-2 text-[0.75rem] text-forest/50">
+              Set uvek ide i u „Setovi", to se dodaje samo.
+            </p>
+            <span v-if="errors.categories" class="mt-1 block text-xs text-clay-700">{{ errors.categories[0] }}</span>
+          </section>
+
+          <!-- What is in it -->
+          <section v-if="assembling || isSet || composing || !creating" class="panel p-4 sm:p-5">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <h2 class="font-display text-[1.25rem] leading-tight">{{ isSet || assembling ? 'Sadržaj seta' : 'Set' }}</h2>
+                <p class="mt-0.5 text-[0.8125rem] text-forest/50">
+                  <template v-if="isSet || assembling">Šta kupac dobija. Prodaje se kao jedan artikal.</template>
+                  <template v-else>Ovaj proizvod može da postane set: dodajte mu delove.</template>
+                </p>
+              </div>
+              <button v-if="isSet && !creating" type="button" class="btn btn-ghost shrink-0 text-clay-700" @click="dissolve">Razloži set</button>
+            </div>
+
+            <template v-if="assembling || isSet || composing">
+              <div class="mt-4">
+                <SetComposer v-model="items" :exclude-id="creating ? null : route.params.id" />
+              </div>
+              <p v-if="errors.items" class="mt-2 text-xs text-clay-700">{{ errors.items[0] }}</p>
+              <p v-if="itemsError" class="mt-2 text-xs text-clay-700">{{ itemsError }}</p>
+
+              <div v-if="!creating" class="mt-4 flex items-center justify-end gap-2">
+                <button v-if="composing && !isSet" type="button" class="btn btn-ghost" @click="composing = false; items = []">Odustani</button>
+                <button type="button" class="btn btn-primary" :disabled="savingItems || !items.length || (isSet && !itemsDirty)" @click="saveItems">
+                  {{ savingItems ? 'Čuvanje…' : (isSet ? 'Sačuvaj sadržaj' : 'Pretvori u set') }}
+                </button>
+              </div>
+            </template>
+
+            <button v-else type="button" class="btn btn-ghost mt-3" @click="composing = true">Pretvori u set</button>
+          </section>
+
           <section class="panel p-4 sm:p-5">
             <ImageManager v-if="!creating" :product-id="route.params.id" />
-            <p v-else class="text-sm text-forest/55">Slike možete dodati čim sačuvate proizvod.</p>
+            <p v-else class="text-sm text-forest/55">Slike možete dodati čim {{ assembling ? 'napravite set' : 'sačuvate proizvod' }}.</p>
           </section>
         </div>
       </div>

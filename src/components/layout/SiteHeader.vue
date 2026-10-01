@@ -1,8 +1,9 @@
 <script setup>
-import logoBlack from '@/assets/brand/logo-black.png'
+import BrandLogo from '@/components/layout/BrandLogo.vue'
 import { useAuthStore } from '@/stores/auth'
 import { useCartStore } from '@/stores/cart'
 import SearchResults from '@/components/search/SearchResults.vue'
+import { FOUNDED, yearsLabel } from '@/lib/heritage'
 import { useSearch } from '@/lib/useSearch'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -34,10 +35,12 @@ const links = [
   { label: 'Svi proizvodi', to: { name: 'catalog' } },
   { label: 'Nega kože', to: { name: 'catalog', query: { category: 'preparati-za-lice' } } },
   { label: 'Kosa', to: { name: 'catalog', query: { category: 'kosa' } } },
+  { label: 'Setovi', to: { name: 'catalog', query: { category: 'setovi' } } },
   { label: 'Seboreja', to: { name: 'catalog', query: { category: 'seboreja' } } },
   { label: 'Psorijaza', to: { name: 'catalog', query: { category: 'psorijaza' } } },
   { label: 'Ekcem', to: { name: 'catalog', query: { category: 'ekcem' } } },
-  { label: 'Setovi', to: { name: 'catalog', query: { category: 'setovi' } } },
+  { label: 'Rozacea', to: { name: 'catalog', query: { category: 'rozacea' } } },
+  { label: 'Akne', to: { name: 'catalog', query: { category: 'akne' } } },
 ]
 
 const more = [
@@ -177,10 +180,15 @@ onBeforeUnmount(() => {
       class="overflow-hidden bg-peach transition-[max-height] duration-500 ease-[var(--ease-silk)]"
       :class="scrolled ? 'max-h-0' : 'max-h-10'"
     >
-      <div class="shell flex h-10 items-center justify-center gap-3 text-[0.75rem] font-semibold tracking-[0.04em] text-blush-700 sm:text-[0.8125rem]">
-        <svg viewBox="0 0 24 24" class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 7.5h11v9h-11zM13.5 10.5h3.6l3.4 3.2v2.8h-7z" /><circle cx="6" cy="18.3" r="1.5" /><circle cx="17.3" cy="18.3" r="1.5" /></svg>
-        <span>Besplatna dostava u celoj Srbiji</span>
+      <div class="shell flex h-10 items-center justify-center gap-2 whitespace-nowrap text-[0.6875rem] font-semibold tracking-[0.04em] text-blush-700 sm:gap-3 sm:text-[0.8125rem]">
+        <!-- A phone has room for three short facts; the full sentences come in as the bar widens. -->
+        <span class="lg:hidden">Od {{ FOUNDED }}.</span>
+        <span class="h-[3px] w-[3px] rounded-full bg-blush-400 lg:hidden" aria-hidden="true" />
+        <svg viewBox="0 0 24 24" class="hidden h-4 w-4 shrink-0 sm:block" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 7.5h11v9h-11zM13.5 10.5h3.6l3.4 3.2v2.8h-7z" /><circle cx="6" cy="18.3" r="1.5" /><circle cx="17.3" cy="18.3" r="1.5" /></svg>
+        <span>Dostava<span class="hidden sm:inline"> kurirom</span> u celoj Srbiji</span>
         <span class="h-[3px] w-[3px] rounded-full bg-blush-400" aria-hidden="true" />
+        <span class="hidden lg:inline">Više od {{ yearsLabel() }} u službi vaše kože</span>
+        <span class="hidden h-[3px] w-[3px] rounded-full bg-blush-400 lg:block" aria-hidden="true" />
         <span>Plaćanje pouzećem</span>
       </div>
     </div>
@@ -210,10 +218,8 @@ onBeforeUnmount(() => {
         aria-label="Meva Cosmetics"
         class="absolute left-1/2 -translate-x-1/2 lg:static lg:translate-x-0"
       >
-        <img
-          :src="logoBlack"
-          alt="Meva Cosmetics"
-          class="w-auto transition-[height] duration-500 ease-[var(--ease-silk)]"
+        <BrandLogo
+          class="text-ink transition-[height] duration-500 ease-[var(--ease-silk)]"
           :class="scrolled ? 'h-10 lg:h-12' : 'h-11 lg:h-16'"
         />
       </RouterLink>

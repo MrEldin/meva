@@ -37,6 +37,11 @@ onMounted(() => setMeta({
     <h1 class="mt-3 font-display text-4xl tracking-tight">Otvorite nalog</h1>
     <p class="mt-3 text-sm text-forest/65">Da vidite svoje porudžbine i pratite gde su.</p>
 
+    <p class="mt-5 flex items-center gap-3 rounded-[1.25rem] border border-blush-100 bg-blush-50 px-4 py-3 text-sm text-forest/70">
+      <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-blush-100 text-[0.75rem] font-bold text-blush-600">+100</span>
+      <span>Uz nalog ulazite u <span class="font-bold text-blush-600">Meva Klub</span> i dobijate 100 poena na poklon — 1 poen na svakih 100 RSD posle toga.</span>
+    </p>
+
     <form class="mt-8 space-y-4" @submit.prevent="submit">
       <div class="grid gap-4 sm:grid-cols-2">
         <label class="block">

@@ -2,16 +2,19 @@
 import client from '@/api/client'
 import { setMeta } from '@/lib/meta'
 import { useAuthStore } from '@/stores/auth'
+import { useLoyaltyStore } from '@/stores/loyalty'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 const auth = useAuthStore()
+const loyalty = useLoyaltyStore()
 const router = useRouter()
 
 const orders = ref([])
 const loading = ref(true)
 
 const money = (minor) => `${new Intl.NumberFormat('sr-RS', { maximumFractionDigits: 0 }).format(minor / 100)} RSD`
+const number = (value) => new Intl.NumberFormat('sr-RS').format(value ?? 0)
 const when = (iso) => (iso ? new Date(iso).toLocaleDateString('sr-RS', { day: '2-digit', month: 'long', year: 'numeric' }) : '')
 
 const TONE = {
@@ -31,6 +34,9 @@ onMounted(async () => {
   setMeta({ title: 'Moj nalog' })
 
   if (!auth.user) await auth.fetchUser()
+
+  // The club card fills in on its own; the orders do not wait for it.
+  loyalty.load()
 
   try {
     const { data } = await client.get('/account/orders')
@@ -54,6 +60,24 @@ onMounted(async () => {
         <button type="button" class="pill border border-forest/20 hover:bg-blush-500 hover:text-paper" @click="signOut">Odjava</button>
       </div>
     </header>
+
+    <RouterLink
+      :to="{ name: 'loyalty' }"
+      class="group mt-8 flex flex-wrap items-center justify-between gap-5 overflow-hidden rounded-[1.5rem] bg-gradient-to-br from-blush-200 via-blush-400 to-blush-600 p-6 text-paper transition-shadow hover:shadow-[0_18px_40px_-20px_rgba(142,59,69,0.6)] sm:p-7"
+    >
+      <div>
+        <p class="kicker text-paper/80">Meva Klub · {{ loyalty.tier?.label ?? 'Pupoljak' }}</p>
+        <p class="mt-2 font-display text-4xl leading-none tabular-nums">
+          {{ number(loyalty.points) }}
+          <span class="text-lg italic">poena</span>
+        </p>
+        <p v-if="loyalty.tier?.next" class="mt-2 text-[0.8125rem] text-paper/85">
+          još {{ number(loyalty.tier.next.points_needed) }} poena do {{ loyalty.tier.next.label }}
+        </p>
+        <p v-else-if="loyalty.pendingPoints > 0" class="mt-2 text-[0.8125rem] text-paper/85">+{{ number(loyalty.pendingPoints) }} poena na čekanju</p>
+      </div>
+      <span class="pill bg-paper text-blush-600 group-hover:bg-blush-50">Nagrade i kuponi →</span>
+    </RouterLink>
 
     <h2 class="eyebrow mt-10 text-forest/50">Moje porudžbine</h2>
 

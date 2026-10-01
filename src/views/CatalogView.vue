@@ -33,6 +33,18 @@ const visible = computed(() => {
   }).sort(byPopularity)
 })
 
+/** The shelves in the order the menu has them; anything else the catalogue holds goes after, once. */
+const ORDER = ['preparati-za-lice', 'kosa', 'setovi', 'seboreja', 'psorijaza', 'ekcem', 'rozacea', 'akne']
+
+const filters = computed(() => {
+  const seen = new Set()
+  const rank = (c) => (ORDER.includes(c.slug) ? ORDER.indexOf(c.slug) : ORDER.length)
+
+  return [...catalog.collections]
+    .sort((a, b) => rank(a) - rank(b))
+    .filter((c) => !seen.has(c.slug) && seen.add(c.slug))
+})
+
 const heading = computed(() => {
   if (onlySets.value) return 'Setovi'
 
@@ -49,7 +61,7 @@ watch(() => route.query, () => (search.value = ''))
 
 setMeta({
   title: 'Svi preparati',
-  description: 'Prirodna kozmetika Meva: preparati za seboreju, psorijazu, ekcem, akne, negu lica i kose. Besplatna dostava, plaćanje pouzećem.',
+  description: 'Prirodna kozmetika Meva: preparati za seboreju, psorijazu, ekcem, akne, negu lica i kose.',
 })
 </script>
 
@@ -78,7 +90,7 @@ setMeta({
         </button>
 
         <button
-          v-for="category in catalog.collections"
+          v-for="category in filters"
           :key="category.slug"
           type="button"
           class="shrink-0 rounded-full border px-4 py-2 text-[0.875rem] font-semibold transition-colors"
@@ -116,7 +128,7 @@ setMeta({
     </div>
 
     <div v-else-if="visible.length" class="mt-12 grid grid-cols-2 gap-x-4 gap-y-12 lg:grid-cols-4 lg:gap-8">
-      <ProductCard v-for="(product, i) in visible" :key="product.id" :product="product" :tint="i" :eager="i < 4" />
+      <ProductCard v-for="(product, i) in visible" :key="product.id" :product="product" :eager="i < 4" />
     </div>
 
     <div v-else class="py-24 text-center">

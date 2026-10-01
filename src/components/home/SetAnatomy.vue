@@ -153,12 +153,12 @@ function addSet() {
         <template v-for="step in placed" :key="step.slug">
           <RouterLink
             :to="{ name: 'product', params: { slug: step.product.slug } }"
-            class="group absolute grid place-items-center rounded-full bg-paper ring-1 ring-blush-100 transition-all duration-500 hover:ring-blush-300 hover:shadow-[0_14px_30px_-14px_rgba(142,59,69,0.5)]"
+            class="group absolute grid place-items-center transition-transform duration-500 hover:-translate-y-0.5"
             :style="step.thumb"
             tabindex="-1"
             aria-hidden="true"
           >
-            <ProductFigure :product="step.product" :tint="step.index" sizes="80px" />
+            <ProductFigure :product="step.product" sizes="80px" />
           </RouterLink>
 
           <RouterLink
@@ -179,7 +179,7 @@ function addSet() {
       <!-- The set itself, under the drawing -->
       <div class="mx-auto mt-10 hidden max-w-[34rem] items-center gap-6 rounded-[1.75rem] border border-blush-100 bg-paper p-4 lg:flex">
         <RouterLink :to="{ name: 'product', params: { slug: set.slug } }" class="group w-28 shrink-0">
-          <ProductFigure :product="set" tint="rose" sizes="120px" />
+          <ProductFigure :product="set" sizes="120px" />
         </RouterLink>
         <div class="min-w-0 flex-1">
           <p class="kicker text-blush-600">Ceo set, jedna cena</p>
@@ -204,7 +204,7 @@ function addSet() {
 
         <div class="mt-7 rounded-[1.5rem] border border-blush-100 bg-paper p-3">
           <RouterLink :to="{ name: 'product', params: { slug: set.slug } }" class="group flex items-center gap-4">
-            <span class="w-24 shrink-0"><ProductFigure :product="set" tint="rose" sizes="110px" /></span>
+            <span class="w-24 shrink-0"><ProductFigure :product="set" sizes="110px" /></span>
             <span class="min-w-0 flex-1">
               <span class="kicker block text-blush-600">Ceo set</span>
               <span class="mt-0.5 block font-display text-[1.0625rem] leading-tight text-ink">{{ set.name }}</span>
@@ -227,7 +227,7 @@ function addSet() {
           <li v-for="step in steps" :key="step.slug" class="relative flex min-h-[5.75rem] items-center gap-3.5 py-2">
             <span class="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-blush-600 text-[0.6875rem] font-bold text-paper ring-4 ring-blush-50">{{ step.index }}</span>
             <RouterLink :to="{ name: 'product', params: { slug: step.product.slug } }" class="flex min-w-0 flex-1 items-center gap-3.5">
-              <span class="w-16 shrink-0 rounded-full bg-paper ring-1 ring-blush-100"><ProductFigure :product="step.product" :tint="step.index" sizes="72px" /></span>
+              <span class="w-16 shrink-0"><ProductFigure :product="step.product" sizes="72px" /></span>
               <span class="min-w-0 flex-1">
                 <span class="block text-[0.6875rem] font-bold uppercase tracking-[0.14em] text-blush-600">{{ step.where }}</span>
                 <span class="block font-display text-[1rem] leading-tight text-ink">{{ step.product.name }}</span>
